@@ -1,0 +1,53 @@
+/* Styles pour le dashboard */
+
+.dashboardContainer {
+  transition: all 0.3s ease;
+}
+
+.cardHover {
+  transition: all 0.2s ease-in-out;
+}
+
+.cardHover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Animation pour les cartes de compteurs */
+.meterCard {
+  transition: all 0.3s ease;
+}
+
+.meterCard:hover {
+  background-color: rgba(255, 255, 255, 0.9);
+}
+
+/* Styles pour les graphiques */
+.chartBar {
+  transition: height 0.5s ease;
+}
+
+/* Styles pour les boutons */
+.actionButton {
+  transition: all 0.2s ease;
+}
+
+.actionButton:hover {
+  transform: scale(1.05);
+}
+
+/* Styles pour les sections */
+.sectionTitle {
+  position: relative;
+}
+
+.sectionTitle::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 0;
+  width: 40px;
+  height: 3px;
+  background-color: #1F7A70;
+  border-radius: 2px;
+}

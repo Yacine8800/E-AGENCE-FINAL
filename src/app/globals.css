@@ -1,0 +1,172 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 249, 249, 249;
+  --background-end-rgb: 255, 255, 255;
+  --scrollbar-track: #f0f0f0;
+  --scrollbar-thumb: #47b5b0;
+  --scrollbar-thumb-hover: #358e8a;
+  --scrollbar-width: 12px;
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: "#FFF";
+}
+
+/* Sélection de texte - Thème électricité */
+::selection {
+  background-color: rgba(71, 181, 176, 0.3);
+  color: #000;
+  text-shadow: 0 0 3px rgba(71, 181, 176, 0.8);
+  box-shadow: 0 0 20px rgba(71, 181, 176, 1);
+}
+
+::-moz-selection {
+  background-color: rgba(71, 181, 176, 0.3);
+  color: #000;
+  text-shadow: 0 0 3px rgba(71, 181, 176, 0.8);
+  box-shadow: 0 0 20px rgba(71, 181, 176, 1);
+}
+
+@layer utilities {
+  .gradient-orange {
+    background: linear-gradient(to right, #efae35, #f7942e);
+  }
+}
+
+/* Personnalisation de la barre de défilement - Thème électricité */
+/* Pour tous les navigateurs */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}
+
+/* Pour WebKit (Chrome, Safari, etc.) */
+::-webkit-scrollbar {
+  width: var(--scrollbar-width);
+  height: var(--scrollbar-width);
+}
+
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+  border-radius: 20px;
+  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.1);
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom, #47b5b0, #358e8a);
+  border-radius: 20px;
+  border: 2px solid var(--scrollbar-track);
+  box-shadow: 0 0 8px rgba(71, 181, 176, 0.3);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(to bottom, #358e8a, #2c7571);
+  box-shadow: 0 0 12px rgba(71, 181, 176, 0.5);
+}
+
+/* Effet de flux d'énergie */
+@keyframes energyFlow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(
+    90deg,
+    #47b5b0,
+    #47b5b0,
+    #358e8a,
+    #47b5b0,
+    #47b5b0
+  );
+  background-size: 200% 100%;
+  animation: energyFlow 3s ease infinite;
+}
+
+/* Animation de sélection électrique */
+@keyframes electricSelection {
+  0% {
+    box-shadow: 0 0 5px rgba(71, 181, 176, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 15px rgba(71, 181, 176, 0.8), 0 0 5px rgba(71, 181, 176, 1);
+  }
+  100% {
+    box-shadow: 0 0 5px rgba(71, 181, 176, 0.5);
+  }
+}
+
+/* Appliquer l'animation aux éléments sélectionnés via une classe */
+.electric-selection {
+  position: relative;
+  animation: electricSelection 2s infinite;
+  border-radius: 4px;
+}
+
+/* Animation pour barres sonores dans l'aperçu audio */
+@keyframes soundbar {
+  0% {
+    height: 3px;
+  }
+  50% {
+    height: 12px;
+  }
+  100% {
+    height: 3px;
+  }
+}
+
+/* Mode sombre */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --scrollbar-track: #181818;
+    --scrollbar-thumb: #47b5b0;
+    --scrollbar-thumb-hover: #358e8a;
+  }
+
+  ::-webkit-scrollbar-track {
+    box-shadow: inset 0 0 6px rgba(71, 181, 176, 0.2);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    box-shadow: 0 0 8px rgba(71, 181, 176, 0.5);
+  }
+
+  ::selection {
+    background-color: rgba(71, 181, 176, 0.4);
+    color: white;
+    text-shadow: 0 0 8px rgba(71, 181, 176, 1);
+  }
+
+  ::-moz-selection {
+    background-color: rgba(71, 181, 176, 0.4);
+    color: white;
+    text-shadow: 0 0 8px rgba(71, 181, 176, 1);
+  }
+}
+
+/* Add the shimmer animation for magical effect */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite;
+}

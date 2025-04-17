@@ -1,0 +1,4 @@
+src/app/components/ChatBot.tsx
+src/app/components/ElectricityEffect.tsx
+src/app/components/FlashInfos.tsx
+src/app/page.tsx
