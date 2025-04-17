@@ -831,16 +831,20 @@ const RegisterStepper = () => {
               )}
 
               {/* Clavier numérique (mélangé après la première saisie) */}
-              <div
-                className={`grid grid-cols-3 ${isMobile ? "gap-2" : "gap-8"}`}
-              >
-                {/* Dernière ligne : Bouton "3" centré */}
-                <button
-                  onClick={() => handleDigitClick("3")}
-                  className={`h-20 w-28 text-4xl font-bold flex items-center justify-center border-2 border-gray-100 rounded-xl hover:bg-gray-100 ${bebas_beue.className} col-start-2`}
-                >
-                  3
-                </button>
+              <div className={`grid grid-cols-3 ${isMobile ? "gap-2" : "gap-8"}`}>
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 0].map((digit, index) => (
+                  <button
+                    key={digit}
+                    onClick={() => handleDigitClick(digit.toString())}
+                    className={`h-20 w-28 text-4xl font-bold flex items-center justify-center border-2 border-gray-100 rounded-xl hover:bg-gray-100 ${bebas_beue.className} ${digit === 0 ? "col-start-2" : ""
+                      }`}
+                    style={{
+                      gridColumn: digit === 0 ? "2" : "auto",
+                    }}
+                  >
+                    {digit}
+                  </button>
+                ))}
 
                 {/* Bouton Supprimer */}
                 <button
