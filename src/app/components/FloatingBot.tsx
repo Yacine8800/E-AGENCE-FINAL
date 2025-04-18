@@ -1,13 +1,16 @@
 "use client";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
-import Lottie from "lottie-react";
+import dynamic from 'next/dynamic';
 import ChatBot from "./ChatBot";
 import SimpleMessage from "./SimpleMessage";
 import { API_BOT_CIE, API_BOT_CIE_SUBSCRIBE } from "@/config/constants";
 import axios from "axios";
 import { decodeTokens } from "@/utils/tokendecod";
 import { collectRoutesUsingEdgeRuntime } from "next/dist/build/utils";
+
+// Dynamically import Lottie with SSR disabled
+const Lottie = dynamic(() => import("lottie-react"), { ssr: false });
 
 // Define MqttTokenType to match the interface in ChatBot.tsx
 interface MqttTokenType {

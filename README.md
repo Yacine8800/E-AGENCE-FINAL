@@ -1,142 +1,187 @@
 # E-AGENCE
 
-![Next.js](https://img.shields.io/badge/Next.js-15.2.0-black?logo=next.js)
-![React](https://img.shields.io/badge/React-19.0.0-blue?logo=react)
-![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?logo=typescript)
-![TailwindCSS](https://img.shields.io/badge/TailwindCSS-3.4.1-38B2AC?logo=tailwind-css)
-![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?logo=docker)
-
-Une application moderne développée avec Next.js pour offrir des services d'agence numérique innovants.
+Application de gestion d'agence avec notifications en temps réel basée sur Next.js.
 
 ## Table des matières
 
-- [Aperçu](#aperçu)
-- [Technologies](#technologies)
-- [Installation](#installation)
-  - [Prérequis](#prérequis)
-  - [Installation standard](#installation-standard)
-  - [Installation avec Docker](#installation-avec-docker)
+- [Présentation](#présentation)
+- [Installation locale](#installation-locale)
+- [Configuration](#configuration)
+- [Déploiement avec Docker](#déploiement-avec-docker)
+- [Fonctionnalités](#fonctionnalités)
 - [Structure du projet](#structure-du-projet)
-- [Utilisation](#utilisation)
-- [Déploiement](#déploiement)
-- [Docker](#docker)
 
-## Aperçu
+## Présentation
 
-E-AGENCE est une application web moderne qui utilise les dernières technologies pour offrir une expérience utilisateur optimale. Cette plateforme a été conçue pour faciliter la gestion des services d'agence numérique et améliorer l'interaction avec les clients.
+E-AGENCE est une application conçue pour la gestion d'agence avec des fonctionnalités de notifications en temps réel via Firebase. L'application est développée avec Next.js, React et Tailwind CSS.
 
-## Technologies
-
-- **Frontend**: Next.js 15.2.0, React 19.0.0, TypeScript
-- **Styles**: TailwindCSS 3.4.1, Framer Motion
-- **État**: Redux Toolkit
-- **Services**: Firebase, MQTT
-- **Autres**: Axios, UUID, Zod pour la validation
-
-## Installation
+## Installation locale
 
 ### Prérequis
 
 - Node.js 18 ou supérieur
-- Yarn (recommandé) ou npm
-- Docker (optionnel, pour l'installation containerisée)
+- Yarn
 
-### Installation standard
+### Étapes d'installation
 
-1. Clonez le dépôt :
+1. Cloner le dépôt
 
    ```bash
-   git clone https://github.com/votre-nom/e-agence.git
-   cd e-agence
+   git clone [url-du-dépôt]
+   cd E-AGENCE-FINAL
    ```
 
-2. Installez les dépendances :
+2. Installer les dépendances
 
    ```bash
    yarn install
    ```
 
-3. Démarrez le serveur de développement :
+3. Configurer les variables d'environnement
+
+   - Copier le fichier `.env.example` (si disponible) vers `.env`
+   - Remplir les variables d'environnement nécessaires (voir la section [Configuration](#configuration))
+
+4. Démarrer l'application en mode développement
 
    ```bash
    yarn dev
    ```
 
-4. Ouvrez [http://localhost:3000](http://localhost:3000) dans votre navigateur pour voir l'application.
-
-### Installation avec Docker
-
-1. Clonez le dépôt :
+5. Construire l'application pour la production
 
    ```bash
-   git clone https://github.com/votre-nom/e-agence.git
-   cd e-agence
+   yarn build
    ```
 
-2. Construisez et démarrez le conteneur Docker :
+6. Démarrer l'application en mode production
+   ```bash
+   yarn start
+   ```
+
+## Configuration
+
+L'application utilise plusieurs variables d'environnement pour la configuration. Voici les principales:
+
+### Firebase Configuration
+
+```
+NEXT_PUBLIC_API_KEY=votre-api-key
+NEXT_PUBLIC_API_AUTH_DOMAIN=votre-auth-domain
+NEXT_PUBLIC_API_PROJECTID=votre-project-id
+NEXT_PUBLIC_API_STORAGE_BUCKET=votre-storage-bucket
+NEXT_PUBLIC_API_MESSAGING_SENDER_ID=votre-messaging-sender-id
+NEXT_PUBLIC_API_APP_ID=votre-app-id
+NEXT_PUBLIC_API_MEASUREMENT_ID=votre-measurement-id
+NEXT_PUBLIC_API_VAPID_KEY=votre-vapid-key
+```
+
+### API Configuration
+
+```
+NEXT_PUBLIC_API_URL=url-de-votre-api
+```
+
+### Autres configurations
+
+```
+NEXT_PUBLIC_API_BOT_CIE=url-du-bot
+NEXT_PUBLIC_API_BOT_CIE_WEBHOOK=url-du-webhook
+NEXT_PUBLIC_API_BOT_CIE_BROKER=url-du-broker-mqtt
+```
+
+## Déploiement avec Docker
+
+### Utilisation du Dockerfile
+
+Le projet inclut un Dockerfile optimisé pour la production avec une construction multi-étapes:
+
+1. **Étape de construction**: Installe les dépendances et construit l'application
+2. **Étape de production**: Crée une image légère contenant seulement les fichiers nécessaires
+
+Pour construire l'image Docker:
+
+```bash
+docker build -t e-agence:(la version) .
+```
+
+Pour exécuter le conteneur:
+
+```bash
+docker run -p 2707:2707 -e NODE_ENV=production e-agence:(la version)
+```
+
+### Utilisation de Docker Compose
+
+Le projet inclut également un fichier `docker-compose.yml` pour simplifier le déploiement:
+
+1. Démarrer l'application:
 
    ```bash
-   docker build -t e-agence .
-   docker run -p 3000:3000 e-agence
+   docker-compose up -d
    ```
 
-3. Ouvrez [http://localhost:3000](http://localhost:3000) dans votre navigateur pour voir l'application.
+2. Visualiser les logs:
+
+   ```bash
+   docker-compose logs -f
+   ```
+
+3. Arrêter l'application:
+   ```bash
+   docker-compose down
+   ```
+
+### Configuration avec Docker
+
+La variable d'environnement PORT est configurée à 2707 par défaut dans le Dockerfile.
+
+Vous pouvez monter votre fichier `.env` comme volume:
+
+```bash
+docker run -p 2707:2707 -v $(pwd)/.env:/app/.env e-agence:latest
+```
+
+Ou utiliser le volume configuré dans docker-compose.yml:
+
+```yaml
+volumes:
+  - ./.env:/app/.env
+```
+
+## Fonctionnalités
+
+- **Notifications en temps réel**: Intégration avec Firebase Cloud Messaging
+- **Interface utilisateur moderne**: Utilisation de Tailwind CSS et Framer Motion
+- **Compatibilité multi-navigateurs**: Support pour les navigateurs modernes, y compris Safari
 
 ## Structure du projet
 
 ```
-e-agence/
-├── src/                 # Code source principal
-│   ├── app/             # Composants d'application
-│   │   ├── components/  # Composants réutilisables
-│   │   └── ...         # Autres dossiers d'application
-├── public/              # Fichiers statiques
-├── package.json         # Dépendances et scripts
-├── tailwind.config.js   # Configuration TailwindCSS
-├── tsconfig.json        # Configuration TypeScript
-└── dockerfile           # Configuration Docker
+E-AGENCE-FINAL/
+├── public/                   # Fichiers statiques
+│   └── firebase-messaging-sw.js  # Service Worker pour Firebase Messaging
+├── src/
+│   ├── app/                  # Application Next.js (App Router)
+│   ├── components/           # Composants React
+│   ├── config/               # Fichiers de configuration
+│   └── firebase/             # Configuration Firebase
+├── .env                      # Variables d'environnement
+├── Dockerfile                # Configuration Docker
+├── docker-compose.yml        # Configuration Docker Compose
+└── package.json              # Dépendances et scripts
 ```
 
-## Utilisation
+## Note sur les notifications Firebase
 
-- Modifiez les fichiers dans le dossier `src/app` pour personnaliser l'application
-- Les modifications sont automatiquement appliquées en temps réel pendant le développement
-- Utilisez `yarn build` pour créer une version de production optimisée
+L'application utilise Firebase Cloud Messaging pour les notifications push. Le Service Worker est configuré pour fonctionner avec les navigateurs supportant l'API Push, avec une solution de secours pour Safari.
 
-## Déploiement
+Pour tester les notifications:
 
-L'application peut être déployée sur diverses plateformes:
-
-- **Vercel** (recommandé pour Next.js): Configuration automatique via GitHub
-- **Docker**: Utilisez le Dockerfile fourni
-- **Serveur traditionnel**: Exécutez `yarn build` puis `yarn start`
-
-## Docker
-
-Le projet inclut un Dockerfile multi-étapes optimisé:
-
-### Stage 1: Construction
-
-- Utilise Node.js 18 Alpine comme image de base
-- Installe toutes les dépendances nécessaires
-- Construit l'application Next.js
-
-### Stage 2: Production
-
-- Crée une image légère avec Node.js 18 Alpine
-- Copie uniquement les fichiers nécessaires à l'exécution
-- Configure l'environnement de production
-- Expose le port 3000 pour accéder à l'application
-
-Pour personnaliser la configuration Docker:
-
-- Modifiez le fichier `dockerfile` selon vos besoins
-- Ajustez les variables d'environnement dans le Dockerfile ou lors de l'exécution
+1. Accepter les permissions de notification dans le navigateur
+2. Vérifier que le token est correctement généré dans la console
+3. Utiliser la console Firebase pour envoyer des notifications test
 
 ---
 
-## 👥 Contact
-
-Pour toute question ou suggestion, veuillez contacter l'équipe de développement **DCTD**.
-
----
+© 2024 E-AGENCE. Tous droits réservés. | Développé par l'équipe DCTD
