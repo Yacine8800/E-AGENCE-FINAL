@@ -15,7 +15,8 @@ import {
 } from "../firebase/config";
 import DesktopEffects from "./components/DesktopEffects";
 import { API_EAGENCE, API_EAGENCE_JOEL, API_BOT_CIE } from "@/config/constants";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import Script from "next/script";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -31,6 +32,118 @@ import { toast, ToastContainer } from "react-toastify";
 import EnergyScrollbar from "./components/EnergyScrollbar";
 import ElectricityEffect from "./components/ElectricityEffect";
 import { useResponsive } from "../hooks/useResponsive";
+import { useAuth } from "../hooks/useAuth";
+
+// Composant enfant qui s'occupe de la protection des routes
+// Il utilisera useAuth à l'intérieur du ReduxProvider
+const RouteGuard = ({ children }: { children: React.ReactNode }) => {
+  const pathname = usePathname();
+  const router = useRouter();
+  const { isAuthenticated } = useAuth();
+
+  // Liste des routes protégées qui nécessitent une authentification
+  const protectedRoutes = [
+    '/dashboard',
+    '/mes-demandes',
+    '/reclamation',
+    '/secretQuestion',
+    '/incident',
+    '/depannage',
+    '/formation',
+    '/audit-eco',
+    '/audit-conso',
+    '/chat',
+  ];
+
+  // Liste des routes d'authentification (réservées aux utilisateurs non connectés)
+  const authRoutes = [
+    '/login',
+    '/register-stepper',
+    '/verify',
+    '/recuperation',
+    '/defineCode',
+    '/code',
+    '/OTP',
+    '/recupOTP',
+    '/recupQuestion',
+  ];
+
+  // Protection des routes côté client
+  useEffect(() => {
+    // Si l'utilisateur tente d'accéder à une route protégée sans être authentifié
+    if (!isAuthenticated && protectedRoutes.some(route =>
+      pathname === route || pathname.startsWith(`${route}/`)
+    )) {
+      router.push('/login');
+      return;
+    }
+
+    // Si l'utilisateur est authentifié et tente d'accéder à une route d'authentification
+    if (isAuthenticated && authRoutes.some(route =>
+      pathname === route || pathname.startsWith(`${route}/`)
+    )) {
+      router.push('/');
+      return;
+    }
+  }, [pathname, isAuthenticated, router, protectedRoutes, authRoutes]);
+
+  // Gérer les événements de navigation manuels (back/forward, changement manuel d'URL)
+  useEffect(() => {
+    // Fonction de gestion pour vérifier l'accès à l'URL actuelle
+    const handleNavigation = () => {
+      const currentPath = window.location.pathname;
+
+      // Vérifier si l'URL actuelle est protégée et l'utilisateur n'est pas authentifié
+      if (!isAuthenticated && protectedRoutes.some(route =>
+        currentPath === route || currentPath.startsWith(`${route}/`)
+      )) {
+        router.push('/login');
+        return;
+      }
+
+      // Vérifier si l'URL actuelle est réservée à l'authentification et l'utilisateur est authentifié
+      if (isAuthenticated && authRoutes.some(route =>
+        currentPath === route || currentPath.startsWith(`${route}/`)
+      )) {
+        router.push('/');
+        return;
+      }
+    };
+
+    // Écouter l'événement popstate (navigation avec les boutons back/forward du navigateur)
+    window.addEventListener('popstate', handleNavigation);
+
+    // Écouter l'événement personnalisé pour les changements d'URL via pushState
+    window.addEventListener('urlChanged', handleNavigation);
+
+    // Nettoyer les écouteurs d'événements
+    return () => {
+      window.removeEventListener('popstate', handleNavigation);
+      window.removeEventListener('urlChanged', handleNavigation);
+    };
+  }, [isAuthenticated, router, protectedRoutes, authRoutes]);
+
+  // Afficher le Header seulement pour certaines pages
+  const showHeader = !['/login', '/register-stepper', '/verify', '/dashboard'].includes(pathname);
+
+  return (
+    <>
+      {showHeader && <Header />}
+      <main className="">
+        <div className="flex-1 overflow-x-hidden">
+          <DesktopEffects />
+          <ToastContainer />
+          {children}
+        </div>
+      </main>
+      <Footer />
+      <div>
+        <FloatingBot />
+      </div>
+      <FlashInfos />
+    </>
+  );
+};
 
 export default function RootLayout({
   children,
@@ -38,10 +151,6 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   const [token, setToken] = useState<string | null>(null);
-  const pathname = usePathname();
-
-  // Détermine la section active en fonction du chemin (même logique que dans le Header)
-
 
   useEffect(() => {
     const getToken = async () => {
@@ -162,24 +271,65 @@ export default function RootLayout({
 
   return (
     <html lang="fr">
+      <head>
+        <Script id="auth-check" strategy="beforeInteractive">
+          {`
+            // Intercepter les requêtes fetch pour ajouter l'en-tête d'authentification
+            const originalFetch = window.fetch;
+            window.fetch = function(url, options = {}) {
+              // Créer des options avec les headers existants ou un nouvel objet
+              const newOptions = { ...options };
+              newOptions.headers = newOptions.headers || {};
+              
+              // Vérifier si l'utilisateur a un token dans localStorage
+              try {
+                const token = localStorage.getItem('token');
+                if (token) {
+                  // Ajouter un header personnalisé pour indiquer qu'un token existe
+                  newOptions.headers = {
+                    ...newOptions.headers,
+                    'x-has-token': 'true'
+                  };
+                }
+              } catch (error) {
+                console.error('Error accessing localStorage:', error);
+              }
+              
+              // Appeler la fonction fetch originale avec les options modifiées
+              return originalFetch(url, newOptions);
+            };
+
+            // Intercepter les navigations par changement d'URL
+            if (typeof window !== 'undefined') {
+              const originalPushState = history.pushState;
+              history.pushState = function(state, title, url) {
+                // Vérifier si l'URL est une route protégée et si l'utilisateur est authentifié
+                const token = localStorage.getItem('token');
+                const isAuthenticated = !!token;
+                
+                // Appeler la méthode originale
+                const result = originalPushState.apply(this, [state, title, url]);
+                
+                // Déclencher un événement personnalisé pour être capturé par React
+                const event = new CustomEvent('urlChanged', { 
+                  detail: { 
+                    url, 
+                    isAuthenticated 
+                  } 
+                });
+                window.dispatchEvent(event);
+                
+                return result;
+              };
+            }
+          `}
+        </Script>
+      </head>
       <body className={montserrat.className}>
         <ReduxProvider>
-          {!['/login', '/register-stepper', '/verify', '/dashboard'].includes(pathname) && <Header />}
-
-          <main className="">
-            <div className="flex-1 overflow-x-hidden">
-              {/* Using component wrapper to handle responsive rendering */}
-              <DesktopEffects />
-              <ToastContainer />
-              {children}
-            </div>
-          </main>
-          <Footer />
-          <div>
-            <FloatingBot />
-          </div>
-
-          <FlashInfos />
+          <RouteGuard>
+            {children}
+          </RouteGuard>
         </ReduxProvider>
       </body>
     </html>

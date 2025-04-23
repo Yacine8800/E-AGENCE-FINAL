@@ -8,6 +8,7 @@ import AssistanceIcon from "./icons/AssistanceIcon";
 import Ecostore from "./icons/EcoStore";
 import { useState, useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
+import { useAuth } from "@/src/hooks/useAuth";
 
 import Column from "./Column";
 import { TAB_CONTENT } from "../utils/headerData";
@@ -37,6 +38,9 @@ const Header = () => {
   const [isMobile, setIsMobile] = useState(false);
   // État pour stocker le sous-menu actif
   const [activeSubmenuPath, setActiveSubmenuPath] = useState<string | null>(null);
+
+  // Récupérer l'état d'authentification
+  const { isAuthenticated } = useAuth();
 
   /* ──────────────────────────  Fonctions utilitaires  ────────────────────────── */
 
@@ -230,7 +234,7 @@ const Header = () => {
                 </Link>
 
                 <Link
-                  href="/login"
+                  href={isAuthenticated ? "/dashboard" : "/login"}
                   className="bg-orange hover:bg-noir font-semibold text-white w-full sm:w-[180px] md:w-[233px] h-[45px] sm:h-[55px] px-4 sm:px-6 md:px-10 py-[10px] sm:py-[15px] rounded-[30px] sm:rounded-[40px] transition-all duration-300 text-xs sm:text-sm flex items-center justify-center gap-[10px] hover:scale-105 hover:shadow-lg"
                 >
                   <UserSolo />

@@ -170,9 +170,9 @@ const Navbar = () => {
               )}
             </div>
 
-            <div className="flex items-center ml-2 sm:ml-3 gap-1 sm:gap-2">
-              {/* Bot icon */}
-              <div
+            {/* <div className="flex items-center ml-2 sm:ml-3 gap-1 sm:gap-2"> */}
+            {/* Bot icon */}
+            {/* <div
                 className="w-[40px] sm:w-[50px] h-[40px] sm:h-[50px] bg-white border border-gray-200 shadow-sm rounded-xl flex items-center justify-center overflow-hidden p-[5px] sm:p-[8px] cursor-pointer hover:bg-gray-50 hover:shadow transition-all duration-200 transform hover:-translate-y-0.5"
                 onClick={() => setIsBotModalOpen(true)}
               >
@@ -183,44 +183,17 @@ const Navbar = () => {
                   height={40}
                   className="object-cover"
                 />
-              </div>
-
-              {/* User profile */}
-              {/* <div className="w-[40px] sm:w-[50px] h-[40px] sm:h-[50px] bg-gradient-to-r from-rouge to-red-600 shadow-sm rounded-xl flex items-center justify-center cursor-pointer hover:shadow transition-all duration-200 transform hover:-translate-y-0.5">
-                <span
-                  style={{ fontFamily: "Montserrat", fontWeight: 600 }}
-                  className="text-white text-xs sm:text-sm"
-                >
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 16 16"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <g clip-path="url(#clip0_6673_1090)">
-                      <path
-                        d="M9 1C9 0.446875 8.55313 0 8 0C7.44688 0 7 0.446875 7 1V8C7 8.55313 7.44688 9 8 9C8.55313 9 9 8.55313 9 8V1ZM4.48438 3.76875C4.90938 3.41562 4.96563 2.78437 4.6125 2.35938C4.25938 1.93438 3.62812 1.87813 3.20312 2.23125C1.55313 3.60625 0.5 5.68125 0.5 8C0.5 12.1406 3.85938 15.5 8 15.5C12.1406 15.5 15.5 12.1406 15.5 8C15.5 5.68125 14.4437 3.60625 12.7937 2.23125C12.3687 1.87813 11.7375 1.9375 11.3844 2.35938C11.0312 2.78125 11.0906 3.41562 11.5125 3.76875C12.7281 4.77812 13.4969 6.3 13.4969 8C13.4969 11.0375 11.0344 13.5 7.99687 13.5C4.95937 13.5 2.49688 11.0375 2.49688 8C2.49688 6.3 3.26875 4.77812 4.48125 3.76875H4.48438Z"
-                        fill="white"
-                      />
-                    </g>
-                    <defs>
-                      <clipPath id="clip0_6673_1090">
-                        <rect width="16" height="16" fill="white" />
-                      </clipPath>
-                    </defs>
-                  </svg>
-                </span>
               </div> */}
-            </div>
+
+
+            {/* </div> */}
           </div>
         </div>
       </div>
 
       {/* Bot Assistant Modal */}
-      {isBotModalOpen && (
+      {/*   {isBotModalOpen && (
         <Portal>
-          {/* Overlay - Utilisation d'une div séparée pour l'overlay */}
           <div
             className="fixed inset-0 bg-black bg-opacity-50 z-[999999]"
             onClick={() => {
@@ -229,7 +202,6 @@ const Navbar = () => {
             }}
           />
 
-          {/* Conteneur du ChatBot */}
           <div
             className="fixed top-0 right-0 h-full w-full sm:w-[600px] bg-white shadow-lg z-[999999]"
             onClick={(e) => {
@@ -244,7 +216,7 @@ const Navbar = () => {
             />
           </div>
         </Portal>
-      )}
+      )} */}
 
       {/* Notifications Slide-in Modal */}
       {isNotifModalOpen && (
