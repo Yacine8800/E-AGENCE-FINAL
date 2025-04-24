@@ -816,7 +816,7 @@ export default function ChatBot({
   const sessionId = useRef(`eagence-chat-${Date.now()}`).current;
 
   const handleSendMessage = async () => {
-    // Vérifier si le champ n’est pas vide
+    // Vérifier si le champ n'est pas vide
     if (!inputValue.trim()) {
       console.log("Le message est vide");
       return;
@@ -1536,8 +1536,8 @@ export default function ChatBot({
               : "linear-gradient(180deg, #FFFFFF 0%, #F9FAFB 100%)",
           }}
         >
-          {!selectedOption ? (
-            <div className="flex flex-col items-center gap-4">
+          {!selectedOption && messages.length === 0 && (
+            <div className="flex flex-col items-center gap-4 mb-4">
               <div className="flex flex-col items-center gap-3 w-full">
                 <div className="flex justify-center gap-2 w-full flex-wrap">
                   <motion.button
@@ -1785,8 +1785,10 @@ export default function ChatBot({
                 </div>
               </div>
             </div>
-          ) : (
-            <div className="flex flex-col gap-4">
+          )}
+
+          <div className="flex flex-col gap-4">
+            {selectedOption && (
               <div
                 className={`flex items-center gap-2 ${theme.bgSecondary} p-4 rounded-xl`}
               >
@@ -1807,420 +1809,438 @@ export default function ChatBot({
                   {selectedOption}
                 </span>
               </div>
+            )}
 
-              {/* Indicateur de chargement en attente de réponse */}
+            {/* Indicateur de chargement en attente de réponse */}
 
-              {messages.map((message, index) => (
+            {messages.map((message, index) => (
+              <div
+                key={index}
+                className={`flex items-start gap-3 ${
+                  message.isUser ? "flex-row-reverse" : ""
+                }`}
+              >
+                {!message.isUser && (
+                  <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 bg-gradient-to-br from-red-500 to-red-600 ring-2 ring-red-500/20">
+                    <Image
+                      src="/chat/bot.png"
+                      alt="Assistant"
+                      width={32}
+                      height={32}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                )}
+                {message.isUser && (
+                  <div className={theme.text + " ml-2"}>
+                    <UserIcon />
+                  </div>
+                )}
                 <div
-                  key={index}
-                  className={`flex items-start gap-3 ${
-                    message.isUser ? "flex-row-reverse" : ""
+                  className={`flex flex-col gap-1.5 ${
+                    message.isUser ? "items-end" : "items-start"
                   }`}
                 >
-                  {!message.isUser && (
-                    <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 bg-gradient-to-br from-red-500 to-red-600 ring-2 ring-red-500/20">
-                      <Image
-                        src="/chat/bot.png"
-                        alt="Assistant"
-                        width={32}
-                        height={32}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  )}
-                  {message.isUser && (
-                    <div className={theme.text + " ml-2"}>
-                      <UserIcon />
-                    </div>
-                  )}
                   <div
-                    className={`flex flex-col gap-1.5 ${
-                      message.isUser ? "items-end" : "items-start"
-                    }`}
+                    className={`
+                    relative 
+                    rounded-2xl px-4 py-2.5 
+                    max-w-[280px]
+                    ${
+                      message.isUser
+                        ? "bg-gradient-to-r from-red-500 via-red-500 to-red-600 text-white shadow-lg shadow-red-500/20 rounded-tr-sm"
+                        : "bg-gradient-to-br from-[#323232] to-[#272727] text-gray-100 shadow-lg shadow-black/10 rounded-tl-sm"
+                    }
+                  `}
                   >
-                    <div
-                      className={`
-                      relative 
-                      rounded-2xl px-4 py-2.5 
-                      max-w-[280px]
-                      ${
-                        message.isUser
-                          ? "bg-gradient-to-r from-red-500 via-red-500 to-red-600 text-white shadow-lg shadow-red-500/20 rounded-tr-sm"
-                          : "bg-gradient-to-br from-[#323232] to-[#272727] text-gray-100 shadow-lg shadow-black/10 rounded-tl-sm"
-                      }
-                    `}
-                    >
-                      {message.isLoading ? (
-                        <div className="py-2">
-                          <div className="flex space-x-2">
-                            <motion.div
-                              animate={{ y: [0, -10, 0] }}
-                              transition={{
-                                duration: 0.5,
-                                repeat: Infinity,
-                                repeatDelay: 0.25,
-                              }}
-                              className="h-2 w-2 rounded-full bg-gray-400"
-                            ></motion.div>
-                            <motion.div
-                              animate={{ y: [0, -10, 0] }}
-                              transition={{
-                                duration: 0.5,
-                                repeat: Infinity,
-                                repeatDelay: 0.25,
-                                delay: 0.1,
-                              }}
-                              className="h-2 w-2 rounded-full bg-gray-400"
-                            ></motion.div>
-                            <motion.div
-                              animate={{ y: [0, -10, 0] }}
-                              transition={{
-                                duration: 0.5,
-                                repeat: Infinity,
-                                repeatDelay: 0.25,
-                                delay: 0.2,
-                              }}
-                              className="h-2 w-2 rounded-full bg-gray-400"
-                            ></motion.div>
-                          </div>
+                    {message.isLoading ? (
+                      <div className="py-2">
+                        <div className="flex space-x-2">
+                          <motion.div
+                            animate={{ y: [0, -10, 0] }}
+                            transition={{
+                              duration: 0.5,
+                              repeat: Infinity,
+                              repeatDelay: 0.25,
+                            }}
+                            className="h-2 w-2 rounded-full bg-gray-400"
+                          ></motion.div>
+                          <motion.div
+                            animate={{ y: [0, -10, 0] }}
+                            transition={{
+                              duration: 0.5,
+                              repeat: Infinity,
+                              repeatDelay: 0.25,
+                              delay: 0.1,
+                            }}
+                            className="h-2 w-2 rounded-full bg-gray-400"
+                          ></motion.div>
+                          <motion.div
+                            animate={{ y: [0, -10, 0] }}
+                            transition={{
+                              duration: 0.5,
+                              repeat: Infinity,
+                              repeatDelay: 0.25,
+                              delay: 0.2,
+                            }}
+                            className="h-2 w-2 rounded-full bg-gray-400"
+                          ></motion.div>
                         </div>
-                      ) : (
-                        message.content.map((content, contentIndex) => (
-                          <div key={contentIndex}>
-                            {content.type === "text" && (
-                              <p className="relative z-10 text-[15px] leading-relaxed">
-                                <MarkdownRenderer text={content.content} />
-                              </p>
-                            )}
+                      </div>
+                    ) : (
+                      message.content.map((content, contentIndex) => (
+                        <div key={contentIndex}>
+                          {content.type === "text" && (
+                            <p className="relative z-10 text-[15px] leading-relaxed">
+                              <MarkdownRenderer text={content.content} />
+                            </p>
+                          )}
 
-                            {content.type === "image" && (
-                              <div
-                                className="relative rounded-lg overflow-hidden my-2 cursor-pointer"
-                                onClick={() =>
-                                  handleImageClick(message.id, contentIndex)
-                                }
-                              >
-                                <Image
-                                  src={content.content}
-                                  alt="Image message"
-                                  width={300}
-                                  height={200}
-                                  className="w-full h-auto"
-                                />
+                          {content.type === "image" && (
+                            <div
+                              className="relative rounded-lg overflow-hidden my-2 cursor-pointer"
+                              onClick={() =>
+                                handleImageClick(message.id, contentIndex)
+                              }
+                            >
+                              <Image
+                                src={content.content}
+                                alt="Image message"
+                                width={300}
+                                height={200}
+                                className="w-full h-auto"
+                              />
+                            </div>
+                          )}
+
+                          {content.type === "button" &&
+                            content.buttons &&
+                            content.buttons.length > 0 && (
+                              <div className="relative my-2 mt-3">
+                                <div className="flex flex-wrap gap-2">
+                                  {content.buttons.map((button) => (
+                                    <button
+                                      key={button.id}
+                                      onClick={() =>
+                                        handleButtonClick(
+                                          message.id,
+                                          contentIndex,
+                                          button
+                                        )
+                                      }
+                                      className="bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded-lg text-sm font-medium transition-colors"
+                                    >
+                                      {button.title}
+                                    </button>
+                                  ))}
+                                </div>
                               </div>
                             )}
+                          
+                          {content.type === "form" && content.formFields && content.formFields.length > 0 && (
+                            <FormComponent 
+                              messageId={message.id}
+                              contentIndex={contentIndex}
+                              formFields={content.formFields}
+                              onSubmit={handleFormSubmit}
+                              theme={theme}
+                            />
+                          )}
 
-                            {content.type === "button" &&
-                              content.buttons &&
-                              content.buttons.length > 0 && (
-                                <div className="relative my-2 mt-3">
-                                  <div className="flex flex-wrap gap-2">
-                                    {content.buttons.map((button) => (
-                                      <button
-                                        key={button.id}
-                                        onClick={() =>
-                                          handleButtonClick(
-                                            message.id,
-                                            contentIndex,
-                                            button
-                                          )
-                                        }
-                                        className="bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded-lg text-sm font-medium transition-colors"
-                                      >
-                                        {button.title}
-                                      </button>
-                                    ))}
-                                  </div>
-                                </div>
-                              )}
-                            
-                            {content.type === "form" && content.formFields && content.formFields.length > 0 && (
-                              <FormComponent 
+                          {content.type === "list" &&
+                            content.listItems &&
+                            content.listItems.length > 0 && (
+                              <InteractiveListComponent
                                 messageId={message.id}
                                 contentIndex={contentIndex}
-                                formFields={content.formFields}
-                                onSubmit={handleFormSubmit}
-                                theme={theme}
+                                text={content.text}
+                                listItems={content.listItems}
+                                selector={content.selector || "unique"}
+                                onConfirm={handleListConfirmation}
                               />
                             )}
 
-                            {content.type === "list" &&
-                              content.listItems &&
-                              content.listItems.length > 0 && (
-                                <InteractiveListComponent
-                                  messageId={message.id}
-                                  contentIndex={contentIndex}
-                                  text={content.text}
-                                  listItems={content.listItems}
-                                  selector={content.selector || "unique"}
-                                  onConfirm={handleListConfirmation}
-                                />
-                              )}
-
-                            {content.type === "location" && (
-                              <div className="relative rounded-lg overflow-hidden my-2 p-3 bg-black/20">
-                                <div className="flex items-center gap-2 mb-2">
-                                  <svg
-                                    width="20"
-                                    height="20"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    className="text-red-400"
-                                  >
-                                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
-                                    <circle cx="12" cy="10" r="3" />
-                                  </svg>
-                                  <span className="font-medium">
-                                    Localisation partagée
-                                  </span>
-                                </div>
-
-                                <div className="relative rounded-lg overflow-hidden h-[150px] w-full bg-gray-800 mb-2">
-                                  {content.latitude && content.longitude && (
-                                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-700 to-gray-800 text-white">
-                                      <div className="text-center p-2">
-                                        <svg
-                                          className="w-6 h-6 mx-auto mb-1"
-                                          viewBox="0 0 24 24"
-                                          fill="none"
-                                          stroke="currentColor"
-                                          strokeWidth="2"
-                                          strokeLinecap="round"
-                                          strokeLinejoin="round"
-                                        >
-                                          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
-                                          <circle cx="12" cy="10" r="3" />
-                                        </svg>
-                                        <p>
-                                          Position:{" "}
-                                          {content.latitude?.toFixed(6)},{" "}
-                                          {content.longitude?.toFixed(6)}
-                                        </p>
-                                      </div>
-                                    </div>
-                                  )}
-                                </div>
-
-                                <div className="text-sm">{content.address}</div>
-
-                                <a
-                                  href={`https://www.google.com/maps?q=${content.latitude},${content.longitude}`}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="mt-2 inline-flex items-center text-sm text-blue-400 hover:text-blue-300"
+                          {content.type === "location" && (
+                            <div className="relative rounded-lg overflow-hidden my-2 p-3 bg-black/20">
+                              <div className="flex items-center gap-2 mb-2">
+                                <svg
+                                  width="20"
+                                  height="20"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  className="text-red-400"
                                 >
-                                  <svg
-                                    width="16"
-                                    height="16"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    className="mr-1"
-                                  >
-                                    <line x1="7" y1="17" x2="17" y2="7"></line>
-                                    <polyline points="7 7 17 7 17 17"></polyline>
-                                  </svg>
-                                  Voir dans Google Maps
-                                </a>
+                                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
+                                  <circle cx="12" cy="10" r="3" />
+                                </svg>
+                                <span className="font-medium">
+                                  Localisation partagée
+                                </span>
                               </div>
-                            )}
 
-                            {content.type === "audio" && (
-                              <div className="flex items-center gap-3 bg-black/20 rounded-xl p-3 min-w-[200px]">
-                                {content.error ? (
-                                  <div className="w-full text-center p-2">
-                                    <div className="text-red-500 mb-1">
+                              <div className="relative rounded-lg overflow-hidden h-[150px] w-full bg-gray-800 mb-2">
+                                {content.latitude && content.longitude && (
+                                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-700 to-gray-800 text-white">
+                                    <div className="text-center p-2">
                                       <svg
-                                        width="24"
-                                        height="24"
+                                        className="w-6 h-6 mx-auto mb-1"
                                         viewBox="0 0 24 24"
                                         fill="none"
                                         stroke="currentColor"
                                         strokeWidth="2"
                                         strokeLinecap="round"
                                         strokeLinejoin="round"
-                                        className="inline-block mr-1"
                                       >
-                                        <circle cx="12" cy="12" r="10"></circle>
-                                        <line
-                                          x1="12"
-                                          y1="8"
-                                          x2="12"
-                                          y2="12"
-                                        ></line>
-                                        <line
-                                          x1="12"
-                                          y1="16"
-                                          x2="12.01"
-                                          y2="16"
-                                        ></line>
+                                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
+                                        <circle cx="12" cy="10" r="3" />
                                       </svg>
+                                      <p>
+                                        Position:{" "}
+                                        {content.latitude?.toFixed(6)},{" "}
+                                        {content.longitude?.toFixed(6)}
+                                      </p>
                                     </div>
-                                    <p className="text-sm text-red-400">
-                                      Impossible de lire le fichier audio
-                                    </p>
-                                    <p className="text-xs text-gray-400 mt-1">
-                                      Format non supporté ou fichier
-                                      indisponible
-                                    </p>
                                   </div>
-                                ) : (
-                                  <>
-                                    <button
-                                      onClick={() =>
-                                        toggleAudioPlayback(index, contentIndex)
-                                      }
-                                      className={`
-                                      relative w-10 h-10 flex items-center justify-center rounded-full transition-all
-                                      ${
-                                        content.isPlaying
-                                          ? "bg-red-500"
-                                          : "bg-red-500/80 hover:bg-red-500"
-                                      }
-                                    `}
-                                    >
-                                      {content.isPlaying && (
-                                        <motion.div
-                                          initial={{ scale: 0 }}
-                                          animate={{ scale: 1.5 }}
-                                          className="absolute inset-0 bg-red-500 rounded-full animate-ping opacity-20"
-                                        />
-                                      )}
-                                      <motion.div
-                                        animate={{
-                                          rotate: content.isPlaying ? 360 : 0,
-                                        }}
-                                        transition={{ duration: 0.3 }}
-                                      >
-                                        {content.isPlaying ? (
-                                          <svg
-                                            width="15"
-                                            height="15"
-                                            viewBox="0 0 24 24"
-                                            fill="white"
-                                          >
-                                            <rect
-                                              x="6"
-                                              y="4"
-                                              width="4"
-                                              height="16"
-                                            />
-                                            <rect
-                                              x="14"
-                                              y="4"
-                                              width="4"
-                                              height="16"
-                                            />
-                                          </svg>
-                                        ) : (
-                                          <svg
-                                            width="15"
-                                            height="15"
-                                            viewBox="0 0 24 24"
-                                            fill="white"
-                                          >
-                                            <path d="M8 5v14l11-7z" />
-                                          </svg>
-                                        )}
-                                      </motion.div>
-                                    </button>
-
-                                    <div className="flex-1 space-y-2">
-                                      <div
-                                        className="relative h-2 bg-black/20 rounded-full overflow-hidden cursor-pointer group"
-                                        onClick={(e) => {
-                                          const rect =
-                                            e.currentTarget.getBoundingClientRect();
-                                          const x = e.clientX - rect.left;
-                                          const percentage =
-                                            (x / rect.width) * 100;
-                                          const audio =
-                                            audioElements[
-                                              `${index}-${contentIndex}`
-                                            ];
-                                          if (audio) {
-                                            audio.currentTime =
-                                              (percentage / 100) *
-                                              audio.duration;
-                                          }
-                                        }}
-                                      >
-                                        <motion.div
-                                          className="absolute inset-0 bg-red-500/20 scale-y-0 origin-bottom transition-transform"
-                                          style={{
-                                            scaleY: content.isPlaying ? 1 : 0,
-                                          }}
-                                        />
-                                        <motion.div
-                                          className="h-full bg-red-500 rounded-full"
-                                          style={{
-                                            width: `${content.progress || 0}%`,
-                                          }}
-                                          animate={{
-                                            backgroundColor: content.isPlaying
-                                              ? [
-                                                  "#EF4444",
-                                                  "#DC2626",
-                                                  "#EF4444",
-                                                ]
-                                              : "#EF4444",
-                                          }}
-                                          transition={{
-                                            duration: 1,
-                                            repeat: Infinity,
-                                            ease: "easeInOut",
-                                          }}
-                                        />
-                                      </div>
-
-                                      <div className="flex justify-between items-center">
-                                        <span
-                                          className={`${theme.textSecondary} text-sm`}
-                                        >
-                                          {formatDuration(
-                                            content.currentTime || 0
-                                          )}
-                                        </span>
-                                        <span
-                                          className={`${theme.textSecondary} text-sm`}
-                                        >
-                                          {formatDuration(
-                                            content.duration || 0
-                                          )}
-                                        </span>
-                                      </div>
-                                    </div>
-                                  </>
                                 )}
                               </div>
-                            )}
-                          </div>
-                        ))
+
+                              <div className="text-sm">{content.address}</div>
+
+                              <a
+                                href={`https://www.google.com/maps?q=${content.latitude},${content.longitude}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="mt-2 inline-flex items-center text-sm text-blue-400 hover:text-blue-300"
+                              >
+                                <svg
+                                  width="16"
+                                  height="16"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  className="mr-1"
+                                >
+                                  <line x1="7" y1="17" x2="17" y2="7"></line>
+                                  <polyline points="7 7 17 7 17 17"></polyline>
+                                </svg>
+                                Voir dans Google Maps
+                              </a>
+                            </div>
+                          )}
+
+                          {content.type === "audio" && (
+                            <div className="flex items-center gap-3 bg-black/20 rounded-xl p-3 min-w-[200px]">
+                              {content.error ? (
+                                <div className="w-full text-center p-2">
+                                  <div className="text-red-500 mb-1">
+                                    <svg
+                                      width="24"
+                                      height="24"
+                                      viewBox="0 0 24 24"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      strokeWidth="2"
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      className="inline-block mr-1"
+                                    >
+                                      <circle cx="12" cy="12" r="10"></circle>
+                                      <line
+                                        x1="12"
+                                        y1="8"
+                                        x2="12"
+                                        y2="12"
+                                      ></line>
+                                      <line
+                                        x1="12"
+                                        y1="16"
+                                        x2="12.01"
+                                        y2="16"
+                                      ></line>
+                                    </svg>
+                                  </div>
+                                  <p className="text-sm text-red-400">
+                                    Impossible de lire le fichier audio
+                                  </p>
+                                  <p className="text-xs text-gray-400 mt-1">
+                                    Format non supporté ou fichier
+                                    indisponible
+                                  </p>
+                                </div>
+                              ) : (
+                                <>
+                                  <button
+                                    onClick={() =>
+                                      toggleAudioPlayback(index, contentIndex)
+                                    }
+                                    className={`
+                                    relative w-10 h-10 flex items-center justify-center rounded-full transition-all
+                                    ${
+                                      content.isPlaying
+                                        ? "bg-red-500"
+                                        : "bg-red-500/80 hover:bg-red-500"
+                                    }
+                                  `}
+                                  >
+                                    {content.isPlaying && (
+                                      <motion.div
+                                        initial={{ scale: 0 }}
+                                        animate={{ scale: 1.5 }}
+                                        className="absolute inset-0 bg-red-500 rounded-full animate-ping opacity-20"
+                                      />
+                                    )}
+                                    <motion.div
+                                      animate={{
+                                        rotate: content.isPlaying ? 360 : 0,
+                                      }}
+                                      transition={{ duration: 0.3 }}
+                                    >
+                                      {content.isPlaying ? (
+                                        <svg
+                                          width="15"
+                                          height="15"
+                                          viewBox="0 0 24 24"
+                                          fill="white"
+                                        >
+                                          <rect
+                                            x="6"
+                                            y="4"
+                                            width="4"
+                                            height="16"
+                                          />
+                                          <rect
+                                            x="14"
+                                            y="4"
+                                            width="4"
+                                            height="16"
+                                          />
+                                        </svg>
+                                      ) : (
+                                        <svg
+                                          width="15"
+                                          height="15"
+                                          viewBox="0 0 24 24"
+                                          fill="white"
+                                        >
+                                          <path d="M8 5v14l11-7z" />
+                                        </svg>
+                                      )}
+                                    </motion.div>
+                                  </button>
+
+                                  <div className="flex-1 space-y-2">
+                                    <div
+                                      className="relative h-2 bg-black/20 rounded-full overflow-hidden cursor-pointer group"
+                                      onClick={(e) => {
+                                        const rect =
+                                          e.currentTarget.getBoundingClientRect();
+                                        const x = e.clientX - rect.left;
+                                        const percentage =
+                                          (x / rect.width) * 100;
+                                        const audio =
+                                          audioElements[
+                                            `${index}-${contentIndex}`
+                                          ];
+                                        if (audio) {
+                                          audio.currentTime =
+                                            (percentage / 100) *
+                                            audio.duration;
+                                        }
+                                      }}
+                                    >
+                                      <motion.div
+                                        className="absolute inset-0 bg-red-500/20 scale-y-0 origin-bottom transition-transform"
+                                        style={{
+                                          scaleY: content.isPlaying ? 1 : 0,
+                                        }}
+                                      />
+                                      <motion.div
+                                        className="h-full bg-red-500 rounded-full"
+                                        style={{
+                                          width: `${content.progress || 0}%`,
+                                        }}
+                                        animate={{
+                                          backgroundColor: content.isPlaying
+                                            ? [
+                                                "#EF4444",
+                                                "#DC2626",
+                                                "#EF4444",
+                                              ]
+                                            : "#EF4444",
+                                        }}
+                                        transition={{
+                                          duration: 1,
+                                          repeat: Infinity,
+                                          ease: "easeInOut",
+                                        }}
+                                      />
+                                    </div>
+
+                                    <div className="flex justify-between items-center">
+                                      <span
+                                        className={`${theme.textSecondary} text-sm`}
+                                      >
+                                        {formatDuration(
+                                          content.currentTime || 0
+                                        )}
+                                      </span>
+                                      <span
+                                        className={`${theme.textSecondary} text-sm`}
+                                      >
+                                        {formatDuration(
+                                          content.duration || 0
+                                        )}
+                                      </span>
+                                    </div>
+                                  </div>
+                                </>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      ))
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-2 px-1 text-xs text-gray-400">
+                    <span>{message.isUser ? "Vous" : "Assistant"}</span>
+                    <span>•</span>
+                    <span>
+                      {message.timestamp.toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </span>
+                  </div>
+
+                  {/* Afficher les checks de statut pour les messages de l'utilisateur */}
+                  {message.isUser && message.status && (
+                    <div className="text-xs text-right mt-1 pr-1">
+                      {message.status === "sent" && (
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="14"
+                          height="14"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          className="text-gray-300 inline-block"
+                        >
+                          <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
                       )}
-                    </div>
-
-                    <div className="flex items-center gap-2 px-1 text-xs text-gray-400">
-                      <span>{message.isUser ? "Vous" : "Assistant"}</span>
-                      <span>•</span>
-                      <span>
-                        {message.timestamp.toLocaleTimeString([], {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
-                      </span>
-                    </div>
-
-                    {/* Afficher les checks de statut pour les messages de l'utilisateur */}
-                    {message.isUser && message.status && (
-                      <div className="text-xs text-right mt-1 pr-1">
-                        {message.status === "sent" && (
+                      {message.status === "delivered" && (
+                        <div className="inline-flex">
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
                             width="14"
@@ -2235,126 +2255,108 @@ export default function ChatBot({
                           >
                             <polyline points="20 6 9 17 4 12"></polyline>
                           </svg>
-                        )}
-                        {message.status === "delivered" && (
-                          <div className="inline-flex">
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="14"
-                              height="14"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              className="text-gray-300 inline-block"
-                            >
-                              <polyline points="20 6 9 17 4 12"></polyline>
-                            </svg>
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="14"
-                              height="14"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              className="text-gray-300 inline-block -ml-2"
-                            >
-                              <polyline points="20 6 9 17 4 12"></polyline>
-                            </svg>
-                          </div>
-                        )}
-                        {message.status === "read" && (
-                          <div className="inline-flex">
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="14"
-                              height="14"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="#3b82f6"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              className="inline-block"
-                            >
-                              <polyline points="20 6 9 17 4 12"></polyline>
-                            </svg>
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="14"
-                              height="14"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="#3b82f6"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              className="inline-block -ml-2"
-                            >
-                              <polyline points="20 6 9 17 4 12"></polyline>
-                            </svg>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ))}
-
-              {waitingForBotResponse && (
-                <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 bg-gradient-to-br from-red-500 to-red-600 ring-2 ring-red-500/20">
-                    <Image
-                      src="/chat/bot.png"
-                      alt="Assistant"
-                      width={32}
-                      height={32}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <div className="bg-gradient-to-br from-[#323232] to-[#272727] text-gray-100 px-4 py-2.5 rounded-2xl max-w-[280px] shadow-lg shadow-black/10">
-                    <div className="flex space-x-2">
-                      <motion.div
-                        animate={{ y: [0, -10, 0] }}
-                        transition={{
-                          duration: 0.5,
-                          repeat: Infinity,
-                          repeatDelay: 0.25,
-                        }}
-                        className="h-2 w-2 rounded-full bg-gray-400"
-                      ></motion.div>
-                      <motion.div
-                        animate={{ y: [0, -10, 0] }}
-                        transition={{
-                          duration: 0.5,
-                          repeat: Infinity,
-                          repeatDelay: 0.25,
-                          delay: 0.1,
-                        }}
-                        className="h-2 w-2 rounded-full bg-gray-400"
-                      ></motion.div>
-                      <motion.div
-                        animate={{ y: [0, -10, 0] }}
-                        transition={{
-                          duration: 0.5,
-                          repeat: Infinity,
-                          repeatDelay: 0.25,
-                          delay: 0.2,
-                        }}
-                        className="h-2 w-2 rounded-full bg-gray-400"
-                      ></motion.div>
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="14"
+                            height="14"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className="text-gray-300 inline-block -ml-2"
+                          >
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                          </svg>
+                        </div>
+                      )}
+                      {message.status === "read" && (
+                        <div className="inline-flex">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="14"
+                            height="14"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="#3b82f6"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className="inline-block"
+                          >
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                          </svg>
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="14"
+                            height="14"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="#3b82f6"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className="inline-block -ml-2"
+                          >
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                          </svg>
+                        </div>
+                      )}
                     </div>
+                  )}
+                </div>
+              </div>
+            ))}
+
+            {waitingForBotResponse && (
+              <div className="flex items-start gap-3">
+                <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 bg-gradient-to-br from-red-500 to-red-600 ring-2 ring-red-500/20">
+                  <Image
+                    src="/chat/bot.png"
+                    alt="Assistant"
+                    width={32}
+                    height={32}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="bg-gradient-to-br from-[#323232] to-[#272727] text-gray-100 px-4 py-2.5 rounded-2xl max-w-[280px] shadow-lg shadow-black/10">
+                  <div className="flex space-x-2">
+                    <motion.div
+                      animate={{ y: [0, -10, 0] }}
+                      transition={{
+                        duration: 0.5,
+                        repeat: Infinity,
+                        repeatDelay: 0.25,
+                      }}
+                      className="h-2 w-2 rounded-full bg-gray-400"
+                    ></motion.div>
+                    <motion.div
+                      animate={{ y: [0, -10, 0] }}
+                      transition={{
+                        duration: 0.5,
+                        repeat: Infinity,
+                        repeatDelay: 0.25,
+                        delay: 0.1,
+                      }}
+                      className="h-2 w-2 rounded-full bg-gray-400"
+                    ></motion.div>
+                    <motion.div
+                      animate={{ y: [0, -10, 0] }}
+                      transition={{
+                        duration: 0.5,
+                        repeat: Infinity,
+                        repeatDelay: 0.25,
+                        delay: 0.2,
+                      }}
+                      className="h-2 w-2 rounded-full bg-gray-400"
+                    ></motion.div>
                   </div>
                 </div>
-              )}
-              <div ref={messagesEndRef} />
-            </div>
-          )}
+              </div>
+            )}
+            <div ref={messagesEndRef} />
+          </div>
         </div>
 
         <div className={`px-4 sm:px-6 py-3 border-t ${theme.border}`}>
@@ -3051,7 +3053,7 @@ export default function ChatBot({
             </div>
           )}
 
-          {selectedOption ? (
+      
             <AnimatePresence>
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -3295,13 +3297,8 @@ export default function ChatBot({
                 </button>
               </motion.div>
             </AnimatePresence>
-          ) : (
-            <div className="flex justify-center items-center py-4">
-              <p className={`text-center ${theme.text} text-sm`}>
-                Sélectionnez une catégorie pour commencer la conversation
-              </p>
-            </div>
-          )}
+      
+    
         </div>
 
         <input

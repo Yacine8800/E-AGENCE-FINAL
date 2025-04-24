@@ -6,7 +6,7 @@ import Image from "next/image";
 import UserSolo from "./icons/UserSolo";
 import AssistanceIcon from "./icons/AssistanceIcon";
 import Ecostore from "./icons/EcoStore";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/src/hooks/useAuth";
 
@@ -48,7 +48,24 @@ const Header = () => {
   const getTabFromPath = (path: string | null): TabType | null => {
     if (!path) return null;
 
-    if (path.includes('/simulateur-facture') || path.includes('/simulateur-puissance')) {
+    // Vérifie d'abord dans les sous-menus existants
+    for (const tabKey in TAB_CONTENT) {
+      const tab = tabKey as TabType;
+      const columns = TAB_CONTENT[tab];
+      
+      // Pour chaque colonne de l'onglet
+      for (const column of columns) {
+        // Pour chaque lien dans la colonne
+        for (const link of column.links) {
+          if (path === link.href || path.startsWith(link.href + '/')) {
+            return tab;
+          }
+        }
+      }
+    }
+
+    // Si aucun sous-menu ne correspond, utilise la détection par parties du chemin
+    if (path.includes('/simulateur-facture') || path.includes('/simulateur-puissance') || path.includes('/mes-demandes')) {
       return "particulier";
     } else if (path.includes('/business') || path.includes('/pro') || path.includes('/entreprise')) {
       return "business";
@@ -81,24 +98,47 @@ const Header = () => {
     return null;
   };
 
+  // Nouvelle fonction pour sauvegarder l'onglet actif
+  const saveActiveTab = useCallback((tab: TabType) => {
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('lastActiveTab', tab);
+    }
+  }, []);
+
+  // Nouvelle fonction pour récupérer l'onglet précédemment actif
+  const getSavedActiveTab = useCallback((): TabType | null => {
+    if (typeof window !== 'undefined') {
+      const savedTab = sessionStorage.getItem('lastActiveTab') as TabType | null;
+      return savedTab;
+    }
+    return null;
+  }, []);
+
   /* ──────────────────────────  Effects  ────────────────────────── */
 
   // Initialisation et changement de page
   useEffect(() => {
-    // Déterminer l'onglet actif en fonction du chemin
+    // Déterminer l'onglet actif en fonction du chemin ou récupérer celui sauvegardé
     const tabFromPath = getTabFromPath(pathname);
-    setActiveTab(tabFromPath);
+    const savedTab = getSavedActiveTab();
+    
+    // Priorité à l'onglet enregistré s'il existe, sinon utiliser celui détecté par l'URL
+    const finalTab = savedTab || tabFromPath;
+    
+    // Ne mettre à jour l'onglet actif que s'il est défini
+    if (finalTab) {
+      setActiveTab(finalTab);
+    }
 
     // Déterminer le sous-menu actif
     const activeSubmenu = findActiveSubmenu(pathname);
     setActiveSubmenuPath(activeSubmenu);
 
     // Log pour le débogage
-    console.log(`Page changed: ${pathname} → Tab: ${tabFromPath} → Active submenu: ${activeSubmenu}`);
+    console.log(`Page changed: ${pathname} → Saved Tab: ${savedTab} → Path Tab: ${tabFromPath} → Final Tab: ${finalTab} → Active submenu: ${activeSubmenu}`);
 
     // Si un sous-menu est actif, ouvrir le menu correspondant automatiquement sur desktop
-    if (activeSubmenu && tabFromPath && !isMobile) {
-      setActiveTab(tabFromPath);
+    if (activeSubmenu && finalTab && !isMobile) {
       setIsMenuOpen(true);
     }
 
@@ -106,7 +146,7 @@ const Header = () => {
     if (isMobile) {
       setIsMenuOpen(false);
     }
-  }, [pathname, isMobile]);
+  }, [pathname, isMobile, getSavedActiveTab]);
 
   // Détecter scroll + mobile
   useEffect(() => {
@@ -137,6 +177,7 @@ const Header = () => {
     // Sinon, on active le nouvel onglet et on ouvre le menu
     else {
       setActiveTab(tab);
+      saveActiveTab(tab);
       setIsMenuOpen(true);
     }
   };
@@ -152,9 +193,8 @@ const Header = () => {
         setIsMenuOpen(false);
       }, 300));
     }
-    // Sinon, activer l'onglet survolé et ouvrir le menu
-    else {
-      setActiveTab(tab);
+    // Sinon, ouvrir le menu sans changer l'onglet actif
+    else if (activeTab) {
       setIsMenuOpen(true);
     }
   };
