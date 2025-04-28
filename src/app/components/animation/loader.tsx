@@ -52,7 +52,7 @@ export default function Loader({ context }: LoaderProps) {
           animation: blink 1s ease-in-out infinite;
         }
       `}</style>
-      <div className="fixed inset-0 bg-white flex flex-col items-center justify-center z-[10000]">
+      <div className="fixed inset-0 bg-white flex flex-col items-center justify-center z-[9999999]">
         {/* Container principal */}
         <div className="relative w-full max-w-md px-6 py-10">
           {/* Animations d'électricité moderne */}

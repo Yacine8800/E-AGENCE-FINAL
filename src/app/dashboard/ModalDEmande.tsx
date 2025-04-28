@@ -137,6 +137,46 @@ const ModalDEmande = ({ onClose }: { onClose: () => void }) => {
 
   const [selectedDemande, setSelectedDemande] = useState<string | null>(null);
 
+  // Effet pour vérifier s'il y a une demande à ouvrir automatiquement
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const openDemandeType = localStorage.getItem('openDemandeType');
+      if (openDemandeType) {
+        console.log("Demande à ouvrir automatiquement:", openDemandeType);
+
+        // Vérifier si le type de demande existe dans les options disponibles
+        const isValidType = Object.values(typesDeDemandeParType)
+          .some(demandes => demandes.some(demande => demande.id === openDemandeType && !demande.disabled));
+
+        if (isValidType) {
+          // Trouver le bon type de profil qui contient cette demande
+          for (const [typeId, demandes] of Object.entries(typesDeDemandeParType)) {
+            if (demandes.some(demande => demande.id === openDemandeType && !demande.disabled)) {
+              setSelectedTypeId(typeId);
+              break;
+            }
+          }
+
+          // Définir la demande sélectionnée
+          setSelectedDemande(openDemandeType);
+
+          // Signaler que la demande a été traitée avec succès
+          console.log("Demande ouverte avec succès dans ModalDEmande");
+
+          // Supprimer la demande du localStorage pour éviter de l'ouvrir à nouveau
+          // mais avec un délai pour être sûr que tout est bien configuré
+          setTimeout(() => {
+            localStorage.removeItem('openDemandeType');
+            console.log("openDemandeType supprimé du localStorage");
+          }, 2000);
+        } else {
+          console.warn(`Le type de demande "${openDemandeType}" n'est pas valide ou est désactivé`);
+          localStorage.removeItem('openDemandeType');
+        }
+      }
+    }
+  }, []);
+
   console.log(selectedDemande, "selectedDemande")
 
   return (

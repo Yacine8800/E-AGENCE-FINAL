@@ -44,7 +44,6 @@ const RouteGuard = ({ children }: { children: React.ReactNode }) => {
   // Liste des routes protégées qui nécessitent une authentification
   const protectedRoutes = [
     '/dashboard',
-    '/mes-demandes',
     '/reclamation',
     '/secretQuestion',
     '/incident',
@@ -126,6 +125,8 @@ const RouteGuard = ({ children }: { children: React.ReactNode }) => {
   // Afficher le Header seulement pour certaines pages
   const showHeader = !['/login', '/register-stepper', '/verify', '/dashboard'].includes(pathname);
 
+
+
   return (
     <>
       {showHeader && <Header />}
@@ -136,7 +137,7 @@ const RouteGuard = ({ children }: { children: React.ReactNode }) => {
           {children}
         </div>
       </main>
-      <Footer />
+      {showHeader && <Footer />}
       <div>
         <FloatingBot />
       </div>

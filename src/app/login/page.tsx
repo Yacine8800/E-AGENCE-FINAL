@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useResponsive } from "@/src/hooks/useResponsive";
@@ -16,13 +16,27 @@ const Login = () => {
   const router = useRouter();
 
   const [loginIdentifier, setLoginIdentifier] = useState("");
-
   const [isLoading, setIsLoading] = useState(false);
-
   const [showNotFoundModal, setShowNotFoundModal] = useState(false);
+  const [modeParam, setModeParam] = useState<string | null>(null);
 
   const auth = useAuth();
   const { storeLogin } = auth;
+
+  // Récupérer le paramètre mode depuis l'URL
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      // Récupérer les paramètres d'URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const mode = urlParams.get('mode');
+
+      if (mode) {
+        // Stocker le mode pour l'utiliser après connexion
+        setModeParam(mode);
+        localStorage.setItem('pendingDemandeMode', mode);
+      }
+    }
+  }, []);
 
   const getApiToken = async () => {
     try {
@@ -143,7 +157,7 @@ const Login = () => {
             <div>
               <Title title="Connexion" />
               <p className="text-[14px] text-smallText font-medium text-center">
-                Saisir l’adresse e-mail ou le n° de téléphone associé à votre
+                Saisir l'adresse e-mail ou le n° de téléphone associé à votre
                 compte maCIE
               </p>
             </div>

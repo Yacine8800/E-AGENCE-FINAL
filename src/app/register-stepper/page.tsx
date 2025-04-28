@@ -24,6 +24,24 @@ const RegisterStepper = () => {
   const router = useRouter();
   const { isMobile } = useResponsive();
 
+  // État pour le paramètre mode de l'URL
+  const [modeParam, setModeParam] = useState<string | null>(null);
+
+  // Récupérer le paramètre mode depuis l'URL
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      // Récupérer les paramètres d'URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const mode = urlParams.get('mode');
+
+      if (mode) {
+        // Stocker le mode pour l'utiliser après inscription
+        setModeParam(mode);
+        localStorage.setItem('pendingDemandeMode', mode);
+      }
+    }
+  }, []);
+
   // État pour suivre l'étape actuelle
   const [currentStep, setCurrentStep] = useState(1);
 
@@ -397,9 +415,54 @@ const RegisterStepper = () => {
           if (loginResponse.ok && loginData.token) {
             // Stocker le token utilisateur
             localStorage.setItem("token", loginData.token);
+            localStorage.setItem("user", JSON.stringify(loginData.data.user));
 
-            // Rediriger vers le tableau de bord
-            router.push("/dashboard");
+            // Récupérer le mode à utiliser pour l'ouverture du modal
+            const pendingMode = localStorage.getItem('pendingDemandeMode');
+
+            // Rediriger vers le tableau de bord avec ouverture automatique du modal si nécessaire
+            if (pendingMode) {
+              // Déterminer quel type de demande ouvrir dans le dashboard
+              let demandeType = "";
+              switch (parseInt(pendingMode)) {
+                case 3: // Mutation
+                  demandeType = "mutation";
+                  break;
+                case 1: // Branchement d'abonnement
+                  demandeType = "branchement";
+                  break;
+                case 2: // Réabonnement
+                  demandeType = "reabonnement";
+                  break;
+                default:
+                  demandeType = "";
+              }
+
+              // Stocker le type de demande dans localStorage pour que le dashboard puisse l'utiliser
+              if (demandeType) {
+                localStorage.setItem('openDemandeType', demandeType);
+                console.log("Type de demande à ouvrir après redirection:", demandeType);
+
+                // Attendre un moment pour s'assurer que le localStorage est bien mis à jour
+                setTimeout(() => {
+                  // S'assurer une dernière fois que tout est bien stocké
+                  console.log("Vérification avant redirection:", {
+                    token: !!localStorage.getItem("token"),
+                    user: !!localStorage.getItem("user"),
+                    openDemandeType: localStorage.getItem('openDemandeType')
+                  });
+
+                  // Rediriger vers le tableau de bord
+                  router.push("/dashboard?openModal=true");
+                }, 500);
+              } else {
+                // Rediriger vers le tableau de bord sans paramètre spécial
+                router.push("/dashboard");
+              }
+            } else {
+              // Rediriger vers le tableau de bord sans paramètre spécial
+              router.push("/dashboard");
+            }
           } else {
             // Si la connexion automatique échoue, afficher le modal de succès pour permettre à l'utilisateur de se connecter manuellement
             setShowSuccessModal(true);

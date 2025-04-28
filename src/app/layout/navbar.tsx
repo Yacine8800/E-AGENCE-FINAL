@@ -80,10 +80,10 @@ const Navbar = () => {
     if (isBotModalOpen || isNotifModalOpen) {
       document.body.style.overflowY = "hidden";
     } else {
-      document.body.style.overflowY = "hidden"; // à bien checker après
+      document.body.style.overflowY = "auto";
     }
     return () => {
-      document.body.style.overflowY = "hidden"; // à bien checker après
+      document.body.style.overflowY = "auto";
     };
   }, [isBotModalOpen, isNotifModalOpen]);
 

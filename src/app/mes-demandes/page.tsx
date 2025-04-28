@@ -177,7 +177,7 @@ export default function MesDemandesPage() {
   const [selectedMode, setSelectedMode] = useState<number>(1);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [animationData, setAnimationData] = useState<any>(null);
-  const [showFloatingBot, setShowFloatingBot] = useState(false);
+  const [showFloatingBot, setShowFloatingBot] = useState(true);
 
   useEffect(() => {
     // Import the animation data dynamically
@@ -188,51 +188,252 @@ export default function MesDemandesPage() {
 
   const handleDemandeClick = (e: React.MouseEvent, link: string, mode: number) => {
     e.preventDefault();
-    setSelectedLink(link);
-    setSelectedMode(mode);
-    setShowAuthModal(true);
+
+    // Vérifier si l'utilisateur est connecté (token présent dans localStorage)
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    const user = typeof window !== 'undefined' ? localStorage.getItem('user') : null;
+
+    if (token && user) {
+      // Utilisateur connecté, redirection vers le dashboard
+      console.log("Utilisateur connecté, redirection vers le dashboard avec mode:", mode);
+
+      // Déterminer quel type de demande ouvrir dans le dashboard
+      let demandeType = "";
+      switch (mode) {
+        case 3: // Mutation
+          demandeType = "mutation";
+          break;
+        case 1: // Branchement d'abonnement
+          demandeType = "branchement";
+          break;
+        case 2: // Réabonnement
+          demandeType = "reabonnement";
+          break;
+        default:
+          demandeType = "";
+      }
+
+      // Stocker le type de demande dans localStorage pour que le dashboard puisse l'utiliser
+      if (demandeType) {
+        localStorage.setItem('openDemandeType', demandeType);
+      }
+
+      // Rediriger vers le dashboard
+      window.location.href = `/dashboard`;
+    } else {
+      // Utilisateur non connecté, afficher la modal d'authentification
+      setSelectedLink(link);
+      setSelectedMode(mode);
+      setShowAuthModal(true);
+    }
   };
 
   const handleLogin = () => {
-    // Ouvrir la page de connexion dans un nouvel onglet
-    window.open(`https://e-agence-v3-git-main-yacine8800s-projects.vercel.app/?mode=${selectedMode}`, '_blank');
+    // Si une demande de chat est en attente, la stocker dans sessionStorage
+    // (car localStorage peut être effacé lors de la redirection)
+    if (typeof window !== 'undefined') {
+      const pendingChatDemande = localStorage.getItem('pendingChatDemande');
+      if (pendingChatDemande) {
+        sessionStorage.setItem('pendingChatAfterLogin', pendingChatDemande);
+        localStorage.removeItem('pendingChatDemande');
+      }
+
+      // Stocker également le type de demande pour l'ouvrir après connexion
+      if (selectedMode) {
+        localStorage.setItem('pendingDemandeMode', selectedMode.toString());
+      }
+    }
+
+    // Rediriger vers la page de connexion dans la même application
+    window.location.href = `/login?mode=${selectedMode}`;
     setShowAuthModal(false);
   };
 
   const handleRegister = () => {
-    // Ouvrir la page d'inscription dans un nouvel onglet
-    window.open(`https://e-agence-v3-git-main-yacine8800s-projects.vercel.app/register-stepper?mode=${selectedMode}`, '_blank');
+    // Si une demande de chat est en attente, la stocker dans sessionStorage
+    if (typeof window !== 'undefined') {
+      const pendingChatDemande = localStorage.getItem('pendingChatDemande');
+      if (pendingChatDemande) {
+        sessionStorage.setItem('pendingChatAfterLogin', pendingChatDemande);
+        localStorage.removeItem('pendingChatDemande');
+      }
+
+      // Stocker également le type de demande pour l'ouvrir après connexion
+      if (selectedMode) {
+        localStorage.setItem('pendingDemandeMode', selectedMode.toString());
+      }
+    }
+
+    // Rediriger vers la page d'inscription dans la même application
+    window.location.href = `/register-stepper?mode=${selectedMode}`;
     setShowAuthModal(false);
   };
 
-  // Fonction pour ouvrir le chat
-  const openChat = () => {
+  // Fonction pour ouvrir le chat avec un message automatique
+  const openChat = (demandeTitle: string) => {
+    // Vérifier si l'utilisateur est connecté
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    const user = typeof window !== 'undefined' ? localStorage.getItem('user') : null;
+
+    if (token && user) {
+      // Utilisateur connecté, on peut procéder directement
+      proceedWithChat(demandeTitle);
+    } else {
+      // Utilisateur non connecté, on affiche la modal d'authentification
+      // et on stocke la demande pour l'utiliser après la connexion
+      localStorage.setItem('pendingChatDemande', demandeTitle);
+      setShowAuthModal(true);
+    }
+  };
+
+  // Fonction qui s'occupe d'ouvrir le chat et d'envoyer le message
+  const proceedWithChat = (demandeTitle: string) => {
+    // Garder une référence de la demande à envoyer
+    const messageToSend = `Je souhaite faire une demande de ${demandeTitle}`;
+
+    // Stocker le message dans le localStorage pour récupération ultérieure
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('pendingBotMessage', messageToSend);
+    }
+
     // Créer et dispatcher un événement personnalisé que le FloatingBot peut écouter
-    const event = new CustomEvent('open-floating-bot-chat');
+    const event = new CustomEvent('open-floating-bot-chat', {
+      detail: { message: messageToSend }
+    });
     document.dispatchEvent(event);
 
-    // Si l'événement ne fonctionne pas, essayer de trouver le bouton de manière plus directe
+    // Si l'événement ne fonctionne pas, essayer d'utiliser la fonction globale
     setTimeout(() => {
-      // Essayer de cibler le bouton dans le FloatingBot 
-      // (en se basant sur l'analyse du composant FloatingBot.tsx)
-      const floatingBotButtons = document.querySelectorAll('.fixed button.rounded-full');
+      if (typeof window !== 'undefined' && (window as any).__sendMessageToBot) {
+        (window as any).__sendMessageToBot(messageToSend);
+      } else {
+        // Essayer de trouver le bouton dans le FloatingBot 
+        const floatingBotButtons = document.querySelectorAll('.fixed button.rounded-full');
 
-      for (const btn of floatingBotButtons) {
-        if (btn.querySelector('div[style*="width: 100%"]')) {
-          console.log("Bouton FloatingBot trouvé!");
-          (btn as HTMLButtonElement).click();
-          break;
+        for (const btn of floatingBotButtons) {
+          if (btn.querySelector('div[style*="width: 100%"]')) {
+            console.log("Bouton FloatingBot trouvé!");
+            (btn as HTMLButtonElement).click();
+            break;
+          }
         }
+
+        // Après avoir ouvert le chat, attendre plus longtemps pour s'assurer que le chat est bien initialisé
+        setTimeout(() => {
+          attemptToSendMessage(messageToSend, 0);
+        }, 2000);
       }
-    }, 100);
+    }, 500);
 
     setShowAuthModal(false);
   };
 
-  // Créer un écouteur d'événement global quand le composant est monté
+  // Fonction récursive qui tente d'envoyer le message avec des délais croissants
+  const attemptToSendMessage = (message: string, attempts: number) => {
+    if (attempts > 5) {
+      console.log("Nombre maximal de tentatives atteint. Impossible d'envoyer le message.");
+      return;
+    }
+
+    console.log(`Tentative ${attempts + 1} d'envoi du message...`);
+
+    // Chercher le champ de saisie de différentes façons
+    const inputField = document.querySelector('input[placeholder*="Message à Clem\'Bot"]')
+      || document.querySelector('input[placeholder*="message"]')
+      || document.querySelector('.fixed input[type="text"]');
+
+    if (inputField) {
+      setMessageInInput(inputField as HTMLInputElement, message);
+    } else {
+      // Si on ne trouve pas l'input, attendre et réessayer avec un délai croissant
+      const delay = 1000 + (attempts * 500);
+      console.log(`Input non trouvé, nouvelle tentative dans ${delay}ms`);
+      setTimeout(() => attemptToSendMessage(message, attempts + 1), delay);
+    }
+  };
+
+  // Fonction utilitaire pour définir le message dans l'input et l'envoyer
+  const setMessageInInput = (input: HTMLInputElement, message: string) => {
+    console.log("Input trouvé, tentative d'envoi du message");
+
+    // Définir la valeur de l'input
+    input.value = message;
+
+    // Simuler un événement de saisie
+    const inputEvent = new Event('input', { bubbles: true });
+    input.dispatchEvent(inputEvent);
+
+    // Attendre un peu pour laisser le temps à React de mettre à jour son état
+    setTimeout(() => {
+      // Chercher le formulaire parent et le soumettre
+      const form = input.closest('form');
+      if (form) {
+        console.log("Formulaire trouvé, soumission directe");
+        const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
+        form.dispatchEvent(submitEvent);
+      } else {
+        // Sinon chercher différents types de boutons d'envoi
+        const sendButtons = Array.from(document.querySelectorAll('button[type="submit"], button.send-button, button[aria-label*="envoyer"], button[aria-label*="Envoyer"], button svg[data-testid="send"]'));
+
+        // Rechercher également les boutons qui contiennent une icône d'envoi
+        const allButtons = document.querySelectorAll('button');
+        for (const btn of allButtons) {
+          if (btn.innerHTML.includes('svg') && (btn.innerHTML.includes('send') || btn.innerHTML.includes('paper-plane'))) {
+            sendButtons.push(btn);
+          }
+        }
+
+        if (sendButtons.length > 0) {
+          console.log(`${sendButtons.length} boutons d'envoi trouvés, clic sur le premier`);
+          (sendButtons[0] as HTMLElement).click();
+        } else {
+          // Simuler l'appui sur Entrée
+          console.log("Aucun bouton d'envoi trouvé, simulation de l'appui sur Entrée");
+          const enterEvent = new KeyboardEvent('keypress', {
+            key: 'Enter',
+            code: 'Enter',
+            bubbles: true,
+            cancelable: true
+          });
+          input.dispatchEvent(enterEvent);
+        }
+      }
+
+      console.log("Message automatique envoyé");
+
+      // Nettoyer le message en attente dans le localStorage
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('pendingBotMessage');
+      }
+    }, 300);
+  };
+
+  // Ajouter un effet pour tenter d'envoyer des messages en attente au chargement de la page
+  useEffect(() => {
+    if (typeof window !== 'undefined' && showFloatingBot) {
+      const pendingMessage = localStorage.getItem('pendingBotMessage');
+      if (pendingMessage) {
+        console.log("Message en attente trouvé dans le localStorage:", pendingMessage);
+        // Attendre que la page soit bien chargée avant de tenter d'envoyer le message
+        setTimeout(() => {
+          // Vérifier si le chat est déjà ouvert
+          const chatContainer = document.querySelector('.fixed [role="dialog"]');
+          if (chatContainer) {
+            // Le chat est déjà ouvert, essayer d'envoyer le message directement
+            attemptToSendMessage(pendingMessage, 0);
+          } else {
+            // Le chat n'est pas ouvert, ouvrir le chat puis envoyer le message
+            openChat(pendingMessage.replace('Je souhaite faire une demande de ', ''));
+          }
+        }, 2000);
+      }
+    }
+  }, [showFloatingBot]);
+
+  // Mise à jour du gestionnaire d'événement global pour l'ouverture du chat
   useEffect(() => {
     // Fonction qui va être appelée quand on veut ouvrir le chat
-    const forceOpenChat = () => {
+    const forceOpenChat = (event: Event) => {
       const buttons = document.querySelectorAll('.fixed button.rounded-full');
       let chatButton: HTMLButtonElement | null = null;
 
@@ -247,6 +448,18 @@ export default function MesDemandesPage() {
       if (chatButton) {
         chatButton.click();
         console.log("Chat ouvert via événement personnalisé");
+
+        // Récupérer le message à envoyer s'il existe
+        const customEvent = event as CustomEvent;
+        if (customEvent.detail) {
+          const message = customEvent.detail.message || customEvent.detail.messageToSend;
+          if (message) {
+            // Attendre plus longtemps pour assurer que le chat est bien initialisé
+            setTimeout(() => {
+              attemptToSendMessage(message, 0);
+            }, 2000);
+          }
+        }
       }
     };
 
@@ -255,7 +468,12 @@ export default function MesDemandesPage() {
 
     // Exposer la fonction globalement pour un accès direct
     if (typeof window !== 'undefined') {
-      (window as any).__openFloatingBotChat = forceOpenChat;
+      (window as any).__openFloatingBotChat = (message?: string) => {
+        const event = new CustomEvent('open-floating-bot-chat', {
+          detail: message ? { message: message } : undefined
+        });
+        document.dispatchEvent(event);
+      };
     }
 
     // Nettoyer l'écouteur et la fonction globale quand le composant est démonté
@@ -265,6 +483,25 @@ export default function MesDemandesPage() {
         delete (window as any).__openFloatingBotChat;
       }
     };
+  }, []);
+
+  // Effet pour vérifier s'il y a une demande de chat en attente après connexion
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('token');
+      const user = localStorage.getItem('user');
+      const pendingChatDemande = sessionStorage.getItem('pendingChatAfterLogin');
+
+      if (token && user && pendingChatDemande) {
+        console.log("Demande de chat en attente trouvée après connexion:", pendingChatDemande);
+        // Supprimer la demande de sessionStorage pour éviter de la traiter plusieurs fois
+        sessionStorage.removeItem('pendingChatAfterLogin');
+        // Traiter la demande de chat
+        setTimeout(() => {
+          proceedWithChat(pendingChatDemande);
+        }, 1000);
+      }
+    }
   }, []);
 
   return (
@@ -377,7 +614,7 @@ export default function MesDemandesPage() {
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        openChat();
+                        openChat(demande.title);
                       }}
                       className="flex items-center justify-center w-12 h-12 rounded-full shadow-md hover:shadow-lg transition-all duration-300 bg-gradient-to-br from-orange to-orange/70 focus:outline-none focus:ring-2 focus:ring-orange/40 hover:scale-110 relative overflow-hidden group"
                       title="Faire une demande via le chat"

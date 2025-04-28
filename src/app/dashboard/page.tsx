@@ -218,6 +218,8 @@ const MeterSection = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const [maxVisibleItems, setMaxVisibleItems] = useState(3);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [displayedItems, setDisplayedItems] = useState<any[]>([]);
+  const [hasMoreItems, setHasMoreItems] = useState(false);
 
   // Déterminer dynamiquement combien d'éléments peuvent être affichés
   useEffect(() => {
@@ -246,12 +248,50 @@ const MeterSection = ({
       }
 
       setMaxVisibleItems(visibleCount);
+
+      // Modifier la logique pour sélectionner les éléments à afficher
+      let itemsToShow: any[] = [];
+      const selectedItemId = selectedItem.item?._id || selectedItem.item?.id || selectedItem.item?.identifiant;
+      const isCorrectType = selectedItem.type === itemType;
+
+      // Si un élément est sélectionné et du bon type, assurer qu'il soit dans les éléments affichés
+      if (selectedItemId && isCorrectType) {
+        // Trouver l'élément sélectionné
+        const selectedItemIndex = items.findIndex(item =>
+          item._id === selectedItemId ||
+          item.id === selectedItemId ||
+          item.identifiant === selectedItemId
+        );
+
+        if (selectedItemIndex !== -1) {
+          if (visibleCount === 1) {
+            // Si on ne peut afficher qu'un seul élément, afficher l'élément sélectionné
+            itemsToShow = [items[selectedItemIndex]];
+          } else if (visibleCount >= items.length) {
+            // Si on peut afficher tous les éléments
+            itemsToShow = [...items];
+          } else {
+            // Essayer d'afficher l'élément sélectionné avec des éléments adjacents
+            const startIndex = Math.max(0, Math.min(selectedItemIndex, items.length - visibleCount));
+            itemsToShow = items.slice(startIndex, startIndex + visibleCount);
+          }
+        } else {
+          // L'élément sélectionné n'est pas trouvé, afficher les premiers éléments
+          itemsToShow = items.slice(0, visibleCount);
+        }
+      } else {
+        // Aucun élément sélectionné ou pas du bon type, afficher les premiers éléments
+        itemsToShow = items.slice(0, visibleCount);
+      }
+
+      setDisplayedItems(itemsToShow);
+      setHasMoreItems(items.length > itemsToShow.length);
     };
 
     // Calcul initial
     calculateVisibleItems();
 
-    // Recalculer quand la fenêtre change de taille
+    // Recalculer quand la fenêtre change de taille ou quand l'élément sélectionné change
     const handleResize = () => {
       calculateVisibleItems();
     };
@@ -260,12 +300,7 @@ const MeterSection = ({
     return () => {
       window.removeEventListener("resize", handleResize);
     };
-  }, [items.length]);
-
-  // Éléments à afficher et vérification s'il y a plus d'éléments
-  const displayedItems =
-    items.length > maxVisibleItems ? items.slice(0, maxVisibleItems) : items;
-  const hasMoreItems = items.length > maxVisibleItems;
+  }, [items, selectedItem, itemType]);
 
   const handleItemClick = (item: any) => {
     setSelectedItem({ type: itemType, item: item });
@@ -1569,6 +1604,27 @@ export default function Dashboard() {
   // Ajouter un nouvel état pour le modal de réclamation
   const [isReclModalOpen, setIsReclModalOpen] = useState(false);
 
+  // Effet pour vérifier s'il y a une demande en attente à ouvrir automatiquement
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      // Utiliser setTimeout pour donner le temps au composant de se monter complètement
+      setTimeout(() => {
+        // Vérifier s'il y a une demande à ouvrir automatiquement
+        const openDemandeType = localStorage.getItem('openDemandeType');
+        if (openDemandeType) {
+          console.log("Demande en attente détectée, ouverture automatique de la modal:", openDemandeType);
+          // Forcer l'ouverture de la modal
+          setIsDemandeModalOpen(true);
+
+          // Pour déboguer
+          console.log("État de la modal après tentative d'ouverture:", isDemandeModalOpen);
+        }
+
+        // Ne pas supprimer la demande en attente si elle n'a pas été traitée correctement
+      }, 1000); // Attendre 1 seconde pour être sûr que tout est bien chargé
+    }
+  }, []);
+
   // Function for level 2 attachment (postpaid only)
   const handleLevel2Attachment = async (data: { index?: number; montant?: number }) => {
     try {
@@ -1696,6 +1752,60 @@ export default function Dashboard() {
       setIsLoading(false);
     }
   };
+
+  // Effet pour surveiller l'état de la modal et vérifier qu'elle est bien ouverte
+  useEffect(() => {
+    if (isDemandeModalOpen) {
+      console.log("Modal de demande ouverte avec succès");
+      // La modal est maintenant ouverte, on peut nettoyer les données
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('pendingDemandeMode');
+        // Ne pas supprimer openDemandeType tout de suite car ModalDEmande en a besoin
+        // pour savoir quel type de demande afficher
+      }
+    }
+  }, [isDemandeModalOpen]);
+
+  // Effet immédiat pour forcer l'ouverture de la modal si nécessaire
+  useEffect(() => {
+    // Script qui s'exécute immédiatement
+    const forceOpenModalIfNeeded = () => {
+      if (typeof window !== 'undefined') {
+        // Vérifier les paramètres URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const shouldOpenModal = urlParams.get('openModal') === 'true';
+
+        // Vérifier le localStorage
+        const openDemandeType = localStorage.getItem('openDemandeType');
+
+        if (openDemandeType || shouldOpenModal) {
+          console.log("Tentative immédiate d'ouverture de modal:",
+            openDemandeType ? openDemandeType : "via paramètre URL");
+          setIsDemandeModalOpen(true);
+
+          // Nettoyer l'URL si nécessaire
+          if (shouldOpenModal && window.history.replaceState) {
+            window.history.replaceState({}, document.title, "/dashboard");
+          }
+        }
+      }
+    };
+
+    // Exécuter immédiatement
+    forceOpenModalIfNeeded();
+
+    // Puis réessayer plusieurs fois avec un délai croissant
+    const timers = [
+      setTimeout(forceOpenModalIfNeeded, 500),
+      setTimeout(forceOpenModalIfNeeded, 1500),
+      setTimeout(forceOpenModalIfNeeded, 3000)
+    ];
+
+    // Nettoyage des timers
+    return () => {
+      timers.forEach(timer => clearTimeout(timer));
+    };
+  }, []);
 
   return (
     <>
