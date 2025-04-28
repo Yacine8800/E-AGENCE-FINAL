@@ -14,6 +14,9 @@ import ModalDEmande from "./ModalDEmande";
 import { API_URL } from "../config/constants";
 import { handleApiError } from "@/utils/apiErrorHandler";
 import ConsumptionBarChart from "../components/barchat";
+import LinkIcon from "@/src/components/icons/LinkIcon";
+import PlusIcon from "@/src/components/icons/PlusIcon";
+
 
 
 interface Client {
@@ -2572,18 +2575,34 @@ export default function Dashboard() {
                   </div>
                 </div>
               ) : (
-                <div className="flex flex-col items-center justify-center px-3 py-6 gap-3 p-6 mb-8 bg-gradient-to-r from-gray-50 to-blue-100 rounded-lg ">
-                  <Image
-                    src="/compteur/compteurgif.gif"
-                    alt="Aucun compteur sélectionné"
-                    width={150}
-                    height={150}
-                    className="object-contain transition-transform duration-300 hover:scale-105 hover:-rotate-3 "
-                  />
-                  <p className="text-xl font-semibold text-noir text-center">
-                    Sélectionner ou Rattacher un compteur pour voir ses
-                    informations
-                  </p>
+                <div className="flex flex-col items-center justify-center px-8 py-10 gap-5 mb-8 bg-gradient-to-r from-[#F7942E]/20 to-amber-50 rounded-xl shadow-sm border border-orange-100 relative overflow-hidden">
+                  {/* Decorative bubbles */}
+                  <div className="absolute top-6 left-8 w-16 h-16 rounded-full bg-[#F7942E]/10 animate-float"></div>
+                  <div className="absolute bottom-8 right-10 w-12 h-12 rounded-full bg-[#F7942E]/15 animate-float-delayed"></div>
+                  <div className="absolute top-1/3 right-8 w-8 h-8 rounded-full bg-[#F7942E]/15 animate-float-slow"></div>
+                  <div className="absolute bottom-10 left-12 w-10 h-10 rounded-full bg-[#F7942E]/10 animate-float-slow"></div>
+                  <div className="absolute top-1/2 left-1/3 w-5 h-5 rounded-full bg-[#F7942E]/20 animate-float"></div>
+                  <div className="absolute top-1/4 right-1/4 w-7 h-7 rounded-full bg-[#F7942E]/10 animate-float-delayed"></div>
+
+                  <div className="relative z-10">
+                    <Image
+                      src="/compteur/compteurgif.gif"
+                      alt="Aucun compteur sélectionné"
+                      width={160}
+                      height={160}
+                      className="object-contain transition-transform duration-300 hover:scale-110 hover:rotate-3 mb-4"
+                    />
+                  </div>
+
+                  <div className="relative z-10 backdrop-blur-sm bg-white/30 px-6 py-5 rounded-xl">
+                    <div className="text-center">
+                      <h3 className="text-xl font-bold text-gray-800 mb-3">Aucun compteur sélectionné</h3>
+                      <p className="text-gray-600">
+                        Sélectionnez un compteur existant ou rattachez-en un nouveau<br />
+                        pour accéder à ses informations détaillées.
+                      </p>
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
@@ -2631,21 +2650,97 @@ export default function Dashboard() {
         scrollbarWidth="none"
         className="overflow-auto"
       >
-        <div
-          className="overflow-y-auto"
+        <div className="overflow-y-auto"
           style={{ scrollbarWidth: "none", WebkitOverflowScrolling: "touch" }}
         >
-          {rattachementType === "postpaid" ? (
-            <RattacherCompteurForm
-              onSubmit={handleRattachementSubmit}
-              onCancel={() => setIsRattachementModalOpen(false)}
-            />
-          ) : (
-            <RattacherIdentifiantForm
-              onSubmit={handleRattachementSubmit}
-              onCancel={() => setIsRattachementModalOpen(false)}
-            />
-          )}
+          {/* Header decorative element with dynamic color */}
+          <div className="flex items-center mb-6 p-1">
+            <div className={`h-1 w-1/3 bg-gradient-to-r ${rattachementType === "postpaid"
+              ? "from-[#F7942E]/60 to-[#F7942E]/20"
+              : "from-[#56C1B5]/60 to-[#56C1B5]/20"
+              } rounded-full`}></div>
+            <div className={`mx-2 h-6 w-6 rounded-full ${rattachementType === "postpaid"
+              ? "bg-[#F7942E]/10"
+              : "bg-[#56C1B5]/10"
+              } flex items-center justify-center`}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M13 5L21 5M21 5L21 13M21 5L13 13" stroke={rattachementType === "postpaid" ? "#F7942E" : "#56C1B5"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M11 3H7.8C5.11984 3 3.77976 3 2.76972 3.49873C1.8805 3.9382 1.1382 4.8805 0.698732 5.76972C0.2 6.77976 0.2 8.11984 0.2 10.8V16.2C0.2 18.8802 0.2 20.2202 0.698732 21.2303C1.1382 22.1195 1.8805 23.0618 2.76972 23.5013C3.77976 24 5.11984 24 7.8 24H13.2C15.8802 24 17.2202 24 18.2303 23.5013C19.1195 23.0618 20.0618 22.1195 20.5013 21.2303C21 20.2202 21 18.8802 21 16.2V13" stroke={rattachementType === "postpaid" ? "#F7942E" : "#56C1B5"} strokeWidth="2" strokeLinecap="round" />
+              </svg>
+            </div>
+            <div className={`h-1 flex-grow bg-gradient-to-r ${rattachementType === "postpaid"
+              ? "from-[#F7942E]/20"
+              : "from-[#56C1B5]/20"
+              } to-transparent rounded-full`}></div>
+          </div>
+
+          {/* Type icon */}
+          <div className="flex justify-center mb-4">
+            <div className={`w-16 h-16 rounded-full flex items-center justify-center ${rattachementType === "postpaid"
+              ? "bg-gradient-to-br from-orange-50 to-orange-100 border border-orange-200"
+              : "bg-gradient-to-br from-green-50 to-green-100 border border-green-200"
+              }`}>
+              {rattachementType === "postpaid" ? (
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M21 5H3C1.89543 5 1 5.89543 1 7V17C1 18.1046 1.89543 19 3 19H21C22.1046 19 23 18.1046 23 17V7C23 5.89543 22.1046 5 21 5Z" stroke="#F7942E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M1 10H23" stroke="#F7942E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              ) : (
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 15.5H7.5C6.10444 15.5 5.40665 15.5 4.83886 15.6722C3.56045 16.06 2.56004 17.0605 2.17224 18.3389C2 18.9067 2 19.6044 2 21M19 21V15M16 18H22M14.5 7.5C14.5 9.98528 12.4853 12 10 12C7.51472 12 5.5 9.98528 5.5 7.5C5.5 5.01472 7.51472 3 10 3C12.4853 3 14.5 5.01472 14.5 7.5Z" stroke="#56C1B5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              )}
+            </div>
+          </div>
+
+          {/* Description text */}
+          <div className="mb-6 px-1 text-center">
+            <h4 className={`text-base font-medium mb-2 ${rattachementType === "postpaid"
+              ? "text-[#F7942E]"
+              : "text-[#56C1B5]"
+              }`}>
+              {rattachementType === "postpaid"
+                ? "Accès à vos informations de facturation"
+                : "Suivi en temps réel de votre consommation"
+              }
+            </h4>
+            <p className="text-gray-600 text-sm">
+              {rattachementType === "postpaid"
+                ? "Rattachez un identifiant à votre compte pour accéder à vos factures, historiques et services."
+                : "Rattachez un compteur à votre compte pour suivre votre consommation et optimiser votre utilisation."
+              }
+            </p>
+          </div>
+
+          {/* Form container with subtle background */}
+          <div className={`bg-gradient-to-br from-gray-50 to-white rounded-xl p-6 border ${rattachementType === "postpaid"
+              ? "border-orange-100/30"
+              : "border-green-100/30"
+            } shadow-sm`}>
+            {rattachementType === "postpaid" ? (
+              <RattacherCompteurForm
+                onSubmit={handleRattachementSubmit}
+                onCancel={() => setIsRattachementModalOpen(false)}
+                colorTheme="orange"
+              />
+            ) : (
+              <RattacherIdentifiantForm
+                onSubmit={handleRattachementSubmit}
+                onCancel={() => setIsRattachementModalOpen(false)}
+                colorTheme="green"
+              />
+            )}
+          </div>
+
+          {/* Footer note */}
+          <div className="mt-4 px-1">
+            <p className="text-xs text-gray-500 italic flex items-center">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="mr-1.5">
+                <path d="M13 16H12V12H11M12 8H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z" stroke={rattachementType === "postpaid" ? "#F7942E" : "#56C1B5"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              Assurez-vous de saisir les informations correctes pour faciliter le rattachement.
+            </p>
+          </div>
         </div>
       </Modal>
 
@@ -2740,11 +2835,11 @@ export default function Dashboard() {
             {/* CONTENU */}
             <div className="flex flex-col items-center justify-center flex-1 p-8 relative overflow-hidden">
               {/* Background effect */}
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-blue-100/50 animate-gradientShift"></div>
+              <div className="absolute inset-0 bg-gradient-to-br from-orange-50 to-[#F7942E]/10 animate-gradientShift"></div>
 
               {/* Illustration en SVG - Améliorée */}
               <div className="w-80 h-80 mb-8 relative hover:scale-105 transition-transform duration-300 z-10">
-                <div className="absolute inset-0 bg-blue-500/10 rounded-full animate-pulse-slow"></div>
+                <div className="absolute inset-0 bg-[#F7942E]/10 rounded-full animate-pulse-slow"></div>
                 <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" className="w-full h-full drop-shadow-xl">
                   {/* Fond */}
                   <defs>

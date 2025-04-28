@@ -40,7 +40,7 @@ const Header = () => {
   const [activeSubmenuPath, setActiveSubmenuPath] = useState<string | null>(null);
 
   // Récupérer l'état d'authentification
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
 
   /* ──────────────────────────  Fonctions utilitaires  ────────────────────────── */
 
@@ -52,7 +52,7 @@ const Header = () => {
     for (const tabKey in TAB_CONTENT) {
       const tab = tabKey as TabType;
       const columns = TAB_CONTENT[tab];
-      
+
       // Pour chaque colonne de l'onglet
       for (const column of columns) {
         // Pour chaque lien dans la colonne
@@ -121,10 +121,10 @@ const Header = () => {
     // Déterminer l'onglet actif en fonction du chemin ou récupérer celui sauvegardé
     const tabFromPath = getTabFromPath(pathname);
     const savedTab = getSavedActiveTab();
-    
+
     // Priorité à l'onglet enregistré s'il existe, sinon utiliser celui détecté par l'URL
     const finalTab = savedTab || tabFromPath;
-    
+
     // Ne mettre à jour l'onglet actif que s'il est défini
     if (finalTab) {
       setActiveTab(finalTab);
@@ -275,10 +275,48 @@ const Header = () => {
 
                 <Link
                   href={isAuthenticated ? "/dashboard" : "/login"}
-                  className="bg-orange hover:bg-noir font-semibold text-white w-full sm:w-[180px] md:w-[233px] h-[45px] sm:h-[55px] px-4 sm:px-6 md:px-10 py-[10px] sm:py-[15px] rounded-[30px] sm:rounded-[40px] transition-all duration-300 text-xs sm:text-sm flex items-center justify-center gap-[10px] hover:scale-105 hover:shadow-lg"
+                  className={`
+                    ${isAuthenticated && user && user.firstname && user.lastname
+                      ? "bg-gradient-to-r from-[#F47D02] via-[#F9B234] to-[#F47D02] border-none text-white"
+                      : "bg-orange text-white"
+                    }
+                    hover:bg-noir hover:text-white
+                    font-semibold 
+                    w-full sm:w-[180px] md:w-[233px] 
+                    h-[45px] sm:h-[55px] 
+                    px-4 sm:px-6 md:px-10 
+                    py-[10px] sm:py-[15px] 
+                    rounded-[30px] sm:rounded-[40px] 
+                    transition-all duration-300 
+                    text-xs sm:text-sm 
+                    flex items-center justify-center 
+                    gap-[10px] 
+                    hover:scale-105 hover:shadow-lg
+                    ${isAuthenticated && user && user.firstname && user.lastname
+                      ? "shadow-md shadow-orange/30"
+                      : ""
+                    }
+                  `}
                 >
-                  <UserSolo />
-                  <span>Mon compte</span>
+                  {isAuthenticated && user && user.firstname && user.lastname ? (
+                    <>
+                      <div className="relative group">
+                        <div className="h-7 w-7 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white font-bold ring-2 ring-white/50 group-hover:ring-white/80 transition-all">
+                          {user.firstname.charAt(0).toUpperCase()}
+                        </div>
+                        <div className="absolute -bottom-1 -right-1 h-3 w-3 bg-green-400 rounded-full border-2 border-white"></div>
+                      </div>
+                      <div className="flex flex-col items-start leading-tight">
+                        <span className="font-bold text-xs">{user.firstname}</span>
+                        <span className="font-medium text-[11px] opacity-90">{user.lastname}</span>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <UserSolo />
+                      <span>Mon compte</span>
+                    </>
+                  )}
                 </Link>
               </div>
             </div>

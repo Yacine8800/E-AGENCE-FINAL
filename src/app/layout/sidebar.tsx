@@ -144,7 +144,7 @@ const Sidebar = () => {
             </div>
           </div>
 
-          <div className="mt-[500px] z-10">
+          {/* <div className="mt-[500px] z-10">
             <button
               onClick={() => setShowLogoutConfirm(true)}
               className="flex items-center justify-center gap-2 bg-white rounded-xl lg:rounded-2xl p-3 lg:p-4 w-full hover:bg-red-50 transition-all duration-300 relative overflow-hidden group"
@@ -157,12 +157,12 @@ const Sidebar = () => {
                 Déconnexion
               </span>
             </button>
-          </div>
+          </div> */}
         </div>
       </div>
 
       {/* Modal de confirmation de déconnexion */}
-      {showLogoutConfirm && (
+      {/* {showLogoutConfirm && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[10000]">
           <div className="bg-white rounded-2xl p-6 max-w-xs w-full mx-4 relative overflow-hidden">
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-500 to-yellow-500"></div>
@@ -202,7 +202,7 @@ const Sidebar = () => {
             </div>
           </div>
         </div>
-      )}
+      )} */}
 
       {/* Overlay (mobile) */}
       {isMobile && isOpen && (

@@ -17,9 +17,13 @@ import {
   ChevronRight,
   AlertCircle,
   Clock,
+  LogOut,
 } from "lucide-react";
 import ChatBot from "../chat/ChatBot";
 import Portal from "../components/Portal";
+import LogoutIcon from "../components/icons/LogoutIcon";
+import { useAuth } from "@/src/hooks/useAuth";
+import Loader from "../components/animation/loader";
 
 
 const Navbar = () => {
@@ -28,6 +32,8 @@ const Navbar = () => {
   const [isNotifModalOpen, setIsNotifModalOpen] = useState(false);
   const [message, setMessage] = useState("");
   const [isRecording, setIsRecording] = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   // const [recordingTime, setRecordingTime] = useState(0);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   type NotificationAttachmentType = {
@@ -53,6 +59,9 @@ const Navbar = () => {
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [isZoomed, setIsZoomed] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState<number>(-1);
+
+  // Hook d'auth pour la déconnexion
+  const { logout: handleLogout, isLogoutLoading } = useAuth();
 
   useEffect(() => {
     const handleEscapeKey = (e: KeyboardEvent) => {
@@ -122,7 +131,7 @@ const Navbar = () => {
         <div className="flex items-center gap-2 sm:gap-8">
           <Link
             href="/"
-            className="flex items-center px-3 py-1.5 sm:px-4 sm:py-2 bg-white border border-gray-200 shadow-sm rounded-xl text-xs font-semibold sm:text-sm text-gray-800 hover:text-gray-900 hover:shadow hover:border-gray-300 gap-2 transition-all duration-200 transform hover:-translate-y-0.5"
+            className="flex items-center px-4 py-2 bg-gradient-to-r from-gray-50 to-white border border-gray-200 shadow-sm hover:shadow rounded-xl text-xs font-semibold sm:text-sm text-gray-800 hover:text-gray-900 hover:border-gray-300 gap-2.5 transition-all duration-200 transform hover:-translate-y-0.5"
           >
             <svg
               width="18"
@@ -130,25 +139,25 @@ const Navbar = () => {
               viewBox="0 0 22 22"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
-              className="w-4 h-4 sm:w-5 sm:h-5"
+              className="w-4 h-4 sm:w-5 sm:h-5 text-[#F7942E]"
             >
               <path
                 fillRule="evenodd"
                 clipRule="evenodd"
                 d="M20.1663 18.7172C17.9236 15.9794 15.932 14.4259 14.1915 14.0568C12.4511 13.6877 10.794 13.6319 9.22042 13.8895V18.7923L1.83301 10.7921L9.22042 3.20898V7.86886C12.1302 7.89178 14.604 8.93571 16.6418 11.0007C18.6792 13.0656 19.8541 15.6378 20.1663 18.7172Z"
-                fill="#222928"
-                stroke="#222928"
+                fill="#F7942E"
+                stroke="#F7942E"
                 strokeWidth="1.5"
                 strokeLinejoin="round"
               />
             </svg>
-            Retour au site
+            <span className="font-medium">Retour au site</span>
           </Link>
         </div>
 
         {/* Right side */}
         <div className="flex items-center pr-2 sm:pr-4 lg:pr-6 ">
-          <div className="flex items-center">
+          <div className="flex items-center gap-3">
             {/* Notifications icon */}
             <div
               className="relative w-[40px] sm:w-[50px] h-[40px] sm:h-[50px] bg-white border border-gray-200 shadow-sm rounded-xl flex items-center justify-center cursor-pointer hover:bg-gray-50 hover:shadow transition-all duration-200 transform hover:-translate-y-0.5"
@@ -169,54 +178,63 @@ const Navbar = () => {
                 </span>
               )}
             </div>
-
-            {/* <div className="flex items-center ml-2 sm:ml-3 gap-1 sm:gap-2"> */}
-            {/* Bot icon */}
-            {/* <div
-                className="w-[40px] sm:w-[50px] h-[40px] sm:h-[50px] bg-white border border-gray-200 shadow-sm rounded-xl flex items-center justify-center overflow-hidden p-[5px] sm:p-[8px] cursor-pointer hover:bg-gray-50 hover:shadow transition-all duration-200 transform hover:-translate-y-0.5"
-                onClick={() => setIsBotModalOpen(true)}
-              >
-                <Image
-                  src="/bot.gif"
-                  alt="Bot Assistant"
-                  width={40}
-                  height={40}
-                  className="object-cover"
-                />
-              </div> */}
+            {/* Logout button */}
+            <div
+              className="relative w-[40px] sm:w-[50px] h-[40px] sm:h-[50px] bg-white border border-gray-200 shadow-sm rounded-xl flex items-center justify-center cursor-pointer hover:bg-red-50 hover:shadow transition-all duration-200 transform hover:-translate-y-0.5"
+              onClick={() => setShowLogoutConfirm(true)}
+            >
+              <LogoutIcon className="h-4 w-4 sm:h-5 sm:w-5" color="#EC4F48" />
+            </div>
 
 
-            {/* </div> */}
           </div>
         </div>
       </div>
 
-      {/* Bot Assistant Modal */}
-      {/*   {isBotModalOpen && (
+      {/* Logout Confirmation Modal */}
+      {showLogoutConfirm && (
         <Portal>
-          <div
-            className="fixed inset-0 bg-black bg-opacity-50 z-[999999]"
-            onClick={() => {
-              console.log("Overlay clicked, closing ChatBot");
-              setIsBotModalOpen(false);
-            }}
-          />
-
-          <div
-            className="fixed top-0 right-0 h-full w-full sm:w-[600px] bg-white shadow-lg z-[999999]"
-            onClick={(e) => {
-              // Empêcher la propagation des clics à l'overlay
-              e.stopPropagation();
-            }}
-          >
-            <ChatBot
-              onClose={() => {
-                setIsBotModalOpen(false);
-              }}
-            />
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[10000]">
+            <div className="bg-white rounded-2xl p-6 max-w-xs w-full mx-4 relative overflow-hidden zoom-in">
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-500 to-yellow-500"></div>
+              <div className="flex justify-center mb-4">
+                <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                  <LogoutIcon className="w-6 h-6" color="#EC4F48" />
+                </div>
+              </div>
+              <h3 className="text-lg font-bold text-center mb-2">
+                Confirmer la déconnexion
+              </h3>
+              <p className="text-sm text-gray-600 text-center mb-6">
+                Êtes-vous sûr de vouloir vous déconnecter de votre compte ?
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowLogoutConfirm(false)}
+                  className="flex-1 py-2 px-4 border border-gray-300 rounded-xl text-sm font-medium"
+                >
+                  Annuler
+                </button>
+                <button
+                  onClick={async () => {
+                    setShowLogoutConfirm(false);
+                    setIsLoading(true);
+                    try {
+                      await handleLogout();
+                    } catch (error) {
+                      console.error("Erreur lors de la déconnexion:", error);
+                      window.location.href = "/";
+                    }
+                  }}
+                  className="flex-1 py-2 px-4 bg-rouge text-white rounded-xl text-sm font-medium"
+                >
+                  Confirmer
+                </button>
+              </div>
+            </div>
           </div>
         </Portal>
-      )} */}
+      )}
 
       {/* Notifications Slide-in Modal */}
       {isNotifModalOpen && (
@@ -1249,6 +1267,9 @@ const Navbar = () => {
           </div>
         </div>
       )}
+
+      {/* Loader pour la déconnexion */}
+      {(isLoading || isLogoutLoading) && <Loader context="logout" />}
     </>
   );
 };

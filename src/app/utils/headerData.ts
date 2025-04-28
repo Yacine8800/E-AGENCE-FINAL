@@ -51,7 +51,7 @@ export const TAB_CONTENT = {
       icon: SimulateurIcon,
       links: [
         { href: "/audit-conso", label: "Audit de consommation électrique" },
-        { href: "/solutions-eco", label: "Solutions d’efficacité énergétique" },
+        { href: "/solution", label: "Solutions d’efficacité énergétique" },
         {
           href: "/transition-energetique",
           label: "Accompagnement à la transition énergétique",

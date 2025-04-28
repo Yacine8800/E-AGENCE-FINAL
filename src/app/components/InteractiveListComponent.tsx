@@ -18,6 +18,7 @@ interface InteractiveListProps {
     contentIndex: number,
     selectedItems: ListItem[]
   ) => void;
+  isLoading?: boolean;
 }
 
 const InteractiveListComponent = ({
@@ -27,12 +28,15 @@ const InteractiveListComponent = ({
   listItems,
   selector,
   onConfirm,
+  isLoading = false,
 }: InteractiveListProps) => {
   // Pour une sélection unique, on stocke l'id de l'élément sélectionné
   // Pour une sélection multiple, on stocke un tableau d'ids
   const [selectedItems, setSelectedItems] = useState<ListItem[]>([]);
 
   const handleItemClick = (item: ListItem) => {
+    if (isLoading) return; // Prevent interaction when loading
+
     if (selector === "unique") {
       // Pour sélection unique, on remplace l'élément sélectionné
       setSelectedItems([item]);
@@ -53,6 +57,8 @@ const InteractiveListComponent = ({
   };
 
   const handleConfirm = () => {
+    if (isLoading) return; // Prevent interaction when loading
+
     if (selectedItems.length > 0) {
       onConfirm(messageId, contentIndex, selectedItems);
     }
@@ -63,14 +69,26 @@ const InteractiveListComponent = ({
   };
 
   return (
-    <div className="relative my-2 p-3 bg-black/20 rounded-lg overflow-hidden">
+    <div className={`relative my-2 p-3 bg-black/20 rounded-lg overflow-hidden ${isLoading ? 'opacity-70' : ''}`}>
+      {/* Loading overlay */}
+      {isLoading && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/30 z-10">
+          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-red-500"></div>
+        </div>
+      )}
+
+      {/* Afficher le texte explicatif formaté en markdown */}
+      {text && (
+        <div className="mb-3 text-gray-100">
+          <MarkdownRenderer text={text} />
+        </div>
+      )}
+
       <div className="divide-y divide-gray-700/50">
         {listItems.map((item) => (
           <div
             key={item.id}
-            className={`py-3 px-2 transition-colors hover:bg-black/20 cursor-pointer ${
-              isItemSelected(item) ? "bg-gray-700/30" : ""
-            }`}
+            className={`py-3 px-2 transition-colors ${!isLoading ? 'hover:bg-black/20 cursor-pointer' : ''} ${isItemSelected(item) ? "bg-gray-700/30" : ""}`}
             onClick={() => handleItemClick(item)}
           >
             <div className="flex items-center gap-3">
@@ -78,11 +96,10 @@ const InteractiveListComponent = ({
               <div className="flex-shrink-0">
                 {selector === "unique" ? (
                   <div
-                    className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                      isItemSelected(item)
-                        ? "border-red-500 bg-red-500/20"
-                        : "border-gray-500"
-                    }`}
+                    className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${isItemSelected(item)
+                      ? "border-red-500 bg-red-500/20"
+                      : "border-gray-500"
+                      }`}
                   >
                     {isItemSelected(item) && (
                       <div className="w-2.5 h-2.5 rounded-full bg-red-500"></div>
@@ -90,11 +107,10 @@ const InteractiveListComponent = ({
                   </div>
                 ) : (
                   <div
-                    className={`w-5 h-5 rounded-sm border-2 flex items-center justify-center ${
-                      isItemSelected(item)
-                        ? "border-red-500 bg-red-500/20"
-                        : "border-gray-500"
-                    }`}
+                    className={`w-5 h-5 rounded-sm border-2 flex items-center justify-center ${isItemSelected(item)
+                      ? "border-red-500 bg-red-500/20"
+                      : "border-gray-500"
+                      }`}
                   >
                     {isItemSelected(item) && (
                       <svg
@@ -134,7 +150,9 @@ const InteractiveListComponent = ({
         <div className="mt-4 flex justify-end">
           <button
             onClick={handleConfirm}
-            className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+            disabled={isLoading}
+            className={`bg-red-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors ${isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-red-600'
+              }`}
           >
             {selector === "unique"
               ? "Confirmer la sélection"

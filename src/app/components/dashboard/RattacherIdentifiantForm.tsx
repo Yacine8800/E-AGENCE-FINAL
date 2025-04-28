@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import ElectricButton from "../ui/ElectricButton";
 
 interface RattacherCompteurFormProps {
+  colorTheme?: "orange" | "green";
   onSubmit: (data: {
     identifiant: string;
     label: string;
@@ -11,9 +12,15 @@ interface RattacherCompteurFormProps {
 }
 
 export default function RattacherIdentifiantForm({
+  colorTheme = "orange",
   onSubmit,
   onCancel,
 }: RattacherCompteurFormProps) {
+  const themeColors = {
+    primary: colorTheme === "orange" ? "primary" : "green-600",
+    light: colorTheme === "orange" ? "primary" : "green-600",
+  };
+
   const [formData, setFormData] = useState({
     identifiant: "",
     label: "",
@@ -51,9 +58,9 @@ export default function RattacherIdentifiantForm({
             id="identifiant"
             name="identifiant"
             required
-            className="w-full px-3 py-2.5 border border-gray-300 rounded-lg 
-                       shadow-sm focus:outline-none focus:ring-2 focus:ring-primary 
-                       focus:border-transparent transition-all duration-200"
+            className={`w-full px-3 py-2.5 border border-gray-300 rounded-lg 
+                       shadow-sm focus:outline-none focus:ring-2 focus:ring-${themeColors.primary} 
+                       focus:border-transparent transition-all duration-200`}
             value={formData.identifiant}
             onChange={handleChange}
             placeholder="Ex: 123456789"
@@ -73,9 +80,9 @@ export default function RattacherIdentifiantForm({
             id="label"
             name="label"
             required
-            className="w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm 
-                       focus:outline-none focus:ring-2 focus:ring-primary 
-                       focus:border-transparent transition-all duration-200"
+            className={`w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm 
+                       focus:outline-none focus:ring-2 focus:ring-${themeColors.primary} 
+                       focus:border-transparent transition-all duration-200`}
             value={formData.label}
             onChange={handleChange}
             placeholder="Ex: HOTEL AICHTI"
@@ -109,7 +116,10 @@ export default function RattacherIdentifiantForm({
           <ElectricButton
             type="submit"
             variant="primary"
-            className="px-4 py-2.5 rounded-lg"
+            className={`px-4 py-2.5 rounded-lg ${colorTheme === "green"
+                ? "bg-gradient-to-r from-[#56C1B5] to-[#56C1B5]/90 hover:from-[#4AB0A4] hover:to-[#4AB0A4]/90"
+                : ""
+              }`}
           >
             Rattacher
           </ElectricButton>

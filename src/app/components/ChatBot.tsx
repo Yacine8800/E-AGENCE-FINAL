@@ -20,6 +20,7 @@ import {
 import axios from "axios";
 import { useMqttClient } from "../hooks/useMqttClient";
 import { decodeTokens } from "@/utils/tokendecod";
+import { useAppSelector } from "@/src/store/hooks";
 
 interface MqttTokenType {
   user_id: number;
@@ -45,15 +46,15 @@ interface ChatBotProps {
 
 interface MessageContent {
   type:
-    | "text"
-    | "image"
-    | "audio"
-    | "pdf"
-    | "doc"
-    | "location"
-    | "button"
-    | "list"
-    | "form";
+  | "text"
+  | "image"
+  | "audio"
+  | "pdf"
+  | "doc"
+  | "location"
+  | "button"
+  | "list"
+  | "form";
   content: string;
   duration?: number;
   isPlaying?: boolean;
@@ -68,7 +69,7 @@ interface MessageContent {
 
   // Pour le texte formate
   text?: string;  // Texte formate avec markdown
-  
+
   // Pour les messages interactifs
   buttons?: {
     id: string;
@@ -202,6 +203,41 @@ const UserIcon = () => (
   </svg>
 );
 
+// User Initials Component
+const UserInitials = ({ firstname, lastname }: { firstname?: string, lastname?: string }) => {
+  // Get first letter of first name and last name, handle undefined cases
+  const firstInitial = firstname?.[0]?.toUpperCase() || '';
+  const lastInitial = lastname?.[0]?.toUpperCase() || '';
+  const initials = firstInitial + lastInitial;
+
+  // Generate shade variation based on name hash for consistent but unique red variations
+  const nameHash = (firstname || '') + (lastname || '');
+  const redVariations = [
+    'from-red-500 to-red-600',
+    'from-red-600 to-red-700',
+    'from-rose-500 to-red-600',
+    'from-red-500 to-rose-600',
+    'from-red-400 to-red-600',
+    'from-red-600 to-red-500',
+  ];
+
+  // Simple hash function to pick a color variation
+  const colorIndex = nameHash
+    .split('')
+    .reduce((acc, char) => acc + char.charCodeAt(0), 0) % redVariations.length;
+
+  const bgGradient = redVariations[colorIndex];
+
+  return (
+    <div
+      className={`w-8 h-8 rounded-full flex items-center justify-center bg-gradient-to-br ${bgGradient} text-white text-sm font-semibold transition-all duration-300 hover:scale-110 hover:shadow-md hover:shadow-red-500/30 border border-white/20`}
+      title={`${firstname || ''} ${lastname || ''}`.trim() || 'Utilisateur'}
+    >
+      {initials || "?"}
+    </div>
+  );
+};
+
 export default function ChatBot({
   onClose,
   mqttToken,
@@ -242,6 +278,42 @@ export default function ChatBot({
   const [audioElements, setAudioElements] = useState<{
     [key: string]: HTMLAudioElement;
   }>({});
+
+  // Get the user authentication state from Redux
+  const { user, isAuthenticated } = useAppSelector((state) => state.auth);
+
+  // Réinitialiser les messages à chaque montage du composant
+  useEffect(() => {
+    // Réinitialiser l'état des messages à chaque ouverture du chat
+    setMessages([]);
+
+    return () => {
+      // Nettoyer l'état à la fermeture du chat
+      setMessages([]);
+    };
+  }, []);
+
+  // Ajouter la définition de la classe d'animation pulse-border
+  useEffect(() => {
+    // Créer et ajouter le style pour l'animation pulse-border
+    const styleElement = document.createElement('style');
+    styleElement.textContent = `
+      @keyframes pulse-border {
+        0% { border-color: rgba(107, 114, 128, 0.3); }
+        50% { border-color: rgba(239, 68, 68, 0.5); }
+        100% { border-color: rgba(107, 114, 128, 0.3); }
+      }
+      .animate-pulse-border {
+        animation: pulse-border 2s infinite;
+      }
+    `;
+    document.head.appendChild(styleElement);
+
+    // Nettoyer à la désinstallation du composant
+    return () => {
+      document.head.removeChild(styleElement);
+    };
+  }, []);
 
   // Get the user_id directly from the token
   const userId = mqttToken?.user_id || null;
@@ -303,143 +375,188 @@ export default function ChatBot({
       const data = payload?.data;
       if (!data) return;
 
+      // Vérifier si c'est un message temporaire
+      const isTemporaryMessage = data.temp === true;
+      const messageId = `${data.message_id}-bot`;
+
       // On traite les différents types de messages
       const botMessage = data.response?.message;
       const botText = botMessage?.text;
 
-      // Si on a un message texte simple (avec prise en charge du Markdown)
-      if (botText && botMessage?.type === "TEXT") {
-        // Créer un nouvel objet message pour la réponse du bot
-        const newMessage: Message = {
-          id: `${data.message_id}-bot`,
-          isUser: false,
-          timestamp: new Date(),
-          content: [{ 
-            type: "text", 
-            content: botText 
-          }],
-        };
+      // Pour les messages temporaires et finaux, avoir une approche plus directe
+      if (isTemporaryMessage) {
+        // Pour un message temporaire, supprimer tous les autres messages temporaires
+        // et ajouter celui-ci (un seul message temporaire à la fois)
+        setMessages(prev => {
+          // Filtrer pour garder seulement les messages non temporaires
+          const nonTempMessages = prev.filter(m => !m.isLoading);
 
-        addMessageToState(newMessage);
-      }
-      
-      // Si on a un message de type liste interactive (INTERACTIVE_LIST)
-      else if (botMessage?.type === "INTERACTIVE_LIST" && Array.isArray(botMessage.list)) {
-        // Déterminer le type de sélecteur (unique ou multiple) selon la propriété selector
-        const selector = botMessage.selector === "multiple" ? "multiple" : "unique";
-        
-        // Créer un nouvel objet message pour la réponse avec liste interactive
-        const listMessage: Message = {
-          id: `${data.message_id}-list`,
-          isUser: false,
-          timestamp: new Date(),
-          content: [{
-            type: "list",
-            content: "Liste de sélection",
-            text: botMessage.text || "", // Texte explicatif formaté en Markdown
-            listItems: botMessage.list.map(item => ({
-              id: item.id || generateSecureId(),
-              title: item.title || "",
-              description: item.description || ""
-            })),
-            selector: selector
-          }],
-        };
-        
-        addMessageToState(listMessage);
-      }
+          // Créer le nouveau message temporaire plus informatif et avec des indicateurs visuels
+          const tempMessage: Message = {
+            id: "temp-message", // ID fixe pour tous les messages temporaires
+            isUser: false,
+            timestamp: new Date(),
+            content: botMessage?.type === "TEXT"
+              ? [{
+                type: "text" as const,
+                content: botText || "",
+                // Ajouter des indicateurs clairs que le message est en cours de génération
+                text: botText ? `${botText}\n\n_Génération en cours..._` : "Génération en cours..."
+              }]
+              : botMessage?.type === "INTERACTIVE_BUTTON" && botMessage?.buttons
+                ? [
+                  {
+                    type: "text" as const,
+                    content: botText || "",
+                    text: botText ? `${botText}\n\n_Chargement des options..._` : "Chargement des options..."
+                  },
+                  {
+                    type: "button" as const,
+                    content: "",
+                    buttons: botMessage.buttons.map((btn) => ({
+                      id: btn.id || generateSecureId(),
+                      title: btn.title || "",
+                      type: btn.type || "INTERACTIVE_BUTTON_REPLY",
+                    })),
+                  },
+                ]
+                : botMessage?.type === "INTERACTIVE_LIST" && Array.isArray(botMessage.list)
+                  ? [{
+                    type: "list" as const,
+                    content: "Liste de sélection",
+                    text: botMessage.text ? `${botMessage.text}\n\n_Préparation des choix..._` : "Préparation des choix...",
+                    listItems: botMessage.list.map(item => ({
+                      id: item.id || generateSecureId(),
+                      title: item.title || "",
+                      description: item.description || ""
+                    })),
+                    selector: botMessage.selector === "multiple" ? "multiple" : "unique"
+                  }]
+                  : [{
+                    type: "text" as const,
+                    content: "Préparation de la réponse...",
+                    text: "_Traitement de votre demande..._"
+                  }],
+            isLoading: true,
+          };
 
-      // Si on a un message avec des boutons interactifs
-      else if (
-        botText &&
-        botMessage?.type === "INTERACTIVE_BUTTON" &&
-        botMessage?.buttons
-      ) {
-        // Créer un nouvel objet message pour la réponse interactive avec boutons
-        const newMessage: Message = {
-          id: `${data.message_id}-bot`,
-          isUser: false,
-          timestamp: new Date(),
-          content: [
-            { type: "text", content: botText },
-            {
-              type: "button",
-              content: "",
-              buttons: botMessage.buttons.map((btn) => ({
-                id: btn.id || generateSecureId(),
-                title: btn.title || "",
-                type: btn.type || "INTERACTIVE_BUTTON_REPLY",
-              })),
-            },
-          ],
-        };
+          // Retourner les messages non temporaires + le nouveau message temporaire
+          return [...nonTempMessages, tempMessage];
+        });
+      } else {
+        // Pour un message final, supprimer TOUS les messages temporaires
+        setMessages(prev => {
+          // Garder seulement les messages non temporaires
+          const nonTempMessages = prev.filter(m => !m.isLoading);
 
-        addMessageToState(newMessage);
-      }
-      
-      // Si on a un message de type formulaire (FORMS)
-      else if (botMessage?.type === "FORMS" && Array.isArray(botMessage.fields)) {
-        // Créer un nouvel objet message pour le formulaire
-        const formMessage: Message = {
-          id: `${data.message_id}-form`,
-          isUser: false,
-          timestamp: new Date(),
-          content: [{
-            type: "form",
-            content: "Formulaire",
-            typeRequest: botMessage.type_request || "",
-            formFields: botMessage.fields.map(field => ({
-              id: field.id,
-              name: field.name,
-              required: field.required,
-              value: field.value || "",
-              type: field.type
-            }))
-          }]
-        };
-        
-        addMessageToState(formMessage);
-      }
+          // Créer le nouveau message final selon son type
+          let finalMessage: Message;
 
-      // Si on a un message de type INTERACTIVE_LIST_REPLY
-      else if (
-        data.message?.type === "INTERACTIVE_LIST_REPLY" &&
-        data.message.list_selected
-      ) {
-        // Créer un nouvel objet message pour la réponse avec liste interactive
-        const listMessage: Message = {
-          id: `${data.message_id || generateSecureId()}-list`,
-          isUser: false,
-          timestamp: new Date(),
-          content: [
-            {
-              type: "list",
-              content: "Liste de sélection",
-              listItems: Array.isArray(data.message.list_selected)
-                ? data.message.list_selected.map((item) => ({
-                    id: item.id || generateSecureId(),
-                    title: item.title || "",
-                    description: item.description || "",
-                  }))
-                : [],
-            },
-          ],
-        };
-
-        addMessageToState(listMessage);
-      }
-
-      // Fonction utilitaire pour ajouter un message à l'état avec vérification des doublons
-      function addMessageToState(message: Message) {
-        setMessages((prev) => {
-          const existingIds = new Set(prev.map((m) => m.id));
-          // Vérifie si ce message n'existe pas déjà
-          if (!existingIds.has(message.id)) {
-            return [...prev, message];
+          if (botMessage?.type === "TEXT") {
+            finalMessage = {
+              id: messageId,
+              isUser: false,
+              timestamp: new Date(),
+              content: [{ type: "text" as const, content: botText || "" }],
+              isLoading: false,
+            };
+          } else if (botMessage?.type === "INTERACTIVE_BUTTON" && botMessage?.buttons) {
+            finalMessage = {
+              id: messageId,
+              isUser: false,
+              timestamp: new Date(),
+              content: [
+                { type: "text" as const, content: botText || "" },
+                {
+                  type: "button" as const,
+                  content: "",
+                  buttons: botMessage.buttons.map((btn) => ({
+                    id: btn.id || generateSecureId(),
+                    title: btn.title || "",
+                    type: btn.type || "INTERACTIVE_BUTTON_REPLY",
+                  })),
+                },
+              ],
+              isLoading: false,
+            };
+          } else if (botMessage?.type === "INTERACTIVE_LIST" && Array.isArray(botMessage.list)) {
+            const selector = botMessage.selector === "multiple" ? "multiple" : "unique";
+            finalMessage = {
+              id: `${data.message_id}-list`,
+              isUser: false,
+              timestamp: new Date(),
+              content: [{
+                type: "list" as const,
+                content: "Liste de sélection",
+                text: botMessage.text || "",
+                listItems: botMessage.list.map(item => ({
+                  id: item.id || generateSecureId(),
+                  title: item.title || "",
+                  description: item.description || ""
+                })),
+                selector: selector
+              }],
+              isLoading: false,
+            };
+          } else if (botMessage?.type === "FORMS" && Array.isArray(botMessage.fields)) {
+            finalMessage = {
+              id: `${data.message_id}-form`,
+              isUser: false,
+              timestamp: new Date(),
+              content: [{
+                type: "form" as const,
+                content: "Formulaire",
+                typeRequest: botMessage.type_request || "",
+                formFields: botMessage.fields.map(field => ({
+                  id: field.id,
+                  name: field.name,
+                  required: field.required,
+                  value: field.value || "",
+                  type: field.type
+                }))
+              }],
+              isLoading: false,
+            };
+          } else if (data.message?.type === "INTERACTIVE_LIST_REPLY" && data.message.list_selected) {
+            finalMessage = {
+              id: `${data.message_id || generateSecureId()}-list`,
+              isUser: false,
+              timestamp: new Date(),
+              content: [
+                {
+                  type: "list" as const,
+                  content: "Liste de sélection",
+                  text: data.response?.message?.text || "",  // Récupérer le texte explicatif pour l'afficher
+                  listItems: Array.isArray(data.message.list_selected)
+                    ? data.message.list_selected.map((item) => ({
+                      id: item.id || generateSecureId(),
+                      title: item.title || "",
+                      description: item.description || "",
+                    }))
+                    : [],
+                },
+              ],
+              isLoading: false,
+            };
+          } else {
+            // Message par défaut au cas où
+            finalMessage = {
+              id: messageId,
+              isUser: false,
+              timestamp: new Date(),
+              content: [{ type: "text" as const, content: "Message reçu" }],
+              isLoading: false,
+            };
           }
-          return prev;
+
+          // Retourner les messages non temporaires + le nouveau message final
+          return [...nonTempMessages, finalMessage];
         });
       }
+
+      // Puisqu'on traite tous les types de messages ci-dessus, on peut simplement
+      // retourner sans continuer le traitement pour éviter la duplication
+      return;
     }
   );
 
@@ -450,6 +567,14 @@ export default function ChatBot({
     button: { id: string; title: string; type: string }
   ) => {
     try {
+      // Trouver le message contenant les boutons pour récupérer son texte
+      const messageIndex = messages.findIndex((m) => m.id === messageId);
+      if (messageIndex === -1) return;
+
+      const message = messages[messageIndex];
+      // Récupérer le texte de la question (généralement dans le premier content de type text)
+      const questionText = message.content.find(c => c.type === "text")?.content || "";
+
       // Préparer les données à envoyer au format demandé
       const buttonData = {
         UrlWebhook: API_BOT_CIE_WEBHOOK,
@@ -457,7 +582,6 @@ export default function ChatBot({
         integrationType: "E-Agence",
         message: {
           type: "INTERACTIVE_BUTTON_REPLY",
-
           title: button.title,
         },
         messageId: messageId || generateSecureId(),
@@ -483,7 +607,7 @@ export default function ChatBot({
         content: [
           {
             type: "text",
-            content: button.title,
+            content: `${questionText}\n\nRéponse: ${button.title}`,
           },
         ],
         status: "sent",
@@ -519,12 +643,12 @@ export default function ChatBot({
     // Trouver le message contenant le formulaire
     const messageIndex = messages.findIndex(m => m.id === messageId);
     if (messageIndex === -1) return;
-    
+
     const message = messages[messageIndex];
     const content = message.content[contentIndex];
-    
+
     if (content.type !== "form" || !content.formFields) return;
-    
+
     try {
       // Préparer les données à envoyer
       const formSubmitData = {
@@ -539,9 +663,28 @@ export default function ChatBot({
         messageId: generateSecureId(),
         receivedAt: new Date().toISOString()
       };
-      
+
       console.log("Envoi du formulaire:", formSubmitData);
-      
+
+      // Créer un message utilisateur pour montrer les données du formulaire
+      const userMessage: Message = {
+        id: generateSecureId(),
+        isUser: true,
+        timestamp: new Date(),
+        content: [
+          {
+            type: "text" as const,
+            content: `Formulaire soumis:\n${Object.entries(formData)
+              .map(([key, value]) => `- ${key}: ${value}`)
+              .join('\n')}`,
+          },
+        ],
+        status: "sent",
+      };
+
+      // Ajouter le message utilisateur
+      setMessages((prev) => [...prev, userMessage]);
+
       // Envoyer la soumission du formulaire via HTTP avec le token d'autorisation
       const response = await axios.post(API_BOT_CIE_INBOUND, formSubmitData, {
         headers: {
@@ -549,25 +692,25 @@ export default function ChatBot({
           'Content-Type': 'application/json'
         }
       });
-      
+
       console.log("✅ Formulaire envoyé avec succès:", response.data);
-      
+
       // Le formulaire reste visible en mode réduit avec son propre récapitulatif
       // Pas besoin d'ajouter un message séparé à la conversation
-      
+
       // Ne pas supprimer le formulaire, mais marquer qu'il a été soumis
       // Le FormComponent s'occupera d'afficher le formulaire en mode réduit
       // avec le récapitulatif des données
       // Cette partie est gérée par les états internes du FormComponent
-      
+
       // Indiquer qu'on attend une réponse du bot
       setWaitingForBotResponse(true);
-      
+
     } catch (error) {
       console.error("❌ Erreur lors de l'envoi du formulaire:", error);
     }
   };
-  
+
   // Gérer la confirmation d'une liste
   const handleListConfirmation = async (
     messageId: string,
@@ -582,6 +725,9 @@ export default function ChatBot({
     const content = message.content[contentIndex];
 
     if (content.type !== "list" || !content.listItems) return;
+
+    // Conserver le texte de la question
+    const questionText = content.text || "";
 
     try {
       // Préparer les données à envoyer au format exact du payload demandé
@@ -602,6 +748,23 @@ export default function ChatBot({
 
       console.log("Envoi de la confirmation de liste:", listData);
 
+      // Créer un message utilisateur pour montrer la sélection
+      const userMessage: Message = {
+        id: generateSecureId(),
+        isUser: true,
+        timestamp: new Date(),
+        content: [
+          {
+            type: "text" as const,
+            content: `${questionText}\n\nRéponse: ${selectedItems.map(item => item.title).join(", ")}`,
+          },
+        ],
+        status: "sent",
+      };
+
+      // Ajouter le message utilisateur
+      setMessages((prev) => [...prev, userMessage]);
+
       // Envoyer la confirmation via HTTP avec le token d'autorisation
       const response = await axios.post(API_BOT_CIE_INBOUND, listData, {
         headers: {
@@ -617,9 +780,9 @@ export default function ChatBot({
       // Enregistrer l'ID de message pour éviter la duplication
       // L'API va nous renvoyer une réponse, donc nous n'ajoutons pas 
       // manuellement un message de confirmation pour éviter la duplication
-      const messageId = generateSecureId();
-      console.log(`Message confirmation envoyé avec ID: ${messageId}`);
-      
+      const responseMessageId = generateSecureId();
+      console.log(`Message confirmation envoyé avec ID: ${responseMessageId}`);
+
       // Nous allons laisser l'API renvoyer la confirmation
       // Le système MQTT va gérer l'affichage du message
 
@@ -638,10 +801,7 @@ export default function ChatBot({
       // Indiquer qu'on attend une réponse du bot
       setWaitingForBotResponse(true);
     } catch (error) {
-      console.error(
-        "❌ Erreur lors de l'envoi de la confirmation de liste:",
-        error
-      );
+      console.error("❌ Erreur lors de l'envoi de la confirmation de liste:", error);
     }
   };
 
@@ -1236,12 +1396,12 @@ export default function ChatBot({
         prev.map((file) =>
           "loadingId" in file && file.loadingId === loadingId
             ? {
-                type: "location",
-                content: `${latitude},${longitude}`,
-                address,
-                latitude,
-                longitude,
-              }
+              type: "location",
+              content: `${latitude},${longitude}`,
+              address,
+              latitude,
+              longitude,
+            }
             : file
         )
       );
@@ -1269,8 +1429,7 @@ export default function ChatBot({
       };
 
       alert(
-        `Impossible d'accéder à votre localisation. ${
-          errorMessages[error.code] || ""
+        `Impossible d'accéder à votre localisation. ${errorMessages[error.code] || ""
         }`
       );
     };
@@ -1375,11 +1534,10 @@ export default function ChatBot({
                   onClick={() =>
                     setImageCarousel((prev) => ({ ...prev, startIndex: index }))
                   }
-                  className={`w-2.5 h-2.5 rounded-full ${
-                    index === imageCarousel.startIndex
-                      ? "bg-white"
-                      : "bg-gray-500"
-                  }`}
+                  className={`w-2.5 h-2.5 rounded-full ${index === imageCarousel.startIndex
+                    ? "bg-white"
+                    : "bg-gray-500"
+                    }`}
                   aria-label={`Image ${index + 1}`}
                 />
               ))}
@@ -1401,10 +1559,9 @@ export default function ChatBot({
                     }
                     className={`
                       w-16 h-16 flex-shrink-0 rounded overflow-hidden 
-                      ${
-                        index === imageCarousel.startIndex
-                          ? "ring-2 ring-white"
-                          : "opacity-70"
+                      ${index === imageCarousel.startIndex
+                        ? "ring-2 ring-white"
+                        : "opacity-70"
                       }
                     `}
                   >
@@ -1429,10 +1586,9 @@ export default function ChatBot({
         exit={{ opacity: 0, y: 20 }}
         className={`
           fixed z-50 
-          ${
-            isExpanded
-              ? "inset-4 sm:inset-8 md:inset-10 lg:inset-20 z-[10000]"
-              : "bottom-20 right-4 sm:right-8 w-[300px] sm:w-[400px] z-[10000]"
+          ${isExpanded
+            ? "inset-4 sm:inset-8 md:inset-10 lg:inset-20 z-[10000]"
+            : "bottom-20 right-4 sm:right-8 w-[300px] sm:w-[400px] z-[10000]"
           } 
           ${theme.bg} 
           rounded-3xl 
@@ -1461,9 +1617,8 @@ export default function ChatBot({
               </h2>
               <div className="flex items-center gap-1.5">
                 <div
-                  className={`w-2 h-2 rounded-full ${
-                    mqttConnected ? "bg-green-500" : "bg-red-500"
-                  }`}
+                  className={`w-2 h-2 rounded-full ${mqttConnected ? "bg-green-500" : "bg-red-500"
+                    }`}
                 ></div>
                 <p className={`${theme.textSecondary} text-sm`}>
                   {mqttConnected ? "En ligne" : "Hors ligne"}
@@ -1522,11 +1677,10 @@ export default function ChatBot({
           px-4 sm:px-6 
           py-3 sm:py-4 
           min-h-[250px] 
-          ${
-            isExpanded
+          ${isExpanded
               ? "flex-grow overflow-y-auto"
               : "max-h-[400px] sm:max-h-[500px] overflow-y-auto"
-          } 
+            } 
           ${theme.bg}
           ${isExpanded ? "mb-0" : ""}
         `}
@@ -1545,11 +1699,10 @@ export default function ChatBot({
                     animate={{ scale: 1 }}
                     className={`
                     flex items-center gap-2
-                    ${
-                      isDarkMode
+                    ${isDarkMode
                         ? "bg-[#18181B] hover:bg-[#27272A]"
                         : "bg-white hover:bg-gray-50"
-                    }
+                      }
                     ${theme.text} 
                     px-4 py-2 
                     rounded-full 
@@ -1591,11 +1744,10 @@ export default function ChatBot({
                     animate={{ scale: 1 }}
                     className={`
                     flex items-center gap-2
-                    ${
-                      isDarkMode
+                    ${isDarkMode
                         ? "bg-[#18181B] hover:bg-[#27272A]"
                         : "bg-white hover:bg-gray-50"
-                    }
+                      }
                     ${theme.text} 
                     px-4 py-2 
                     rounded-full 
@@ -1630,11 +1782,10 @@ export default function ChatBot({
                     animate={{ scale: 1 }}
                     className={`
                     flex items-center gap-2
-                    ${
-                      isDarkMode
+                    ${isDarkMode
                         ? "bg-[#18181B] hover:bg-[#27272A]"
                         : "bg-white hover:bg-gray-50"
-                    }
+                      }
                     ${theme.text} 
                     px-4 py-2 
                     rounded-full 
@@ -1671,11 +1822,10 @@ export default function ChatBot({
                     animate={{ scale: 1 }}
                     className={`
                     flex items-center gap-2
-                    ${
-                      isDarkMode
+                    ${isDarkMode
                         ? "bg-[#18181B] hover:bg-[#27272A]"
                         : "bg-white hover:bg-gray-50"
-                    }
+                      }
                     ${theme.text} 
                     px-4 py-2 
                     rounded-full 
@@ -1710,11 +1860,10 @@ export default function ChatBot({
                     animate={{ scale: 1 }}
                     className={`
                     flex items-center gap-2
-                    ${
-                      isDarkMode
+                    ${isDarkMode
                         ? "bg-[#18181B] hover:bg-[#27272A]"
                         : "bg-white hover:bg-gray-50"
-                    }
+                      }
                     ${theme.text} 
                     px-4 py-2 
                     rounded-full 
@@ -1749,11 +1898,10 @@ export default function ChatBot({
                     animate={{ scale: 1 }}
                     className={`
                     flex items-center gap-2
-                    ${
-                      isDarkMode
+                    ${isDarkMode
                         ? "bg-[#18181B] hover:bg-[#27272A]"
                         : "bg-white hover:bg-gray-50"
-                    }
+                      }
                     ${theme.text} 
                     px-4 py-2 
                     rounded-full 
@@ -1816,9 +1964,8 @@ export default function ChatBot({
             {messages.map((message, index) => (
               <div
                 key={index}
-                className={`flex items-start gap-3 ${
-                  message.isUser ? "flex-row-reverse" : ""
-                }`}
+                className={`flex items-start gap-3 ${message.isUser ? "flex-row-reverse" : ""
+                  }`}
               >
                 {!message.isUser && (
                   <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 bg-gradient-to-br from-red-500 to-red-600 ring-2 ring-red-500/20">
@@ -1833,59 +1980,109 @@ export default function ChatBot({
                 )}
                 {message.isUser && (
                   <div className={theme.text + " ml-2"}>
-                    <UserIcon />
+                    {isAuthenticated && user ? (
+                      <UserInitials
+                        firstname={user.firstname}
+                        lastname={user.lastname}
+                      />
+                    ) : (
+                      <UserIcon />
+                    )}
                   </div>
                 )}
                 <div
-                  className={`flex flex-col gap-1.5 ${
-                    message.isUser ? "items-end" : "items-start"
-                  }`}
+                  className={`flex flex-col gap-1.5 ${message.isUser ? "items-end" : "items-start"
+                    }`}
                 >
                   <div
                     className={`
                     relative 
                     rounded-2xl px-4 py-2.5 
                     max-w-[280px]
-                    ${
-                      message.isUser
+                    ${message.isUser
                         ? "bg-gradient-to-r from-red-500 via-red-500 to-red-600 text-white shadow-lg shadow-red-500/20 rounded-tr-sm"
-                        : "bg-gradient-to-br from-[#323232] to-[#272727] text-gray-100 shadow-lg shadow-black/10 rounded-tl-sm"
-                    }
+                        : message.isLoading
+                          ? "bg-gradient-to-br from-[#323232] to-[#272727] text-gray-100 shadow-lg shadow-black/10 rounded-tl-sm border border-gray-500/30 animate-pulse-border"
+                          : "bg-gradient-to-br from-[#323232] to-[#272727] text-gray-100 shadow-lg shadow-black/10 rounded-tl-sm"
+                      }
                   `}
                   >
                     {message.isLoading ? (
                       <div className="py-2">
-                        <div className="flex space-x-2">
-                          <motion.div
-                            animate={{ y: [0, -10, 0] }}
-                            transition={{
-                              duration: 0.5,
-                              repeat: Infinity,
-                              repeatDelay: 0.25,
-                            }}
-                            className="h-2 w-2 rounded-full bg-gray-400"
-                          ></motion.div>
-                          <motion.div
-                            animate={{ y: [0, -10, 0] }}
-                            transition={{
-                              duration: 0.5,
-                              repeat: Infinity,
-                              repeatDelay: 0.25,
-                              delay: 0.1,
-                            }}
-                            className="h-2 w-2 rounded-full bg-gray-400"
-                          ></motion.div>
-                          <motion.div
-                            animate={{ y: [0, -10, 0] }}
-                            transition={{
-                              duration: 0.5,
-                              repeat: Infinity,
-                              repeatDelay: 0.25,
-                              delay: 0.2,
-                            }}
-                            className="h-2 w-2 rounded-full bg-gray-400"
-                          ></motion.div>
+                        <div className="flex items-center gap-2 mb-2 pb-2 border-b border-gray-600/30">
+                          <svg className="animate-spin w-5 h-5 text-red-500/70" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                          <span className="text-red-400 text-sm font-medium animate-pulse">Assistant réfléchit...</span>
                         </div>
+
+                        {/* Afficher le contenu réel du message temporaire */}
+                        {message.content.map((content, contentIndex) => (
+                          <div key={contentIndex}>
+                            {content.type === "text" && (
+                              <div className="space-y-2">
+                                <p className="relative z-10 text-[15px] leading-relaxed text-gray-300">
+                                  <MarkdownRenderer text={content.text || content.content} />
+                                </p>
+
+                                {/* Indicateur de chargement plus attrayant */}
+                                <div className="mt-3 flex items-center gap-2 pl-2 border-l-2 border-red-500/30">
+                                  <div className="w-20 h-1.5 bg-gray-700 rounded-full overflow-hidden">
+                                    <motion.div
+                                      className="h-full bg-gradient-to-r from-red-500 to-red-600"
+                                      animate={{
+                                        width: ["0%", "100%"],
+                                        x: ["-100%", "100%"]
+                                      }}
+                                      transition={{
+                                        duration: 1.5,
+                                        repeat: Infinity,
+                                        ease: "linear"
+                                      }}
+                                    />
+                                  </div>
+                                  <span className="text-xs text-gray-400">En cours</span>
+                                </div>
+                              </div>
+                            )}
+
+                            {content.type === "list" && content.listItems && (
+                              <div className="opacity-80 pointer-events-none">
+                                <InteractiveListComponent
+                                  messageId={message.id}
+                                  contentIndex={contentIndex}
+                                  text={content.text}
+                                  listItems={content.listItems}
+                                  selector={content.selector || "unique"}
+                                  onConfirm={() => { }}
+                                  isLoading={true}
+                                />
+                              </div>
+                            )}
+
+                            {content.type === "button" && content.buttons && (
+                              <div className="relative my-2 mt-3 opacity-80 pointer-events-none">
+                                <div className="flex flex-wrap gap-2">
+                                  {content.buttons.map((button) => (
+                                    <button
+                                      key={button.id}
+                                      disabled
+                                      className="bg-gray-700 text-white py-2 px-4 rounded-lg text-sm font-medium cursor-not-allowed relative overflow-hidden"
+                                    >
+                                      <motion.div
+                                        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent"
+                                        animate={{ x: ["-100%", "100%"] }}
+                                        transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+                                      />
+                                      {button.title}
+                                    </button>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        ))}
                       </div>
                     ) : (
                       message.content.map((content, contentIndex) => (
@@ -1936,9 +2133,9 @@ export default function ChatBot({
                                 </div>
                               </div>
                             )}
-                          
+
                           {content.type === "form" && content.formFields && content.formFields.length > 0 && (
-                            <FormComponent 
+                            <FormComponent
                               messageId={message.id}
                               contentIndex={contentIndex}
                               formFields={content.formFields}
@@ -2082,11 +2279,10 @@ export default function ChatBot({
                                     }
                                     className={`
                                     relative w-10 h-10 flex items-center justify-center rounded-full transition-all
-                                    ${
-                                      content.isPlaying
+                                    ${content.isPlaying
                                         ? "bg-red-500"
                                         : "bg-red-500/80 hover:bg-red-500"
-                                    }
+                                      }
                                   `}
                                   >
                                     {content.isPlaying && (
@@ -2146,7 +2342,7 @@ export default function ChatBot({
                                           (x / rect.width) * 100;
                                         const audio =
                                           audioElements[
-                                            `${index}-${contentIndex}`
+                                          `${index}-${contentIndex}`
                                           ];
                                         if (audio) {
                                           audio.currentTime =
@@ -2169,10 +2365,10 @@ export default function ChatBot({
                                         animate={{
                                           backgroundColor: content.isPlaying
                                             ? [
-                                                "#EF4444",
-                                                "#DC2626",
-                                                "#EF4444",
-                                              ]
+                                              "#EF4444",
+                                              "#DC2626",
+                                              "#EF4444",
+                                            ]
                                             : "#EF4444",
                                         }}
                                         transition={{
@@ -2571,9 +2767,8 @@ export default function ChatBot({
                       {(file.type === "pdf" || file.type === "doc") && (
                         <div className="p-3 rounded-lg flex items-center gap-2 bg-[#27272A] min-w-[180px] max-w-[220px]">
                           <div
-                            className={`text-${
-                              file.type === "pdf" ? "red" : "blue"
-                            }-500 flex-shrink-0`}
+                            className={`text-${file.type === "pdf" ? "red" : "blue"
+                              }-500 flex-shrink-0`}
                           >
                             <svg
                               width="20"
@@ -2823,10 +3018,9 @@ export default function ChatBot({
                               }}
                               className={`
                                 relative w-10 h-10 flex items-center justify-center rounded-full
-                                ${
-                                  file.isPlaying
-                                    ? "bg-red-500"
-                                    : "bg-red-500/80 hover:bg-red-500"
+                                ${file.isPlaying
+                                  ? "bg-red-500"
+                                  : "bg-red-500/80 hover:bg-red-500"
                                 }
                               `}
                             >
@@ -3053,50 +3247,48 @@ export default function ChatBot({
             </div>
           )}
 
-      
-            <AnimatePresence>
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 20 }}
-                className={`flex items-center gap-3 ${
-                  theme.inputBg
-                } rounded-xl px-4 py-2.5 ${
-                  isExpanded ? "max-w-full w-full" : ""
+
+          <AnimatePresence mode="sync">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 20 }}
+              className={`flex items-center gap-3 ${theme.inputBg
+                } rounded-xl px-4 py-2.5 ${isExpanded ? "max-w-full w-full" : ""
                 }`}
-                key="input-container"
-              >
-                <div className="relative">
-                  <button
-                    className={`
+              key="input-container"
+            >
+              <div className="relative">
+                <button
+                  className={`
                     p-2 
                     ${theme.buttonHover} 
                     rounded-full 
                     transition-colors
                   `}
-                    onClick={() => setShowAttachMenu(!showAttachMenu)}
+                  onClick={() => setShowAttachMenu(!showAttachMenu)}
+                >
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke={isDarkMode ? "#9CA3AF" : "#4B5563"}
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
                   >
-                    <svg
-                      width="20"
-                      height="20"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke={isDarkMode ? "#9CA3AF" : "#4B5563"}
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48" />
-                    </svg>
-                  </button>
+                    <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48" />
+                  </svg>
+                </button>
 
-                  <AnimatePresence>
-                    {showAttachMenu && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 10 }}
-                        className={`
+                <AnimatePresence>
+                  {showAttachMenu && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 10 }}
+                      className={`
                         absolute bottom-full left-0 mb-2 
                         ${theme.bg} 
                         rounded-xl 
@@ -3105,121 +3297,121 @@ export default function ChatBot({
                         min-w-[180px] 
                         z-[10000]
                       `}
+                    >
+                      <button
+                        className={`
+                          w-full flex items-center gap-3 px-4 py-2 
+                          ${theme.buttonHover}
+                          transition-colors 
+                          ${theme.text}
+                        `}
+                        onClick={() => handleFileSelect("photo")}
                       >
-                        <button
-                          className={`
+                        <svg
+                          width="20"
+                          height="20"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <rect
+                            x="3"
+                            y="3"
+                            width="18"
+                            height="18"
+                            rx="2"
+                            ry="2"
+                          />
+                          <circle cx="8.5" cy="8.5" r="1.5" />
+                          <path d="M21 15l-5-5L5 21" />
+                        </svg>
+                        <span>Photo</span>
+                      </button>
+
+                      <button
+                        className={`
                           w-full flex items-center gap-3 px-4 py-2 
                           ${theme.buttonHover}
                           transition-colors 
                           ${theme.text}
                         `}
-                          onClick={() => handleFileSelect("photo")}
+                        onClick={() => handleFileSelect("file")}
+                      >
+                        <svg
+                          width="20"
+                          height="20"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
                         >
-                          <svg
-                            width="20"
-                            height="20"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          >
-                            <rect
-                              x="3"
-                              y="3"
-                              width="18"
-                              height="18"
-                              rx="2"
-                              ry="2"
-                            />
-                            <circle cx="8.5" cy="8.5" r="1.5" />
-                            <path d="M21 15l-5-5L5 21" />
-                          </svg>
-                          <span>Photo</span>
-                        </button>
+                          <path d="M13 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+                          <polyline points="13 2 13 9 20 9" />
+                        </svg>
+                        <span>Fichiers</span>
+                      </button>
 
-                        <button
-                          className={`
+                      <button
+                        className={`
                           w-full flex items-center gap-3 px-4 py-2 
                           ${theme.buttonHover}
                           transition-colors 
                           ${theme.text}
                         `}
-                          onClick={() => handleFileSelect("file")}
+                        onClick={() => handleShareLocation()}
+                      >
+                        <svg
+                          width="20"
+                          height="20"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
                         >
-                          <svg
-                            width="20"
-                            height="20"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          >
-                            <path d="M13 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
-                            <polyline points="13 2 13 9 20 9" />
-                          </svg>
-                          <span>Fichiers</span>
-                        </button>
+                          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
+                          <circle cx="12" cy="10" r="3" />
+                        </svg>
+                        <span>Localisation</span>
+                      </button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
 
-                        <button
-                          className={`
-                          w-full flex items-center gap-3 px-4 py-2 
-                          ${theme.buttonHover}
-                          transition-colors 
-                          ${theme.text}
-                        `}
-                          onClick={() => handleShareLocation()}
-                        >
-                          <svg
-                            width="20"
-                            height="20"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          >
-                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
-                            <circle cx="12" cy="10" r="3" />
-                          </svg>
-                          <span>Localisation</span>
-                        </button>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-
-                <input
-                  type="text"
-                  value={inputValue}
-                  onChange={(e) => setInputValue(e.target.value)}
-                  onKeyPress={(e) => {
-                    if (e.key === "Enter" && !e.shiftKey && !isProcessing) {
-                      e.preventDefault();
-                      handleSendMessage();
-                    }
-                  }}
-                  placeholder={
-                    isProcessing
-                      ? "Attendez la réponse..."
-                      : "Message à Clem'Bot ..."
+              <input
+                type="text"
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                onKeyPress={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey && !isProcessing) {
+                    e.preventDefault();
+                    handleSendMessage();
                   }
-                  className={`
+                }}
+                placeholder={
+                  isProcessing
+                    ? "Attendez la réponse..."
+                    : "Message à Clem'Bot ..."
+                }
+                className={`
                   flex-1 
                   bg-transparent 
                   outline-none 
                   ${theme.text} 
                   ${theme.inputPlaceholder}
                 `}
-                  disabled={isProcessing}
-                />
+                disabled={isProcessing}
+              />
 
-                <button
-                  className={`
+              <button
+                className={`
                   relative 
                   p-2 
                   ${theme.buttonHover} 
@@ -3227,26 +3419,26 @@ export default function ChatBot({
                   transition-colors
                   ${isRecording ? "text-red-500" : theme.iconColor}
                 `}
-                  onClick={handleRecordClick}
-                  disabled={isProcessing}
+                onClick={handleRecordClick}
+                disabled={isProcessing}
+              >
+                <svg
+                  className="w-5 h-5"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                 >
-                  <svg
-                    className="w-5 h-5"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M12 2a3 3 0 00-3 3v7a3 3 0 006 0V5a3 3 0 00-3-3z" />
-                    <path d="M19 10v2a7 7 0 01-14 0v-2" />
-                    <line x1="12" y1="19" x2="12" y2="22" />
-                  </svg>
-                  {isRecording && (
-                    <>
-                      <div
-                        className={`
+                  <path d="M12 2a3 3 0 00-3 3v7a3 3 0 006 0V5a3 3 0 00-3-3z" />
+                  <path d="M19 10v2a7 7 0 01-14 0v-2" />
+                  <line x1="12" y1="19" x2="12" y2="22" />
+                </svg>
+                {isRecording && (
+                  <>
+                    <div
+                      className={`
                         absolute -top-16 left-1/2 -translate-x-1/2 
                         ${theme.bg} 
                         ${theme.text} 
@@ -3254,51 +3446,51 @@ export default function ChatBot({
                         rounded-xl 
                         shadow-lg
                       `}
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className="flex space-x-1">
-                            <div className="w-1.5 h-4 bg-red-500 rounded-full animate-[soundbar_1s_ease-in-out_infinite]" />
-                            <div className="w-1.5 h-4 bg-red-500 rounded-full animate-[soundbar_1s_ease-in-out_infinite_0.2s]" />
-                            <div className="w-1.5 h-4 bg-red-500 rounded-full animate-[soundbar_1s_ease-in-out_infinite_0.4s]" />
-                          </div>
-                          <span className={`${theme.text} text-sm font-medium`}>
-                            {formatDuration(recordingDuration)}
-                          </span>
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="flex space-x-1">
+                          <div className="w-1.5 h-4 bg-red-500 rounded-full animate-[soundbar_1s_ease-in-out_infinite]" />
+                          <div className="w-1.5 h-4 bg-red-500 rounded-full animate-[soundbar_1s_ease-in-out_infinite_0.2s]" />
+                          <div className="w-1.5 h-4 bg-red-500 rounded-full animate-[soundbar_1s_ease-in-out_infinite_0.4s]" />
                         </div>
+                        <span className={`${theme.text} text-sm font-medium`}>
+                          {formatDuration(recordingDuration)}
+                        </span>
                       </div>
-                      <div className="absolute inset-0 rounded-full border-2 border-red-500 animate-ping"></div>
-                    </>
-                  )}
-                </button>
+                    </div>
+                    <div className="absolute inset-0 rounded-full border-2 border-red-500 animate-ping"></div>
+                  </>
+                )}
+              </button>
 
-                <button
-                  className={`
+              <button
+                className={`
                   p-2 
                   ${theme.buttonHover} 
                   rounded-full 
                   transition-colors
                   ${isProcessing ? "opacity-50 cursor-not-allowed" : ""}
                 `}
-                  onClick={handleSendMessage}
-                  disabled={isProcessing}
+                onClick={handleSendMessage}
+                disabled={isProcessing}
+              >
+                <svg
+                  className="w-5 h-5"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke={isDarkMode ? "#FF3B30" : "#FF3B30"}
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                 >
-                  <svg
-                    className="w-5 h-5"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke={isDarkMode ? "#FF3B30" : "#FF3B30"}
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <line x1="22" y1="2" x2="11" y2="13" />
-                    <polygon points="22 2 15 22 11 13 2 9 22 2" />
-                  </svg>
-                </button>
-              </motion.div>
-            </AnimatePresence>
-      
-    
+                  <line x1="22" y1="2" x2="11" y2="13" />
+                  <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                </svg>
+              </button>
+            </motion.div>
+          </AnimatePresence>
+
+
         </div>
 
         <input

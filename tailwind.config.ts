@@ -27,6 +27,21 @@ const config: Config = {
       backgroundImage: {
         "gradient-orange": "linear-gradient(to right, #EFAE35, #F7942E)",
       },
+      keyframes: {
+        float: {
+          "0%, 100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(-10px)" },
+        },
+        floatSlow: {
+          "0%, 100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(-6px)" },
+        },
+      },
+      animation: {
+        float: "float 3s ease-in-out infinite",
+        "float-delayed": "float 3s ease-in-out 1s infinite",
+        "float-slow": "floatSlow 5s ease-in-out infinite",
+      },
     },
   },
   plugins: [],

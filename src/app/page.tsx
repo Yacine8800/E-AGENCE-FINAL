@@ -1444,13 +1444,15 @@ export default function Home() {
           transition={{ duration: 0.6, delay: 0.4, ease: "easeOut" }}
           className="
           w-full 
-          p-4 sm:p-6 md:p-[50px] pb-[100px]
+          p-4 sm:p-6 md:p-[50px] pb-[80px]
           bg-black 
-          border-[3px] border-noir 
-          rounded-[40px] 
+          border-none
+          rounded-t-[40px]
+          rounded-br-[40px]
+          rounded-bl-[40px]
           flex flex-col 
           gap-6 sm:gap-8 md:gap-[70px] 
-          relative 
+           
           min-h-[600px] sm:min-h-[700px] md:min-h-[813px]
         "
         >
@@ -1516,8 +1518,8 @@ export default function Home() {
               </div>
 
               <div className="text-center">
-                <h3 className="text-4xl sm:text-5xl md:text-7xl text-[#47B5B0] font-bold mb-2 md:mb-4">
-                  80<span className="font-light">%</span>
+                <h3 className="text-4xl sm:text-5xl md:text-7xl text-[#47B5B0] font-medium mb-2 md:mb-4">
+                  80<span className="font-thin">%</span>
                 </h3>
                 <p className="text-base sm:text-lg md:text-xl text-white">
                   taux d&apos;électrification
@@ -1527,31 +1529,18 @@ export default function Home() {
           </div>
         </motion.section>
 
-
-        {/* Encoche style iPhone améliorée */}
+        {/* Separated bottom part to create the curved cutout effect */}
         <div
-          className="absolute bottom-0 left-1/2 bg-white z-10"
+          className="absolute bottom-0 left-0 right-0 mx-auto bg-white"
           style={{
-            width: '320px',
-            height: '80px',
-            borderTopLeftRadius: '40px',
-            borderTopRightRadius: '40px',
-            transform: 'translateX(-50%) translateY(25px)',
+            height: '100px',
+            width: '25%',
+            borderTopLeftRadius: '150px',
+            borderTopRightRadius: '150px',
+            transform: 'translateY(40px)',
+            zIndex: 10
           }}
-        >
-          {/* Effet de gradient subtil à l'intérieur de l'encoche */}
-          <div
-            style={{
-              position: 'absolute',
-              top: '0',
-              left: '0',
-              right: '0',
-              height: '10px',
-              borderTopLeftRadius: '40px',
-              borderTopRightRadius: '40px'
-            }}
-          />
-        </div>
+        />
       </div>
     </div>
   );
