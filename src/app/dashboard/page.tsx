@@ -2714,8 +2714,8 @@ export default function Dashboard() {
 
           {/* Form container with subtle background */}
           <div className={`bg-gradient-to-br from-gray-50 to-white rounded-xl p-6 border ${rattachementType === "postpaid"
-              ? "border-orange-100/30"
-              : "border-green-100/30"
+            ? "border-orange-100/30"
+            : "border-green-100/30"
             } shadow-sm`}>
             {rattachementType === "postpaid" ? (
               <RattacherCompteurForm
