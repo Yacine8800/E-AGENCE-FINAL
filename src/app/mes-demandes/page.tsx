@@ -7,6 +7,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import Lottie from "lottie-react";
 import FloatingBot from "../components/FloatingBot";
 
+// Configuration pour forcer le rendu côté client uniquement
+export const dynamic = "force-dynamic";
+export const runtime = "edge";
+
 const DEMANDES = [
   {
     id: 1,
@@ -214,12 +218,14 @@ export default function MesDemandesPage() {
       }
 
       // Stocker le type de demande dans localStorage pour que le dashboard puisse l'utiliser
-      if (demandeType) {
+      if (demandeType && typeof window !== 'undefined') {
         localStorage.setItem('openDemandeType', demandeType);
       }
 
       // Rediriger vers le dashboard
-      window.location.href = `/dashboard`;
+      if (typeof window !== 'undefined') {
+        window.location.href = `/dashboard`;
+      }
     } else {
       // Utilisateur non connecté, afficher la modal d'authentification
       setSelectedLink(link);
@@ -242,10 +248,10 @@ export default function MesDemandesPage() {
       if (selectedMode) {
         localStorage.setItem('pendingDemandeMode', selectedMode.toString());
       }
-    }
 
-    // Rediriger vers la page de connexion dans la même application
-    window.location.href = `/login?mode=${selectedMode}`;
+      // Rediriger vers la page de connexion dans la même application
+      window.location.href = `/login?mode=${selectedMode}`;
+    }
     setShowAuthModal(false);
   };
 
@@ -262,246 +268,161 @@ export default function MesDemandesPage() {
       if (selectedMode) {
         localStorage.setItem('pendingDemandeMode', selectedMode.toString());
       }
-    }
 
-    // Rediriger vers la page d'inscription dans la même application
-    window.location.href = `/register-stepper?mode=${selectedMode}`;
+      // Rediriger vers la page d'inscription
+      window.location.href = `/registration?mode=${selectedMode}`;
+    }
     setShowAuthModal(false);
   };
 
-  // Fonction pour ouvrir le chat avec un message automatique
   const openChat = (demandeTitle: string) => {
+    if (typeof window === 'undefined') return;
+
     // Vérifier si l'utilisateur est connecté
-    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-    const user = typeof window !== 'undefined' ? localStorage.getItem('user') : null;
+    const token = localStorage.getItem('token');
+    const user = localStorage.getItem('user');
 
     if (token && user) {
-      // Utilisateur connecté, on peut procéder directement
+      // Utilisateur connecté, ouvrir le chat directement
       proceedWithChat(demandeTitle);
     } else {
-      // Utilisateur non connecté, on affiche la modal d'authentification
-      // et on stocke la demande pour l'utiliser après la connexion
+      // Utilisateur non connecté, stocker la demande de chat et afficher la modale d'auth
       localStorage.setItem('pendingChatDemande', demandeTitle);
+      setSelectedMode(0); // Mode générique pour le chat
       setShowAuthModal(true);
     }
   };
 
-  // Fonction qui s'occupe d'ouvrir le chat et d'envoyer le message
   const proceedWithChat = (demandeTitle: string) => {
-    // Garder une référence de la demande à envoyer
-    const messageToSend = `Je souhaite faire une demande de ${demandeTitle}`;
+    if (typeof window === 'undefined' || typeof document === 'undefined') return;
 
-    // Stocker le message dans le localStorage pour récupération ultérieure
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('pendingBotMessage', messageToSend);
+    setIsChatOpen(true);
+    setShowFloatingBot(false);
+
+    // Afficher le conteneur de chat et lui donner le focus
+    const chatContainer = document.querySelector('#botpress-webchat') as HTMLElement;
+    if (chatContainer) {
+      chatContainer.style.display = 'block';
+      chatContainer.focus();
     }
 
-    // Créer et dispatcher un événement personnalisé que le FloatingBot peut écouter
-    const event = new CustomEvent('open-floating-bot-chat', {
-      detail: { message: messageToSend }
-    });
-    document.dispatchEvent(event);
-
-    // Si l'événement ne fonctionne pas, essayer d'utiliser la fonction globale
+    // Petite temporisation pour s'assurer que l'iframe est chargée
     setTimeout(() => {
-      if (typeof window !== 'undefined' && (window as any).__sendMessageToBot) {
-        (window as any).__sendMessageToBot(messageToSend);
-      } else {
-        // Essayer de trouver le bouton dans le FloatingBot 
-        const floatingBotButtons = document.querySelectorAll('.fixed button.rounded-full');
+      // Message de bienvenue spécifique à la demande
+      const message = `Bonjour, je souhaite être accompagné pour une demande de ${demandeTitle.toLowerCase()}.`;
 
-        for (const btn of floatingBotButtons) {
-          if (btn.querySelector('div[style*="width: 100%"]')) {
-            console.log("Bouton FloatingBot trouvé!");
-            (btn as HTMLButtonElement).click();
-            break;
-          }
-        }
-
-        // Après avoir ouvert le chat, attendre plus longtemps pour s'assurer que le chat est bien initialisé
-        setTimeout(() => {
-          attemptToSendMessage(messageToSend, 0);
-        }, 2000);
-      }
-    }, 500);
-
-    setShowAuthModal(false);
+      // Tentative d'envoi du message (avec retries)
+      attemptToSendMessage(message, 0);
+    }, 1000);
   };
 
-  // Fonction récursive qui tente d'envoyer le message avec des délais croissants
   const attemptToSendMessage = (message: string, attempts: number) => {
+    if (typeof window === 'undefined' || typeof document === 'undefined') return;
+
     if (attempts > 5) {
-      console.log("Nombre maximal de tentatives atteint. Impossible d'envoyer le message.");
+      console.warn("Impossible d'envoyer le message après plusieurs tentatives");
       return;
     }
 
-    console.log(`Tentative ${attempts + 1} d'envoi du message...`);
+    try {
+      const webchatIframe = document.querySelector('#botpress-webchat iframe') as HTMLIFrameElement;
+      if (!webchatIframe || !webchatIframe.contentDocument) {
+        setTimeout(() => attemptToSendMessage(message, attempts + 1), 1000);
+        return;
+      }
 
-    // Chercher le champ de saisie de différentes façons
-    const inputField = document.querySelector('input[placeholder*="Message à Clem\'Bot"]')
-      || document.querySelector('input[placeholder*="message"]')
-      || document.querySelector('.fixed input[type="text"]');
+      const inputElement = webchatIframe.contentDocument.querySelector('input[type="text"]') as HTMLInputElement;
 
-    if (inputField) {
-      setMessageInInput(inputField as HTMLInputElement, message);
-    } else {
-      // Si on ne trouve pas l'input, attendre et réessayer avec un délai croissant
-      const delay = 1000 + (attempts * 500);
-      console.log(`Input non trouvé, nouvelle tentative dans ${delay}ms`);
-      setTimeout(() => attemptToSendMessage(message, attempts + 1), delay);
+      if (inputElement) {
+        setMessageInInput(inputElement, message);
+
+        // Déclencher l'envoi du message
+        const form = inputElement.closest('form');
+        if (form) {
+          form.dispatchEvent(new Event('submit', { cancelable: true }));
+        } else {
+          // Fallback: simuler l'appui sur Entrée
+          inputElement.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', code: 'Enter', keyCode: 13, which: 13, bubbles: true }));
+        }
+      } else {
+        // Réessayer si l'input n'est pas encore disponible
+        setTimeout(() => attemptToSendMessage(message, attempts + 1), 1000);
+      }
+    } catch (error) {
+      console.error("Erreur lors de l'envoi du message:", error);
+      setTimeout(() => attemptToSendMessage(message, attempts + 1), 1000);
     }
   };
 
-  // Fonction utilitaire pour définir le message dans l'input et l'envoyer
   const setMessageInInput = (input: HTMLInputElement, message: string) => {
-    console.log("Input trouvé, tentative d'envoi du message");
+    if (typeof window === 'undefined' || typeof document === 'undefined') return;
 
-    // Définir la valeur de l'input
+    // Définir la valeur
     input.value = message;
 
-    // Simuler un événement de saisie
+    // Créer et dispatcher les événements nécessaires pour simuler une saisie utilisateur
     const inputEvent = new Event('input', { bubbles: true });
+    const changeEvent = new Event('change', { bubbles: true });
+
     input.dispatchEvent(inputEvent);
-
-    // Attendre un peu pour laisser le temps à React de mettre à jour son état
-    setTimeout(() => {
-      // Chercher le formulaire parent et le soumettre
-      const form = input.closest('form');
-      if (form) {
-        console.log("Formulaire trouvé, soumission directe");
-        const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
-        form.dispatchEvent(submitEvent);
-      } else {
-        // Sinon chercher différents types de boutons d'envoi
-        const sendButtons = Array.from(document.querySelectorAll('button[type="submit"], button.send-button, button[aria-label*="envoyer"], button[aria-label*="Envoyer"], button svg[data-testid="send"]'));
-
-        // Rechercher également les boutons qui contiennent une icône d'envoi
-        const allButtons = document.querySelectorAll('button');
-        for (const btn of allButtons) {
-          if (btn.innerHTML.includes('svg') && (btn.innerHTML.includes('send') || btn.innerHTML.includes('paper-plane'))) {
-            sendButtons.push(btn);
-          }
-        }
-
-        if (sendButtons.length > 0) {
-          console.log(`${sendButtons.length} boutons d'envoi trouvés, clic sur le premier`);
-          (sendButtons[0] as HTMLElement).click();
-        } else {
-          // Simuler l'appui sur Entrée
-          console.log("Aucun bouton d'envoi trouvé, simulation de l'appui sur Entrée");
-          const enterEvent = new KeyboardEvent('keypress', {
-            key: 'Enter',
-            code: 'Enter',
-            bubbles: true,
-            cancelable: true
-          });
-          input.dispatchEvent(enterEvent);
-        }
-      }
-
-      console.log("Message automatique envoyé");
-
-      // Nettoyer le message en attente dans le localStorage
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem('pendingBotMessage');
-      }
-    }, 300);
+    input.dispatchEvent(changeEvent);
   };
 
-  // Ajouter un effet pour tenter d'envoyer des messages en attente au chargement de la page
+  // Effet pour vérifier si un message est en attente après la connexion
   useEffect(() => {
-    if (typeof window !== 'undefined' && showFloatingBot) {
-      const pendingMessage = localStorage.getItem('pendingBotMessage');
-      if (pendingMessage) {
-        console.log("Message en attente trouvé dans le localStorage:", pendingMessage);
-        // Attendre que la page soit bien chargée avant de tenter d'envoyer le message
-        setTimeout(() => {
-          // Vérifier si le chat est déjà ouvert
-          const chatContainer = document.querySelector('.fixed [role="dialog"]');
-          if (chatContainer) {
-            // Le chat est déjà ouvert, essayer d'envoyer le message directement
-            attemptToSendMessage(pendingMessage, 0);
-          } else {
-            // Le chat n'est pas ouvert, ouvrir le chat puis envoyer le message
-            openChat(pendingMessage.replace('Je souhaite faire une demande de ', ''));
-          }
-        }, 2000);
-      }
+    if (typeof window === 'undefined' || typeof document === 'undefined') return;
+
+    const pendingChatMessage = sessionStorage.getItem('pendingChatAfterLogin');
+    if (pendingChatMessage) {
+      // Effacer le message en attente
+      sessionStorage.removeItem('pendingChatAfterLogin');
+
+      // Laisser un peu de temps pour que le chatbot se charge
+      setTimeout(() => {
+        proceedWithChat(pendingChatMessage);
+      }, 1500);
     }
-  }, [showFloatingBot]);
 
-  // Mise à jour du gestionnaire d'événement global pour l'ouverture du chat
-  useEffect(() => {
-    // Fonction qui va être appelée quand on veut ouvrir le chat
-    const forceOpenChat = (event: Event) => {
-      const buttons = document.querySelectorAll('.fixed button.rounded-full');
-      let chatButton: HTMLButtonElement | null = null;
+    // Vérifier également si une demande est en attente d'ouverture après connexion
+    const pendingDemandeMode = localStorage.getItem('pendingDemandeMode');
+    if (pendingDemandeMode) {
+      const mode = parseInt(pendingDemandeMode, 10);
+      let demandeType = "";
 
-      for (const btn of buttons) {
-        // Si le bouton contient une animation lottie
-        if (btn.querySelector('div[style*="width: 100%"]')) {
-          chatButton = btn as HTMLButtonElement;
+      switch (mode) {
+        case 3:
+          demandeType = "mutation";
           break;
-        }
+        case 1:
+          demandeType = "branchement";
+          break;
+        case 2:
+          demandeType = "reabonnement";
+          break;
       }
 
-      if (chatButton) {
-        chatButton.click();
-        console.log("Chat ouvert via événement personnalisé");
+      if (demandeType) {
+        localStorage.setItem('openDemandeType', demandeType);
+        localStorage.removeItem('pendingDemandeMode');
+        window.location.href = `/dashboard`;
+      }
+    }
 
-        // Récupérer le message à envoyer s'il existe
-        const customEvent = event as CustomEvent;
-        if (customEvent.detail) {
-          const message = customEvent.detail.message || customEvent.detail.messageToSend;
-          if (message) {
-            // Attendre plus longtemps pour assurer que le chat est bien initialisé
-            setTimeout(() => {
-              attemptToSendMessage(message, 0);
-            }, 2000);
-          }
-        }
+    // Ajouter un gestionnaire d'événements pour forcer l'ouverture du chat depuis d'autres pages
+    const forceOpenChat = (event: Event) => {
+      if (typeof document === 'undefined') return;
+
+      const customEvent = event as CustomEvent;
+      if (customEvent.detail && customEvent.detail.message) {
+        proceedWithChat(customEvent.detail.message);
       }
     };
 
-    // Enregistrer le gestionnaire d'événement global
-    document.addEventListener('open-floating-bot-chat', forceOpenChat);
+    document.addEventListener('forceOpenChat', forceOpenChat as EventListener);
 
-    // Exposer la fonction globalement pour un accès direct
-    if (typeof window !== 'undefined') {
-      (window as any).__openFloatingBotChat = (message?: string) => {
-        const event = new CustomEvent('open-floating-bot-chat', {
-          detail: message ? { message: message } : undefined
-        });
-        document.dispatchEvent(event);
-      };
-    }
-
-    // Nettoyer l'écouteur et la fonction globale quand le composant est démonté
     return () => {
-      document.removeEventListener('open-floating-bot-chat', forceOpenChat);
-      if (typeof window !== 'undefined') {
-        delete (window as any).__openFloatingBotChat;
-      }
+      document.removeEventListener('forceOpenChat', forceOpenChat as EventListener);
     };
-  }, []);
-
-  // Effet pour vérifier s'il y a une demande de chat en attente après connexion
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const token = localStorage.getItem('token');
-      const user = localStorage.getItem('user');
-      const pendingChatDemande = sessionStorage.getItem('pendingChatAfterLogin');
-
-      if (token && user && pendingChatDemande) {
-        console.log("Demande de chat en attente trouvée après connexion:", pendingChatDemande);
-        // Supprimer la demande de sessionStorage pour éviter de la traiter plusieurs fois
-        sessionStorage.removeItem('pendingChatAfterLogin');
-        // Traiter la demande de chat
-        setTimeout(() => {
-          proceedWithChat(pendingChatDemande);
-        }, 1000);
-      }
-    }
   }, []);
 
   return (
