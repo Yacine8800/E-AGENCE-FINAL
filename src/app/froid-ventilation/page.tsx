@@ -6,15 +6,17 @@ Nous assurons l'installation, la maintenance et le dépannage de tous types d'é
 Solutions sur mesure adaptées à vos besoins et à votre budget.`;
 
   return (
-    <GenericPage
-      title="Froid et ventilation"
-      description={description}
-      buttonText="Demander un devis"
-      buttonLink="/contact"
-      secondButtonText="Faites vous assister par clembot"
-      secondButtonLink="#"
-      imageRight="/depannage/climatisation.png"
-      highlightWord="ventilation"
-    />
+    <div className="overflow-hidden -mt-[200px] -mb-[200px]">
+      <GenericPage
+        title="Froid et ventilation"
+        description={description}
+        buttonText="Demander un devis"
+        buttonLink="/contact"
+        secondButtonText="Faites vous assister par clembot"
+        secondButtonLink="#"
+        imageRight="/depannage/climatisation.png"
+        highlightWord="ventilation"
+      />
+    </div>
   );
 }

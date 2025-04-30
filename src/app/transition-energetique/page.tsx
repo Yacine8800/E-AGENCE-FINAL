@@ -7,15 +7,17 @@ bornes de recharge électrique, systèmes de gestion intelligente de l'énergie.
 Bénéficiez d'aides financières et de crédits d'impôt grâce à nos solutions certifiées.`;
 
   return (
-    <GenericPage
-      title="Accompagnement à la transition énergétique"
-      description={description}
-      buttonText="Étudier mon projet"
-      buttonLink="/contact"
-      secondButtonText="Faites vous assister par clembot"
-      secondButtonLink="#"
-      imageRight="/depannage/energie.png"
-      highlightWord="énergétique"
-    />
+    <div className="overflow-hidden -mt-[200px] -mb-[200px]">
+      <GenericPage
+        title="Accompagnement à la transition énergétique"
+        description={description}
+        buttonText="Étudier mon projet"
+        buttonLink="/contact"
+        secondButtonText="Faites vous assister par clembot"
+        secondButtonLink="#"
+        imageRight="/depannage/energie.png"
+        highlightWord="énergétique"
+      />
+    </div>
   );
 }

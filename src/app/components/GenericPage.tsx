@@ -79,9 +79,9 @@ const GenericPage: React.FC<GenericPageProps> = ({
   const { beforeText, highlightedWord } = getHighlightedTitle();
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 -mt-[100px] -mb-[100px] sm:px-6 md:px-8 lg:px-10 xl:px-12 overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center px-4 -mt-[20px] sm:px-6 md:px-8 lg:px-10 xl:px-12 overflow-hidden">
       <div className="w-[96%] bg-[#F3F3F3] rounded-[40px] py-8 sm:py-10 md:py-12 lg:py-16 overflow-hidden">
-        <div className="container mx-auto">
+        <div className="container mx-auto overflow-hidden">
           <div className="flex flex-col lg:flex-row items-center gap-6 sm:gap-8 md:gap-10 lg:gap-12 xl:gap-16">
             <div className="w-full lg:w-1/2 text-center lg:text-left">
               <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-6xl font-extrabold text-noir mb-6 sm:mb-8 md:mb-10">

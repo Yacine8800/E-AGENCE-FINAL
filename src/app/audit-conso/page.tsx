@@ -7,14 +7,18 @@ export default function AuditConsoPage() {
 18 m pour les 225 kV  ⚠️ Tenez compte des objets manipulés (outils, perches...).  Ne touchez jamais aux pylônes, poteaux ou câbles, même de loin.`;
 
   return (
-    <GenericPage
-      title="Audit de consommation électrique"
-      description={description}
-      buttonText="Faire une demande"
-      buttonLink="#"
-      secondButtonText="Faites vous assister par clembot"
-      secondButtonLink="#"
-      imageRight="/depannage/audit.png"
-    />
+
+    <div className=" overflow-hidden">
+      <GenericPage
+        title="Audit de consommation électrique"
+        description={description}
+        buttonText="Faire une demande"
+        buttonLink="#"
+        secondButtonText="Faites vous assister par clembot"
+        secondButtonLink="#"
+        imageRight="/depannage/audit.png"
+      />
+    </div>
+
   );
 } 

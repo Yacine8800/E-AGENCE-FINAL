@@ -6,15 +6,20 @@ Analyse complète de vos installations électriques, thermiques et de votre isol
 Recevez un rapport détaillé avec des recommandations concrètes et un plan d'action chiffré pour réduire vos factures énergétiques jusqu'à 30%.`;
 
   return (
-    <GenericPage
-      title="Audit efficacité énergétique"
-      description={description}
-      buttonText="Programmer un audit"
-      buttonLink="/contact"
-      secondButtonText="Faites vous assister par clembot"
-      secondButtonLink="#"
-      imageRight="/depannage/audit-eco.png"
-      highlightWord="énergétique"
-    />
+
+    <div className="overflow-hidden -mt-[200px] -mb-[200px]">
+      <GenericPage
+        title="Audit efficacité énergétique"
+        description={description}
+        buttonText="Programmer un audit"
+        buttonLink="/contact"
+        secondButtonText="Faites vous assister par clembot"
+        secondButtonLink="#"
+        imageRight="/depannage/audit-eco.png"
+        highlightWord="énergétique"
+
+      />
+    </div>
+
   );
 }

@@ -6,15 +6,17 @@ Large gamme de groupes électrogènes de 10 à 500 kVA disponibles immédiatemen
 Service clé en main incluant livraison, installation, mise en service et assistance technique 24h/24 par nos techniciens spécialisés.`;
 
   return (
-    <GenericPage
-      title="Location groupe électrogène"
-      description={description}
-      buttonText="Réserver maintenant"
-      buttonLink="/contact"
-      secondButtonText="Faites vous assister par clembot"
-      secondButtonLink="#"
-      imageRight="/depannage/groupe-electrogene.png"
-      highlightWord="électrogène"
-    />
+    <div className="overflow-hidden -mt-[200px] -mb-[200px]">
+      <GenericPage
+        title="Location groupe électrogène"
+        description={description}
+        buttonText="Réserver maintenant"
+        buttonLink="/contact"
+        secondButtonText="Faites vous assister par clembot"
+        secondButtonLink="#"
+        imageRight="/depannage/groupe-electrogene.png"
+        highlightWord="électrogène"
+      />
+    </div>
   );
 }
