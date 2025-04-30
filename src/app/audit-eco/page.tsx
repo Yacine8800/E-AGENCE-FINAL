@@ -7,7 +7,8 @@ Recevez un rapport détaillé avec des recommandations concrètes et un plan d'a
 
   return (
 
-    <div className="overflow-hidden -mt-[200px] -mb-[200px]">
+    <div className="overflow-hidden mt-[-100px] sm:-mt-[120px] md:-mt-[140px] lg:-mt-[160px] mb-[-120px] sm:-mb-[120px] md:-mb-[140px] lg:-mb-[160px]">
+
       <GenericPage
         title="Audit efficacité énergétique"
         description={description}

@@ -111,7 +111,7 @@ export default function RisquesElectriquesPage() {
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center px-4 -mt-10 sm:px-6 md:px-8 lg:px-10 xl:px-12"
+      className="min-h-screen flex items-center justify-center mt-10 mb-10 px-4 lg:-mt-16 lg:-mb-16 sm:px-6 md:px-8 lg:px-10 xl:px-12"
       onKeyDown={handleKeyDown}
       tabIndex={0}
       role="region"

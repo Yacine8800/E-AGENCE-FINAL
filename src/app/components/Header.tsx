@@ -36,6 +36,7 @@ const Header = () => {
   const [hasScrolled, setHasScrolled] = useState(false);
   const [hoverTimeout, setHoverTimeout] = useState<NodeJS.Timeout | null>(null);
   const [isMobile, setIsMobile] = useState(false);
+  const [isTablet, setIsTablet] = useState(false);
   // État pour stocker le sous-menu actif
   const [activeSubmenuPath, setActiveSubmenuPath] = useState<string | null>(null);
 
@@ -151,7 +152,10 @@ const Header = () => {
   // Détecter scroll + mobile
   useEffect(() => {
     const handleScroll = () => setHasScrolled(window.scrollY > 0);
-    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 640);
+      setIsTablet(window.innerWidth >= 640 && window.innerWidth < 1024);
+    };
 
     handleResize();
     window.addEventListener("scroll", handleScroll);
@@ -206,10 +210,10 @@ const Header = () => {
       {/* Styles globaux pour le header */}
       <style jsx global>{headerStyles}</style>
 
-      <div className="px-4 sm:px-6 md:px-[40px] lg:px-[80px] pt-4 sm:pt-6 sticky-header-container">
+      <div className="px-2 sm:px-4 md:px-6 lg:px-[40px] xl:px-[80px] pt-2 sm:pt-4 md:pt-6 sticky-header-container">
         <motion.header
-          className={`bg-[#F5F5F5] w-full rounded-[20px] sm:rounded-[40px] overflow-hidden shadow-sm transition-all duration-300 ease-in-out ${hasScrolled
-            ? "fixed top-0 left-0 right-0 z-[9999] rounded-none sm:rounded-none shadow-lg"
+          className={`bg-[#F5F5F5] w-full rounded-[10px] sm:rounded-[20px] md:rounded-[40px] overflow-hidden shadow-sm transition-all duration-300 ease-in-out ${hasScrolled
+            ? "fixed top-0 left-0 right-0 z-[9999] rounded-none shadow-lg"
             : ""
             }`}
           initial={{ opacity: 0, y: -20 }}
@@ -217,30 +221,30 @@ const Header = () => {
           transition={{ duration: 0.5 }}
         >
           {/* ─────────────  Bandeau supérieur  ───────────── */}
-          <div className="py-3 sm:py-5">
-            <div className="px-4 sm:px-8 md:px-12 lg:px-20 flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-0">
+          <div className="py-2 sm:py-3 md:py-5">
+            <div className="px-3 sm:px-6 md:px-8 lg:px-12 xl:px-20 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
               {/* Logo + Tabs */}
-              <div className="flex flex-col sm:flex-row items-center gap-4 sm:space-x-6 md:space-x-12 w-full sm:w-auto">
+              <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 md:gap-6 lg:gap-12 w-full sm:w-auto">
                 <Link href="/" className="flex items-center group">
                   <Image
                     src="/logo.png"
                     alt="Ma CIE en ligne"
                     width={180}
                     height={60}
-                    className="w-[140px] sm:w-[160px] md:w-[180px] h-auto transition-transform duration-300 group-hover:scale-105"
+                    className="w-[120px] sm:w-[140px] md:w-[160px] lg:w-[180px] h-auto transition-transform duration-300 group-hover:scale-105"
                     priority
                   />
                 </Link>
 
                 <nav
-                  className="relative flex items-center space-x-4 sm:space-x-6 md:space-x-8 mt-2 sm:mt-0"
+                  className="relative flex items-center space-x-2 xs:space-x-3 sm:space-x-4 md:space-x-6 lg:space-x-8 mt-2 sm:mt-0"
                   onMouseLeave={() => handleTabHover(null)}
                 >
                   {(["particulier", "business", "institution"] as const).map(
                     (tab) => (
                       <button
                         key={tab}
-                        className={`relative text-base sm:text-lg md:text-xl text-noir hover:text-orange transition-all duration-300 ${activeTab === tab ? "font-semibold" : ""
+                        className={`relative text-sm xs:text-base sm:text-lg md:text-xl text-noir hover:text-orange transition-all duration-300 ${activeTab === tab ? "font-semibold" : ""
                           }`}
                         onClick={() => handleTabClick(tab)}
                         onMouseEnter={() => handleTabHover(tab)}
@@ -253,7 +257,7 @@ const Header = () => {
                         {activeTab === tab && (
                           <motion.div
                             layoutId="underline"
-                            className="absolute left-0 right-0 -bottom-2 sm:-bottom-3 mx-auto h-[6px] sm:h-[10px] w-full bg-orange shadow-sm rounded-full"
+                            className="absolute left-0 right-0 -bottom-1 sm:-bottom-2 md:-bottom-3 mx-auto h-[4px] sm:h-[6px] md:h-[10px] w-full bg-orange shadow-sm rounded-full"
                             style={{ opacity: 1 }}
                           />
                         )}
@@ -264,10 +268,10 @@ const Header = () => {
               </div>
 
               {/* CTA */}
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 sm:gap-3 md:gap-4 mt-2 sm:mt-0 w-full sm:w-auto justify-center sm:justify-end shrink-0">
                 <Link
                   href="/solutions-eco"
-                  className="bg-[#F5F5F5] border border-vert hover:bg-white font-semibold text-vert w-full sm:w-[180px] md:w-[233px] h-[45px] sm:h-[55px] px-4 sm:px-6 md:px-10 py-[10px] sm:py-[15px] rounded-[30px] sm:rounded-[40px] transition-all duration-300 text-xs sm:text-sm flex items-center justify-center gap-[10px] hover:scale-105 hover:shadow-lg"
+                  className="bg-[#F5F5F5] border border-vert hover:bg-white font-semibold text-vert min-w-[80px] xs:min-w-[120px] sm:min-w-[120px] md:min-w-[120px] lg:min-w-[160px] max-w-[140px] xs:max-w-[140px] sm:max-w-[160px] md:max-w-[180px] lg:max-w-[233px] h-[35px] sm:h-[45px] md:h-[55px] px-2 xs:px-3 sm:px-4 md:px-6 lg:px-10 py-[8px] sm:py-[10px] md:py-[15px] rounded-[20px] sm:rounded-[30px] md:rounded-[40px] transition-all duration-300 text-[10px] xs:text-xs sm:text-sm flex items-center justify-center gap-[6px] sm:gap-[10px] hover:scale-105 hover:shadow-lg truncate"
                 >
                   <Ecostore />
                   <span>Ecostore</span>
@@ -282,16 +286,18 @@ const Header = () => {
                     }
                     hover:bg-noir hover:text-white
                     font-semibold 
-                    w-full sm:w-[180px] md:w-[233px] 
-                    h-[45px] sm:h-[55px] 
-                    px-4 sm:px-6 md:px-10 
-                    py-[10px] sm:py-[15px] 
-                    rounded-[30px] sm:rounded-[40px] 
+                    min-w-[80px] xs:min-w-[120px] sm:min-w-[120px] md:min-w-[120px] lg:min-w-[160px]
+                    max-w-[140px] xs:max-w-[140px] sm:max-w-[160px] md:max-w-[180px] lg:max-w-[233px]
+                    h-[35px] sm:h-[45px] md:h-[55px]
+                    px-2 xs:px-3 sm:px-4 md:px-6 lg:px-10 
+                    py-[8px] sm:py-[10px] md:py-[15px]
+                    rounded-[20px] sm:rounded-[30px] md:rounded-[40px]
                     transition-all duration-300 
-                    text-xs sm:text-sm 
+                    text-[10px] xs:text-xs sm:text-sm
                     flex items-center justify-center 
-                    gap-[10px] 
+                    gap-[6px] sm:gap-[10px]
                     hover:scale-105 hover:shadow-lg
+                    truncate shrink-0
                     ${isAuthenticated && user && user.firstname && user.lastname
                       ? "shadow-md shadow-orange/30"
                       : ""
@@ -300,15 +306,15 @@ const Header = () => {
                 >
                   {isAuthenticated && user && user.firstname && user.lastname ? (
                     <>
-                      <div className="relative group">
-                        <div className="h-7 w-7 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white font-bold ring-2 ring-white/50 group-hover:ring-white/80 transition-all">
+                      <div className="relative group shrink-0">
+                        <div className="h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white font-bold ring-2 ring-white/50 group-hover:ring-white/80 transition-all">
                           {user.firstname.charAt(0).toUpperCase()}
                         </div>
-                        <div className="absolute -bottom-1 -right-1 h-3 w-3 bg-green-400 rounded-full border-2 border-white"></div>
+                        <div className="absolute -bottom-1 -right-1 h-2 w-2 sm:h-3 sm:w-3 bg-green-400 rounded-full border-[1px] sm:border-2 border-white"></div>
                       </div>
                       <div className="flex flex-col items-start leading-tight">
-                        <span className="font-bold text-xs">{user.firstname}</span>
-                        <span className="font-medium text-[11px] opacity-90">{user.lastname}</span>
+                        <span className="font-bold text-[9px] xs:text-[10px] sm:text-xs">{user.firstname}</span>
+                        <span className="font-medium text-[8px] xs:text-[9px] sm:text-[11px] opacity-90">{user.lastname}</span>
                       </div>
                     </>
                   ) : (
@@ -331,21 +337,21 @@ const Header = () => {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.3 }}
-                className="w-full px-4 sm:px-8 md:px-12 lg:px-20 py-4 sm:py-6 md:py-8"
+                className="w-full px-3 sm:px-6 md:px-8 lg:px-12 xl:px-20 py-3 sm:py-4 md:py-6 lg:py-8"
                 onMouseEnter={() => hoverTimeout && clearTimeout(hoverTimeout)}
                 onMouseLeave={() => handleTabHover(null)}
               >
                 {/* Fermeture mobile */}
-                {isMobile && (
+                {(isMobile || isTablet) && (
                   <button
                     onClick={() => setIsMenuOpen(false)}
-                    className="absolute top-2 right-2 w-8 h-8 flex items-center justify-center bg-gray-200 rounded-full hover:bg-gray-300 transition-colors duration-300"
+                    className="absolute top-2 right-2 w-6 h-6 sm:w-8 sm:h-8 flex items-center justify-center bg-gray-200 rounded-full hover:bg-gray-300 transition-colors duration-300"
                     aria-label="Fermer le menu"
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
-                      width="16"
-                      height="16"
+                      width={isMobile ? "14" : "16"}
+                      height={isMobile ? "14" : "16"}
                       viewBox="0 0 24 24"
                       fill="none"
                       stroke="currentColor"
@@ -360,8 +366,8 @@ const Header = () => {
                 )}
 
                 {/* Message spécifique selon l'onglet */}
-                <div className="w-full mb-6">
-                  <p className="text-xl font-semibold text-noir ">
+                <div className="w-full mb-3 sm:mb-4 md:mb-6">
+                  <p className="text-base sm:text-lg md:text-xl font-semibold text-noir">
                     {activeTab === "particulier"
                       ? "Vous êtes particulier professionnel ou particulier domicile"
                       : activeTab === "business"
@@ -371,7 +377,7 @@ const Header = () => {
                 </div>
 
                 {/* Grille de colonnes */}
-                <div className="bg-[#f1f1f1] flex flex-col md:flex-row items-start gap-8 p-6 rounded-xl shadow-sm">
+                <div className="bg-[#f1f1f1] flex flex-col md:flex-row items-start gap-4 sm:gap-6 md:gap-8 p-3 sm:p-4 md:p-6 rounded-lg sm:rounded-xl shadow-sm">
                   {activeTab && TAB_CONTENT[activeTab].map((col, idx) => (
                     <Column
                       key={col.title}
@@ -387,7 +393,7 @@ const Header = () => {
                       initial={{ opacity: 0, x: 20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.2 }}
-                      className={`border-2 p-3 sm:p-5 gap-4 sm:gap-8 ${pathname === "/mes-demandes" ? "border-orange bg-orange/5" : "border-white"} rounded-[30px] sm:rounded-[50px] w-full flex max-w-md justify-center items-center hover:bg-gray-100 transition-all duration-300 hover:shadow-md cursor-pointer`}
+                      className={`border-2 p-2 sm:p-3 md:p-5 gap-2 sm:gap-4 md:gap-8 ${pathname === "/mes-demandes" ? "border-orange bg-orange/5" : "border-white"} rounded-[20px] sm:rounded-[30px] md:rounded-[50px] w-full flex max-w-md justify-center items-center hover:bg-gray-100 transition-all duration-300 hover:shadow-md cursor-pointer`}
                       onClick={() => (window.location.href = "/mes-demandes")}
                     >
                       <div>
@@ -396,14 +402,14 @@ const Header = () => {
                           alt="profile"
                           width={80}
                           height={15}
-                          className="w-[50px] sm:w-[80px] h-auto transition-transform duration-300 hover:scale-110"
+                          className="w-[40px] sm:w-[50px] md:w-[80px] h-auto transition-transform duration-300 hover:scale-110"
                         />
                       </div>
-                      <div className="flex flex-col gap-1 sm:gap-2">
-                        <p className="font-bold text-base sm:text-xl">
+                      <div className="flex flex-col gap-0.5 sm:gap-1 md:gap-2">
+                        <p className="font-bold text-sm sm:text-base md:text-xl">
                           Mes demandes
                         </p>
-                        <p className="text-xs sm:text-sm">
+                        <p className="text-[10px] sm:text-xs md:text-sm">
                           Tout savoir sur mes demandes
                         </p>
                       </div>

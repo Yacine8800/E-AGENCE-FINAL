@@ -8,7 +8,8 @@ export default function AuditConsoPage() {
 
   return (
 
-    <div className=" overflow-hidden">
+    <div className="overflow-hidden mt-[40px] sm:-mt-[120px] md:-mt-[140px] lg:-mt-[160px] mb-[40px] sm:-mb-[120px] md:-mb-[140px] lg:-mb-[160px]">
+
       <GenericPage
         title="Audit de consommation électrique"
         description={description}

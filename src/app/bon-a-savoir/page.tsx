@@ -133,7 +133,7 @@ export default function BonASavoirPage() {
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center px-4 -mt-[100px] sm:px-6 md:px-8 lg:px-10 xl:px-12 -mb-[100px]"
+      className="min-h-screen flex items-center justify-center px-4 -mt-[-60px] lg:-mt-[100px] sm:px-6 md:px-8 lg:px-10 xl:px-12 -mb-[-60px] lg:-mb-[100px]"
       onKeyDown={handleKeyDown}
       tabIndex={0}
       role="region"

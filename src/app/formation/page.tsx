@@ -6,7 +6,7 @@ Nos programmes couvrent les normes électriques, la sécurité, le dépannage, l
 Formations certifiantes dispensées par des formateurs experts et disponibles en présentiel ou à distance, en sessions individuelles ou collectives.`;
 
   return (
-    <div className="overflow-hidden -mt-[200px] -mb-[200px]">
+    <div className="overflow-hidden mt-[-100px] sm:-mt-[120px] md:-mt-[140px] lg:-mt-[160px] mb-[-120px] sm:-mb-[120px] md:-mb-[140px] lg:-mb-[160px]">
       <GenericPage
         title="Formation professionnelle"
         description={description}
