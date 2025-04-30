@@ -1,17 +1,10 @@
-/* ---------------------------------------------------------------------------
-   app/simulateur-facture/page.tsx
---------------------------------------------------------------------------- */
+
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useCallback } from "react";
 import Image from "next/image";
-import Link from "next/link";
-import { Toastify } from "@/utils/toast";
-import Breadcrumb from "../components/Breadcrumb";
 
-/* ──────────────────────────
-   Types & constantes
-────────────────────────── */
+import { Toastify } from "@/utils/toast";
 
 const TARIFF_CODES: string[] = [
   "5A – Tarif social",

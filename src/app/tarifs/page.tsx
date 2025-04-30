@@ -4,16 +4,13 @@ import { useState, useEffect } from "react";
 import GenericPage from "../components/GenericPage";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { FaFilePdf, FaDownload, FaEye, FaCreditCard, FaMoneyBill, FaClock } from "react-icons/fa";
+import { FaDownload, FaEye, FaClock } from "react-icons/fa";
 
 export default function TarifsPage() {
   const [currentPdfUrl, setCurrentPdfUrl] = useState("/test.pdf");
   const [isLoading, setIsLoading] = useState(true);
   const [showAnimation, setShowAnimation] = useState(false);
-  const [selectedPdf, setSelectedPdf] = useState<string | null>(null);
-  const [selectedPdfName, setSelectedPdfName] = useState<string>("");
-  const [filter, setFilter] = useState<string | null>(null);
-  const [searchTerm, setSearchTerm] = useState("");
+
 
   // Historique fictif des tarifs récents (les plus récents uniquement)
   const recentTarifHistory = [
