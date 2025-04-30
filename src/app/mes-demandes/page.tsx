@@ -426,7 +426,7 @@ export default function MesDemandesPage() {
   }, []);
 
   return (
-    <div className="min-h-screen flex items-start justify-center pt-14 pb-20 bg-gray-50">
+    <div className="min-h-screen flex items-start justify-center pt-14 pb-20 ">
       {/* Rendre conditionnellement le composant FloatingBot */}
       {showFloatingBot && <FloatingBot />}
 
