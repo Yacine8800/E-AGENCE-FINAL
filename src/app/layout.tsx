@@ -44,14 +44,6 @@ const RouteGuard = ({ children }: { children: React.ReactNode }) => {
   // Liste des routes protégées qui nécessitent une authentification
   const protectedRoutes = [
     '/dashboard',
-    '/reclamation',
-    '/secretQuestion',
-    '/incident',
-    '/depannage',
-    '/formation',
-    '/audit-eco',
-    '/audit-conso',
-    '/chat',
   ];
 
   // Liste des routes d'authentification (réservées aux utilisateurs non connectés)
