@@ -378,7 +378,7 @@ export default function SimulateurFacturePage() {
   }, []);
 
   return (
-    <div className="min-h-screen flex items-start justify-center pt-10 pb-10">
+    <div className="min-h-screen flex items-start justify-center pt-10 pb-10 -mb-[200px]">
       <div className="w-[91%]">
         {/* Fil d'Ariane avec design segmenté */}
 

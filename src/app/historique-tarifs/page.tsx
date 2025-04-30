@@ -152,7 +152,7 @@ export default function HistoriqueTarifsPage() {
 
     return (
         <div className="min-h-screen ">
-            <div className="w-full -mt-[250px]">
+            <div className="w-full -mt-[290px]">
                 <GenericPage
                     title="Historique des Tarifs"
                     description="Consultez l'historique complet des tarifs disponibles depuis 2019."

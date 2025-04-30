@@ -79,8 +79,8 @@ const GenericPage: React.FC<GenericPageProps> = ({
   const { beforeText, highlightedWord } = getHighlightedTitle();
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 -mt-10 sm:px-6 md:px-8 lg:px-10 xl:px-12">
-      <div className="w-[96%] bg-[#F3F3F3] rounded-[40px] py-12 sm:py-16 md:py-20 lg:py-24">
+    <div className="min-h-screen flex items-center justify-center px-4 -mt-[100px] -mb-[100px] sm:px-6 md:px-8 lg:px-10 xl:px-12 overflow-hidden">
+      <div className="w-[96%] bg-[#F3F3F3] rounded-[40px] py-8 sm:py-10 md:py-12 lg:py-16 overflow-hidden">
         <div className="container mx-auto">
           <div className="flex flex-col lg:flex-row items-center gap-6 sm:gap-8 md:gap-10 lg:gap-12 xl:gap-16">
             <div className="w-full lg:w-1/2 text-center lg:text-left">
@@ -126,7 +126,7 @@ const GenericPage: React.FC<GenericPageProps> = ({
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: isVisible ? 1 : 0, y: isVisible ? 0 : 20 }}
                   transition={{ duration: 0.5, delay: 0.3 }}
-                  className="text-base sm:text-lg md:text-xl text-gray-600 mb-8 sm:mb-10 md:mb-12 max-w-[500px] sm:max-w-[600px] mx-auto lg:mx-0"
+                  className="text-base sm:text-lg md:text-xl text-gray-600 mb-6 sm:mb-8 md:mb-10 max-w-[500px] sm:max-w-[600px] mx-auto lg:mx-0"
                 >
                   {description}
                 </motion.p>
@@ -174,7 +174,7 @@ const GenericPage: React.FC<GenericPageProps> = ({
 
             {imageRight && (
               <motion.div
-                className="w-full lg:w-1/2 mt-8 lg:mt-0"
+                className="w-full lg:w-1/2 mt-6 lg:mt-0"
                 initial={{ opacity: 0, x: 50 }}
                 animate={{ opacity: isVisible ? 1 : 0, x: isVisible ? 0 : 50 }}
                 transition={{ duration: 0.6, delay: 0.3 }}

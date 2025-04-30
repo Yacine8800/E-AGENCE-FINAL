@@ -77,7 +77,7 @@ export default function TarifsPage() {
 
   return (
     <div className="min-h-screen ">
-      <div className="w-full -mt-[250px]">
+      <div className="w-full -mt-[290px]">
         <GenericPage
           title="Nos Tarifs"
           description="Consultez les tarifs en vigueur pour tous vos services d'eau et d'assainissement."

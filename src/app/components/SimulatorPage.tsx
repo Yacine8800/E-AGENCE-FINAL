@@ -258,7 +258,7 @@ export default function SimulatorPage({
 
   return (
     <>
-      <div className="min-h-screen flex items-start justify-center pt-16 pb-28">
+      <div className="min-h-screen flex items-start justify-center pt-16 pb-28 -mb-[100px]">
         <div className="w-[91%]">
           <div className="bg-gradient-to-br from-[#F5F5F5]  rounded-[40px] overflow-hidden relative ">
             {/* Titre & sous‑texte */}
