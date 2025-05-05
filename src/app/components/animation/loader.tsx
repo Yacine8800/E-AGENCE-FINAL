@@ -65,9 +65,9 @@ export default function Loader({ context }: LoaderProps) {
         }
       `}</style>
       {/* Premier div pour le fond opaque */}
-      <div className="fixed inset-0 bg-white z-[9999999]"></div>
+      <div className="fixed inset-0 bg-white z-[999999999]"></div>
       {/* Deuxième div pour le contenu du loader */}
-      <div className="fixed inset-0 flex flex-col items-center justify-center z-[99999999]">
+      <div className="fixed inset-0 flex flex-col items-center justify-center z-[9999999999]">
         {/* Container principal */}
         <div className="relative w-full max-w-md px-6 py-10">
           {/* Animations d'électricité moderne */}

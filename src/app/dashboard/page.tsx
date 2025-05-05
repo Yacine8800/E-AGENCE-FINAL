@@ -2704,7 +2704,7 @@ export default function Dashboard() {
                     />
                   </div>
 
-                  <div className="backdrop-blur-sm bg-white/30 px-6 py-5 rounded-xl">
+                  <div className="bg-white/30 px-6 py-5 rounded-xl">
                     <div className="text-center">
                       <h3 className="text-xl font-bold text-gray-800 mb-3">Aucun compteur sélectionné</h3>
                       <p className="text-gray-600">
