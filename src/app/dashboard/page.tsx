@@ -2134,7 +2134,7 @@ export default function Dashboard() {
                       <div className="mt-auto">
                         <button
                           onClick={() => setIsReclModalOpen(true)}
-                          className="flex items-center justify-center gap-2 bg-vert rounded-xl py-2 px-3 w-full hover:bg-[#16625A] transition-all duration-300 relative z-[5]"
+                          className="flex items-center justify-center gap-2 bg-vert rounded-xl py-2 px-3 w-full hover:bg-[#16625A] transition-all duration-300 "
                         >
                           <div className="text-white">
                             <svg
@@ -2181,7 +2181,7 @@ export default function Dashboard() {
                       <div className="mt-auto">
                         <button
                           onClick={() => setIsDemandeModalOpen(true)}
-                          className="flex items-center justify-center gap-2 bg-rouge rounded-xl py-2 px-3 w-full hover:bg-[#D43631] transition-all duration-300 relative z-[5]"
+                          className="flex items-center justify-center gap-2 bg-rouge rounded-xl py-2 px-3 w-full hover:bg-[#D43631] transition-all duration-300"
                         >
                           <div className="text-white">
                             <svg
@@ -2685,7 +2685,7 @@ export default function Dashboard() {
                   </div>
                 </div>
               ) : (
-                <div className="flex flex-col items-center justify-center px-8 py-10 gap-5 mb-8 bg-gradient-to-r from-[#F7942E]/20 to-amber-50 rounded-xl shadow-sm border border-orange-100 relative overflow-hidden">
+                <div className="flex flex-col items-center justify-center px-8 py-10 gap-5 mb-8 bg-gradient-to-r from-[#F7942E]/20 to-amber-50 rounded-xl shadow-sm border border-orange-100  overflow-hidden">
                   {/* Decorative bubbles */}
                   <div className="absolute top-6 left-8 w-16 h-16 rounded-full bg-[#F7942E]/10 animate-float"></div>
                   <div className="absolute bottom-8 right-10 w-12 h-12 rounded-full bg-[#F7942E]/15 animate-float-delayed"></div>
@@ -2694,7 +2694,7 @@ export default function Dashboard() {
                   <div className="absolute top-1/2 left-1/3 w-5 h-5 rounded-full bg-[#F7942E]/20 animate-float"></div>
                   <div className="absolute top-1/4 right-1/4 w-7 h-7 rounded-full bg-[#F7942E]/10 animate-float-delayed"></div>
 
-                  <div className="relative z-10">
+                  <div className="">
                     <Image
                       src="/compteur/compteurgif.gif"
                       alt="Aucun compteur sélectionné"
@@ -2704,7 +2704,7 @@ export default function Dashboard() {
                     />
                   </div>
 
-                  <div className="relative z-10 backdrop-blur-sm bg-white/30 px-6 py-5 rounded-xl">
+                  <div className="backdrop-blur-sm bg-white/30 px-6 py-5 rounded-xl">
                     <div className="text-center">
                       <h3 className="text-xl font-bold text-gray-800 mb-3">Aucun compteur sélectionné</h3>
                       <p className="text-gray-600">

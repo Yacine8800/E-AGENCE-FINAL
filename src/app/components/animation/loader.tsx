@@ -5,6 +5,18 @@ interface LoaderProps {
 }
 
 export default function Loader({ context }: LoaderProps) {
+  // Déterminer le texte à afficher en fonction du contexte
+  const getContextText = () => {
+    switch (context) {
+      case "logout":
+        return "Déconnexion";
+      case "login":
+        return "Connexion";
+      default:
+        return "Chargement";
+    }
+  };
+
   return (
     <>
       {/* Styles pour les animations personnalisées */}
@@ -52,7 +64,10 @@ export default function Loader({ context }: LoaderProps) {
           animation: blink 1s ease-in-out infinite;
         }
       `}</style>
-      <div className="fixed inset-0 bg-white flex flex-col items-center justify-center z-[9999999]">
+      {/* Premier div pour le fond opaque */}
+      <div className="fixed inset-0 bg-white z-[9999999]"></div>
+      {/* Deuxième div pour le contenu du loader */}
+      <div className="fixed inset-0 flex flex-col items-center justify-center z-[99999999]">
         {/* Container principal */}
         <div className="relative w-full max-w-md px-6 py-10">
           {/* Animations d'électricité moderne */}
@@ -103,7 +118,7 @@ export default function Loader({ context }: LoaderProps) {
           {/* Texte moderne */}
           <div className="text-center">
             <h3 className="text-[#1F2937] text-xl font-bold mb-2">
-              {context === "logout" ? "Déconnexion" : "Connexion"} en cours
+              {getContextText()}
               <span className="inline-block w-1 h-1 bg-vert rounded-full ml-1 animate-blink"></span>
               <span
                 className="inline-block w-1 h-1 bg-vert rounded-full ml-1 animate-blink"
