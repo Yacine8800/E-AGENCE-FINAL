@@ -560,7 +560,7 @@ export default function SimulatorPage({
                             />
                           </div>
                           <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Puissance (Watts)</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Puissance (kWh)</label>
                             <input
                               type="number"
                               value={newEquipementPower}
@@ -724,13 +724,13 @@ export default function SimulatorPage({
                   <div className="grid grid-cols-2 gap-8 mb-6">
                     <div className="flex flex-col justify-center items-center">
                       <div className="text-5xl font-bold text-orange mb-1">{getTotalPuissance()}</div>
-                      <div className="text-lg text-gray-600">Watts</div>
+                      <div className="text-lg text-gray-600">Kwh</div>
                     </div>
                     <div className="flex flex-col justify-center items-center">
                       <div className="text-5xl font-bold text-orange mb-1">
-                        {calculateAmperage(getTotalPuissance()).toFixed(1)}
+                        {calculateAmperage(getTotalPuissance()).toFixed(0)}
                       </div>
-                      <div className="text-lg text-gray-600">Ampères</div>
+                      <div className="text-lg text-gray-600">A</div>
                     </div>
                   </div>
 
