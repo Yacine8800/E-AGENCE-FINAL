@@ -334,8 +334,8 @@ export default function SimulateurFacturePage() {
                           Facture d'électricité
                         </h3>
                         <div className="text-sm text-gray-500 flex flex-col items-end">
-                          <div>N° Facture: F2341002-2023/05</div>
-                          <div>Contrat: DOM - {formData.code}</div>
+                          <div>N° Facture: 04/2024</div>
+                          <div>Période: 04/02/2024 - 04/04/2024</div>
                         </div>
                       </div>
                     </div>
@@ -345,17 +345,14 @@ export default function SimulateurFacturePage() {
                       <div className="flex justify-between items-start mb-6">
                         <div>
                           <div className="text-gray-600 text-sm">Client:</div>
-                          <div className="font-medium">YORO CHRISTIAN</div>
-                          <div className="text-sm text-gray-500">Compte n° 1234789-01</div>
-                          <div className="text-sm text-gray-500">N° Compteur: 08020129</div>
+                          <div className="font-medium">{formData.code === "5A – Tarif social" ? "Client Tarif Social" : formData.code === "6A – Tarif résidentiel" ? "Client Résidentiel" : "Client Professionnel"}</div>
+                          <div className="text-sm text-gray-500">N° Compteur: {Math.floor(10000000 + Math.random() * 90000000)}</div>
+                          <div className="text-sm text-gray-500">Type: {formData.exploit}</div>
                         </div>
                         <div className="text-right">
-                          <div className="text-gray-600 text-sm">Période facturée:</div>
-                          <div className="font-medium">
-                            {new Date(formData.start).toLocaleDateString("fr-FR")} - {new Date(formData.end).toLocaleDateString("fr-FR")}
-                          </div>
-                          <div className="text-sm text-gray-500">Facture émise le {new Date().toLocaleDateString("fr-FR")}</div>
-                          <div className="text-sm text-gray-500">Consommation moyenne: 11,6 kWh/jour</div>
+                          <div className="text-gray-600 text-sm">Branchement:</div>
+                          <div className="font-medium">{formData.branch} - {formData.power}</div>
+                          <div className="text-sm text-gray-500">Tarif: {formData.code}</div>
                         </div>
                       </div>
 
@@ -365,86 +362,119 @@ export default function SimulateurFacturePage() {
                           <thead className="bg-gray-50 text-xs uppercase text-gray-600">
                             <tr>
                               <th className="px-4 py-2 border-b text-left">Description</th>
-                              <th className="px-4 py-2 border-b text-right">Quantité</th>
-                              <th className="px-4 py-2 border-b text-right">Prix unitaire</th>
-                              <th className="px-4 py-2 border-b text-right">Montant</th>
+                              <th className="px-4 py-2 border-b text-right">Consommation (kWh)</th>
+                              <th className="px-4 py-2 border-b text-right">Prix unitaire HT</th>
+                              <th className="px-4 py-2 border-b text-right">Montant (FCFA)</th>
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-gray-100">
                             <tr>
-                              <td className="px-4 py-3 text-sm">Abonnement ({formData.power})</td>
-                              <td className="px-4 py-3 text-sm text-right">1</td>
-                              <td className="px-4 py-3 text-sm text-right">1 325 FCFA</td>
-                              <td className="px-4 py-3 text-sm text-right">1 325 FCFA</td>
+                              <td className="px-4 py-3 text-sm">Tranche 1</td>
+                              <td className="px-4 py-3 text-sm text-right">584</td>
+                              <td className="px-4 py-3 text-sm text-right">81 FCFA</td>
+                              <td className="px-4 py-3 text-sm text-right">47 320 FCFA</td>
                             </tr>
                             <tr>
-                              <td className="px-4 py-3 text-sm">Consommation d'énergie</td>
-                              <td className="px-4 py-3 text-sm text-right">347 kWh</td>
-                              <td className="px-4 py-3 text-sm text-right">65 FCFA</td>
-                              <td className="px-4 py-3 text-sm text-right">22 555 FCFA</td>
+                              <td className="px-4 py-3 text-sm">Tranche 2</td>
+                              <td className="px-4 py-3 text-sm text-right">144</td>
+                              <td className="px-4 py-3 text-sm text-right">70 FCFA</td>
+                              <td className="px-4 py-3 text-sm text-right">10 110 FCFA</td>
                             </tr>
                             <tr>
-                              <td className="px-4 py-3 text-sm">Redevance RTI</td>
-                              <td className="px-4 py-3 text-sm text-right">1</td>
-                              <td className="px-4 py-3 text-sm text-right">1 000 FCFA</td>
-                              <td className="px-4 py-3 text-sm text-right">1 000 FCFA</td>
+                              <td className="px-4 py-3 text-sm">Prime Fixe</td>
+                              <td className="px-4 py-3 text-sm text-right">-</td>
+                              <td className="px-4 py-3 text-sm text-right">-</td>
+                              <td className="px-4 py-3 text-sm text-right">4 895 FCFA</td>
                             </tr>
                             <tr>
-                              <td className="px-4 py-3 text-sm">Taxe SDTC</td>
-                              <td className="px-4 py-3 text-sm text-right">1</td>
-                              <td className="px-4 py-3 text-sm text-right">3 FCFA</td>
-                              <td className="px-4 py-3 text-sm text-right">1 041 FCFA</td>
+                              <td className="px-4 py-3 text-sm">TVA (18%)</td>
+                              <td className="px-4 py-3 text-sm text-right">-</td>
+                              <td className="px-4 py-3 text-sm text-right">-</td>
+                              <td className="px-4 py-3 text-sm text-right">11 220 FCFA</td>
                             </tr>
-                            <tr className="bg-gray-50">
-                              <td colSpan={3} className="px-4 py-3 text-sm font-medium text-right">Total HT</td>
-                              <td className="px-4 py-3 text-sm text-right font-medium">25 921 FCFA</td>
-                            </tr>
-                            <tr>
-                              <td colSpan={3} className="px-4 py-3 text-sm text-right">TVA (18%)</td>
-                              <td className="px-4 py-3 text-sm text-right">4 666 FCFA</td>
-                            </tr>
-                            <tr className="bg-orange/5">
-                              <td colSpan={3} className="px-4 py-3 font-semibold text-right">Total TTC</td>
-                              <td className="px-4 py-3 font-semibold text-right text-orange">30 587 FCFA</td>
+                            <tr className="bg-orange/5 font-medium">
+                              <td colSpan={3} className="px-4 py-3 text-sm text-right">Total Facture Energie de la période TTC</td>
+                              <td className="px-4 py-3 text-sm text-right">73 545 FCFA</td>
                             </tr>
                           </tbody>
                         </table>
                       </div>
 
+                      {/* Taxes et Redevances */}
+                      <div className="border rounded-lg overflow-hidden mb-6">
+                        <div className="bg-gray-50 px-4 py-2 border-b">
+                          <h4 className="text-xs uppercase font-medium text-gray-600">Taxes et Redevances</h4>
+                        </div>
+                        <table className="w-full">
+                          <tbody className="divide-y divide-gray-100">
+                            <tr>
+                              <td className="px-4 py-3 text-sm">Redevance Electrification Rurale</td>
+                              <td className="px-4 py-3 text-sm text-right">955 FCFA</td>
+                            </tr>
+                            <tr>
+                              <td className="px-4 py-3 text-sm">Taxes rémunératoire pour l'Enlèvement des Ordures Ménagères</td>
+                              <td className="px-4 py-3 text-sm text-right">2 020 FCFA</td>
+                            </tr>
+                            <tr>
+                              <td className="px-4 py-3 text-sm">Redevance RTI</td>
+                              <td className="px-4 py-3 text-sm text-right">2 000 FCFA</td>
+                            </tr>
+                            <tr>
+                              <td className="px-4 py-3 text-sm">Frais de timbre (Si règlement en espèces)</td>
+                              <td className="px-4 py-3 text-sm text-right">100 FCFA</td>
+                            </tr>
+                            <tr className="bg-gray-50 font-medium">
+                              <td className="px-4 py-3 text-sm text-right">Total Taxes et Redevances</td>
+                              <td className="px-4 py-3 text-sm text-right">5 075 FCFA</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+
+                      {/* Total Facture */}
+                      <div className="bg-orange/10 p-4 rounded-lg mb-6 border border-orange/20">
+                        <div className="flex justify-between items-center">
+                          <h4 className="font-semibold text-gray-800">Total Facture 04/2024</h4>
+                          <span className="font-bold text-xl text-orange">78 235 FCFA</span>
+                        </div>
+                        <p className="text-sm text-gray-600 mt-2">
+                          Passée la date limite de paiement, il sera perçu 10% du solde dû de cette facture
+                        </p>
+                      </div>
+
                       {/* Informations sur la consommation */}
                       <div className="bg-gray-50 p-4 rounded-lg mb-6">
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                          <div className="flex flex-col items-center">
+                            <div className="text-sm text-gray-600 mb-1">Période facturée</div>
+                            <div className="text-md font-medium">04/02/2024 - 04/04/2024</div>
+                          </div>
                           <div className="flex flex-col items-center">
                             <div className="text-sm text-gray-600 mb-1">Index ancien</div>
-                            <div className="text-xl font-bold text-gray-800">8721</div>
+                            <div className="text-xl font-bold text-gray-800">17245</div>
                           </div>
                           <div className="flex flex-col items-center">
                             <div className="text-sm text-gray-600 mb-1">Index nouveau</div>
-                            <div className="text-xl font-bold text-gray-800">9068</div>
+                            <div className="text-xl font-bold text-gray-800">17973</div>
                           </div>
                           <div className="flex flex-col items-center">
-                            <div className="text-sm text-gray-600 mb-1">Consommation</div>
-                            <div className="text-xl font-bold text-orange">347 kWh</div>
+                            <div className="text-sm text-gray-600 mb-1">Consommation totale</div>
+                            <div className="text-xl font-bold text-orange">728 kWh</div>
                           </div>
                         </div>
                       </div>
 
                       {/* Informations de paiement */}
                       <div className="bg-white border border-gray-100 rounded-lg p-4 mb-6">
-                        <h4 className="text-sm font-medium text-gray-700 mb-3">Dates importantes</h4>
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
-                          <div>
-                            <div className="text-gray-500">Date limite de paiement</div>
-                            <div className="font-medium">06/06/2023</div>
-                          </div>
-                          <div>
-                            <div className="text-gray-500">Date prochaine facture</div>
-                            <div className="font-medium">07/06/2023</div>
-                          </div>
-                          <div>
-                            <div className="text-gray-500">Prochaine relève compteur</div>
-                            <div className="font-medium">05/06/2023</div>
-                          </div>
+                        <h4 className="text-sm font-medium text-gray-700 mb-3">Information importante</h4>
+                        <div className="text-sm text-red-600 font-medium mb-2">
+                          Passée la date limite de paiement, il sera perçu 10% du solde dû de cette facture
+                        </div>
+                        <div className="flex items-center mt-2">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-orange mr-2" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                          </svg>
+                          <span className="text-sm text-gray-600">Pour toute réclamation, veuillez contacter notre service client au 179</span>
                         </div>
                       </div>
 
