@@ -695,13 +695,13 @@ export default function SimulatorPage({
       <AnimatePresence>
         {showResultModal && (
           <motion.div
-            className="fixed inset-0 z-50 flex items-start justify-center pt-24 bg-black/60 overflow-y-auto"
+            className="fixed inset-0 z-[10000] flex items-start justify-center pt-32 bg-black/60 overflow-y-auto"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
             <motion.div
-              className="bg-white rounded-3xl w-full max-w-2xl shadow-xl mb-20"
+              className="bg-white rounded-3xl w-full max-w-2xl shadow-xl mb-20 mt-10"
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: 20, opacity: 0 }}
@@ -720,42 +720,80 @@ export default function SimulatorPage({
                   </button>
                 </div>
 
-                <div className="bg-gradient-to-br from-orange/10 to-orange/5 rounded-2xl p-6 mb-8">
+                <div className="bg-gradient-to-br from-orange/10 to-orange/5 rounded-2xl p-6 mb-8 shadow-md transform transition-all duration-300 hover:shadow-lg hover:scale-[1.01]">
                   <div className="grid grid-cols-2 gap-8 mb-6">
-                    <div className="flex flex-col justify-center items-center">
-                      <div className="text-5xl font-bold text-orange mb-1">{getTotalPuissance()}</div>
-                      <div className="text-lg text-gray-600">Kwh</div>
-                    </div>
-                    <div className="flex flex-col justify-center items-center">
-                      <div className="text-5xl font-bold text-orange mb-1">
-                        {calculateAmperage(getTotalPuissance()).toFixed(0)}
+                    <div className="flex flex-col justify-center items-center bg-white/50 backdrop-blur-sm rounded-xl p-4 shadow-sm transition-transform duration-300 hover:shadow-md hover:translate-y-[-2px]">
+                      <p className="text-gray-500 mb-1 text-sm font-medium">PUISSANCE TOTALE</p>
+                      <div className="flex items-baseline">
+                        <span className="text-5xl font-bold text-orange mb-1">{getTotalPuissance()}</span>
+                        <span className="text-xl text-orange ml-2">kWh</span>
                       </div>
-                      <div className="text-lg text-gray-600">A</div>
+                    </div>
+                    <div className="flex flex-col justify-center items-center bg-white/50 backdrop-blur-sm rounded-xl p-4 shadow-sm transition-transform duration-300 hover:shadow-md hover:translate-y-[-2px]">
+                      <p className="text-gray-500 mb-1 text-sm font-medium">AMPÉRAGE REQUIS</p>
+                      <div className="flex items-baseline">
+                        <span className="text-5xl font-bold text-orange mb-1">
+                          {calculateAmperage(getTotalPuissance()).toFixed(0)}
+                        </span>
+                        <span className="text-xl text-orange ml-2">A</span>
+                      </div>
                     </div>
                   </div>
 
-                  <div className="bg-white rounded-xl p-4">
-                    <h3 className="font-medium text-gray-800 mb-2">Recommandation:</h3>
-                    <p className="text-gray-700">
-                      {calculateAmperage(getTotalPuissance()) <= 16
-                        ? "Votre installation est compatible avec un abonnement standard de 16A."
-                        : calculateAmperage(getTotalPuissance()) <= 32
-                          ? "Nous vous recommandons un abonnement renforcé de 32A pour votre installation."
-                          : "Votre installation nécessite un contrat professionnel ou triphasé. Contactez un le service client."
-                      }
+                  <div className="bg-white rounded-xl p-5 shadow-sm border border-orange/10">
+                    <h3 className="font-semibold text-gray-800 mb-3 flex items-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-orange mr-2" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                      </svg>
+                      Informations CIE:
+                    </h3>
+                    <p className="text-gray-700 pl-7 border-l-2 border-orange/30">
+                      Ces valeurs représentent la consommation totale lorsque tous les appareils sélectionnés fonctionnent en même temps.
+                      Les puissances indiquées sont celles conseillées par la CIE pour les appareils sélectionnés.
                     </p>
+                    <div className="mt-4 bg-gradient-to-r from-orange/5 to-orange/10 p-4 rounded-lg">
+                      <p className="text-gray-700 font-medium">
+                        {calculateAmperage(getTotalPuissance()) <= 16
+                          ? (
+                            <span className="flex items-center">
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                              </svg>
+                              Votre installation est compatible avec un abonnement standard de 16A.
+                            </span>
+                          )
+                          : calculateAmperage(getTotalPuissance()) <= 32
+                            ? (
+                              <span className="flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-yellow-500 mr-2 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                                  <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                                </svg>
+                                Nous vous recommandons un abonnement renforcé de 32A pour votre installation.
+                              </span>
+                            )
+                            : (
+                              <span className="flex items-center"></span>
+                            )
+                        }
+                      </p>
+                    </div>
                   </div>
                 </div>
 
                 <div className="space-y-4">
-                  <h3 className="font-medium text-gray-800">Équipements sélectionnés:</h3>
-                  <div className="max-h-60 overflow-y-auto pr-2">
+                  <h3 className="font-medium text-gray-800 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-orange mr-2" viewBox="0 0 20 20" fill="currentColor">
+                      <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                    </svg>
+                    Équipements sélectionnés:
+                  </h3>
+                  <div className="max-h-60 overflow-y-auto pr-2 rounded-xl border border-gray-100 shadow-sm bg-white/70 backdrop-blur-sm">
                     <table className="w-full">
-                      <thead className="text-left bg-gray-50">
+                      <thead className="text-left sticky top-0 bg-gray-50 border-b border-gray-100 shadow-sm">
                         <tr>
-                          <th className="py-2 px-4 text-sm font-medium text-gray-600">Équipement</th>
-                          <th className="py-2 px-4 text-sm font-medium text-gray-600">Quantité</th>
-                          <th className="py-2 px-4 text-sm font-medium text-gray-600">Puissance</th>
+                          <th className="py-3 px-4 text-sm font-medium text-gray-600">Équipement</th>
+                          <th className="py-3 px-4 text-sm font-medium text-gray-600">Quantité</th>
+                          <th className="py-3 px-4 text-sm font-medium text-gray-600">Puissance</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-100">
@@ -764,12 +802,12 @@ export default function SimulatorPage({
                           const equipement = category?.equipements.find(e => e.id === eq.id);
 
                           return (
-                            <tr key={eq.id} className="hover:bg-gray-50">
-                              <td className="py-2 px-4 text-sm font-medium">
+                            <tr key={eq.id} className="hover:bg-orange/5 transition-colors duration-150">
+                              <td className="py-3 px-4 text-sm font-medium">
                                 {equipement ? equipement.label : eq.label || "Équipement personnalisé"}
                               </td>
-                              <td className="py-2 px-4 text-sm">{eq.quantity}</td>
-                              <td className="py-2 px-4 text-sm">{eq.puissance * eq.quantity} W</td>
+                              <td className="py-3 px-4 text-sm">{eq.quantity}</td>
+                              <td className="py-3 px-4 text-sm font-medium text-orange">{eq.puissance * eq.quantity} W</td>
                             </tr>
                           );
                         })}
@@ -780,9 +818,10 @@ export default function SimulatorPage({
 
                 <div className="mt-8 flex justify-end">
                   <button
-                    className="py-3 px-8 bg-orange text-white rounded-full font-medium hover:bg-orange/90 transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center gap-2 transform hover:translate-y-[-1px] focus:outline-none focus:ring-2 focus:ring-orange/50"
+                    className="py-3 px-8 bg-orange text-white rounded-full font-medium hover:bg-orange/90 transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center gap-2 transform hover:translate-y-[-1px] focus:outline-none focus:ring-2 focus:ring-orange/50 relative overflow-hidden group"
                     onClick={() => setShowResultModal(false)}
                   >
+                    <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-white/0 via-white/20 to-white/0 transform -translate-x-full group-hover:animate-shimmer"></span>
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                       <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
                     </svg>
