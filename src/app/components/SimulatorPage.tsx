@@ -741,7 +741,7 @@ export default function SimulatorPage({
                         ? "Votre installation est compatible avec un abonnement standard de 16A."
                         : calculateAmperage(getTotalPuissance()) <= 32
                           ? "Nous vous recommandons un abonnement renforcé de 32A pour votre installation."
-                          : "Votre installation nécessite un contrat professionnel ou triphasé. Contactez un électricien."
+                          : "Votre installation nécessite un contrat professionnel ou triphasé. Contactez un le service client."
                       }
                     </p>
                   </div>
