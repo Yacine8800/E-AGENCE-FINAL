@@ -50,7 +50,7 @@ const Login = () => {
       }
 
       // Sinon, en demander un nouveau
-      const response = await fetch(`${API_URL}v3/user/get-token`, {
+      const response = await fetch(`${API_URL}/v3/user/get-token`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
