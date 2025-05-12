@@ -280,7 +280,7 @@ export default function RootLayout({
 
   return (
     <html lang="fr">
-       <head>
+      <head>
         <Script id="auth-check" strategy="beforeInteractive">
           {`
             // Intercepter les requêtes fetch pour ajouter l'en-tête d'authentification
@@ -339,18 +339,6 @@ new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
 j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
 })(window,document,'script','dataLayer','GTM-WSGT5KVL');`}
-        </Script>
-        <Script
-          src="https://www.googletagmanager.com/gtag/js?id=G-M9KJ90D8Y2"
-          strategy="afterInteractive"
-        />
-        <Script id="ga4-init" strategy="afterInteractive">
-          {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', 'G-M9KJ90D8Y2');
-          `}
         </Script>
       </head>
       <body className={montserrat.className}>
