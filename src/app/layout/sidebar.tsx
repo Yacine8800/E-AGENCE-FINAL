@@ -161,49 +161,6 @@ const Sidebar = () => {
         </div>
       </div>
 
-      {/* Modal de confirmation de déconnexion */}
-      {/* {showLogoutConfirm && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[10000]">
-          <div className="bg-white rounded-2xl p-6 max-w-xs w-full mx-4 relative overflow-hidden">
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-500 to-yellow-500"></div>
-            <div className="flex justify-center mb-4">
-              <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
-                <LogoutIcon className="w-6 h-6" color="#EC4F48" />
-              </div>
-            </div>
-            <h3 className="text-lg font-bold text-center mb-2">
-              Confirmer la déconnexion
-            </h3>
-            <p className="text-sm text-gray-600 text-center mb-6">
-              Êtes-vous sûr de vouloir vous déconnecter de votre compte ?
-            </p>
-            <div className="flex gap-3">
-              <button
-                onClick={() => setShowLogoutConfirm(false)}
-                className="flex-1 py-2 px-4 border border-gray-300 rounded-xl text-sm font-medium"
-              >
-                Annuler
-              </button>
-              <button
-                onClick={async () => {
-                  setShowLogoutConfirm(false);
-                  setIsLoading(true);
-                  try {
-                    await handleLogout();
-                  } catch (error) {
-                    console.error("Erreur lors de la déconnexion:", error);
-                    window.location.href = "/";
-                  }
-                }}
-                className="flex-1 py-2 px-4 bg-rouge text-white rounded-xl text-sm font-medium"
-              >
-                Confirmer
-              </button>
-            </div>
-          </div>
-        </div>
-      )} */}
-
       {/* Overlay (mobile) */}
       {isMobile && isOpen && (
         <div
