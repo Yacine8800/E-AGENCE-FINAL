@@ -2089,7 +2089,7 @@ export default function Dashboard() {
           </header>
 
           <main className="sm:px-5 pt-4 sm:pt-6 pr-2 sm:pr-3 lg:pr-6 overflow-hidden max-w-[2280px] mx-auto">
-            <div className="h-[calc(100vh-80px)] overflow-y-auto pb-6 pr-1 custom-scrollbar">
+            <div className="h-[calc(100vh-80px)] overflow-y-auto pb-6 px-4 sm:px-6 pr-1 scrollbar-hide">
               {/* Bloc de bienvenue */}
               <div className="mb-6 sm:mb-8 to-transparent py-4 rounded-xl">
                 <h1 className="text-2xl sm:text-2xl md:text-3xl font-bold">
@@ -2108,8 +2108,8 @@ export default function Dashboard() {
               </div>
 
               {/* Section compteurs prépayés / postpayés + cartes */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 pb-10 items-start">
-                <div className="h-[201px]">
+              <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-4 gap-4 pb-10 items-start max-w-[1625px] mx-auto">
+                <div className="h-[201px] min-w-0 w-full">
                   <MeterSection
                     title="Mes postpayés"
                     iconFill="#EE761A"
@@ -2124,7 +2124,7 @@ export default function Dashboard() {
                   />
                 </div>
 
-                <div className="h-[201px]">
+                <div className="h-[201px] min-w-0 w-full">
                   <MeterSection
                     title="Mes prépayés"
                     iconFill="#1F7A70"
@@ -2139,7 +2139,7 @@ export default function Dashboard() {
                   />
                 </div>
 
-                <div className="h-[201px]">
+                <div className="h-[201px] min-w-0 w-full">
                   {/* Carte 1 : "Un service d'électricité à demander ?" */}
                   <div className="flex flex-col h-full">
                     <div className="flex items-center mb-3 h-[42px]">
@@ -2187,7 +2187,7 @@ export default function Dashboard() {
                   </div>
                 </div>
 
-                <div className="h-[201px]">
+                <div className="h-[201px] min-w-0 w-full">
                   {/* Carte 2 : "Un problème rencontrée ?" */}
                   <div className="flex flex-col h-full">
                     <div className="flex items-center mb-3 h-[42px]">
@@ -2264,12 +2264,12 @@ export default function Dashboard() {
                         : ""}
                     </span>
                   </h1>
-                  <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-4 rounded-xl transition-all duration-300 overflow-hidden max-w-full">
+                  <div className="w-full grid grid-cols-1 2xl:grid-cols-12 gap-4 rounded-xl transition-all duration-300 overflow-hidden max-w-[1500px] mx-auto">
                     {/* Solde à régler - Ne s'affiche que lorsque les deux requêtes sont terminées */}
                     {itemDetails &&
                       !isLoadingDetails &&
                       (!isLoadingInvoice) ? (
-                      <div className="lg:col-span-5 dashboard-card max-w-full">
+                      <div className="2xl:col-span-5 dashboard-card max-w-full min-w-0 w-full">
                         <div className="dashboard-header">
                           <p className="text-base font-semibold text-gray-800 ml-4 mt-2">
                             Solde à régler
@@ -2533,7 +2533,7 @@ export default function Dashboard() {
                         </div>
                       </div>
                     ) : isLoadingDetails || isLoadingInvoice ? (
-                      <div className="lg:col-span-5 dashboard-card p-8 flex justify-center items-center">
+                      <div className="2xl:col-span-5 dashboard-card p-8 flex justify-center items-center">
                         <div className="flex flex-col items-center">
                           <div className="w-10 h-10 border-t-4 border-orange-500 rounded-full animate-spin mb-4"></div>
                           <p className="text-gray-600">
@@ -2544,7 +2544,7 @@ export default function Dashboard() {
                     ) : null}
 
                     {/* Conteneur pour les composants de droite */}
-                    <div className="lg:col-span-7 relative overflow-hidden max-w-full">
+                    <div className="2xl:col-span-7 relative overflow-hidden max-w-full min-w-0 w-full">
                       <div className="relative">
                         {/* Blur overlay */}
                         {itemDetails &&
@@ -2924,7 +2924,7 @@ export default function Dashboard() {
 
       {/* Modal "En cours de développement" pour les réclamations */}
       {isReclModalOpen && (
-        <div className="fixed inset-0 z-50 flex justify-end">
+        <div className="fixed inset-0 z-[9999] flex justify-end">
           {/* BACKDROP */}
           <div
             className="absolute inset-0 bg-black/60 backdrop-blur-md transition-opacity duration-300 animate-fadeIn"
