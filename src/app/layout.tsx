@@ -1,12 +1,10 @@
 "use client";
 
-import "./globals.css";
-import { Montserrat } from "next/font/google";
-import Header from "./components/Header";
+import { API_EAGENCE } from "@/config/constants";
 import { ReduxProvider } from "@/src/store/provider";
-import Footer from "./components/Footer";
-import FloatingBot from "./components/FloatingBot";
-import FlashInfos from "./components/FlashInfos";
+import { Montserrat } from "next/font/google";
+import { usePathname, useRouter } from "next/navigation";
+import Script from "next/script";
 import { useEffect, useState } from "react";
 import {
   listenForMessages,
@@ -14,9 +12,11 @@ import {
   simulateNotification,
 } from "../firebase/config";
 import DesktopEffects from "./components/DesktopEffects";
-import { API_EAGENCE, API_EAGENCE_JOEL, API_BOT_CIE } from "@/config/constants";
-import { usePathname, useRouter } from "next/navigation";
-import Script from "next/script";
+import FlashInfos from "./components/FlashInfos";
+import FloatingBot from "./components/FloatingBot";
+import Footer from "./components/Footer";
+import Header from "./components/Header";
+import "./globals.css";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -28,11 +28,11 @@ const montserrat = Montserrat({
 //   description: "Votre agence digitale de confiance",
 // };
 
-import { toast, ToastContainer } from "react-toastify";
-import EnergyScrollbar from "./components/EnergyScrollbar";
-import ElectricityEffect from "./components/ElectricityEffect";
-import { useResponsive } from "../hooks/useResponsive";
+import { ToastContainer } from "react-toastify";
 import { useAuth } from "../hooks/useAuth";
+import { useResponsive } from "../hooks/useResponsive";
+import ElectricityEffect from "./components/ElectricityEffect";
+import EnergyScrollbar from "./components/EnergyScrollbar";
 
 // Composant enfant qui s'occupe de la protection des routes
 // Il utilisera useAuth à l'intérieur du ReduxProvider
@@ -42,38 +42,42 @@ const RouteGuard = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated } = useAuth();
 
   // Liste des routes protégées qui nécessitent une authentification
-  const protectedRoutes = [
-    '/dashboard',
-  ];
+  const protectedRoutes = ["/dashboard"];
 
   // Liste des routes d'authentification (réservées aux utilisateurs non connectés)
   const authRoutes = [
-    '/login',
-    '/register-stepper',
-    '/verify',
-    '/recuperation',
-    '/defineCode',
-    '/code',
-    '/OTP',
-    '/recupOTP',
-    '/recupQuestion',
+    "/login",
+    "/register-stepper",
+    "/verify",
+    "/recuperation",
+    "/defineCode",
+    "/code",
+    "/OTP",
+    "/recupOTP",
+    "/recupQuestion",
   ];
 
   // Protection des routes côté client
   useEffect(() => {
     // Si l'utilisateur tente d'accéder à une route protégée sans être authentifié
-    if (!isAuthenticated && protectedRoutes.some(route =>
-      pathname === route || pathname.startsWith(`${route}/`)
-    )) {
-      router.push('/login');
+    if (
+      !isAuthenticated &&
+      protectedRoutes.some(
+        (route) => pathname === route || pathname.startsWith(`${route}/`)
+      )
+    ) {
+      router.push("/login");
       return;
     }
 
     // Si l'utilisateur est authentifié et tente d'accéder à une route d'authentification
-    if (isAuthenticated && authRoutes.some(route =>
-      pathname === route || pathname.startsWith(`${route}/`)
-    )) {
-      router.push('/');
+    if (
+      isAuthenticated &&
+      authRoutes.some(
+        (route) => pathname === route || pathname.startsWith(`${route}/`)
+      )
+    ) {
+      router.push("/");
       return;
     }
   }, [pathname, isAuthenticated, router, protectedRoutes, authRoutes]);
@@ -85,44 +89,55 @@ const RouteGuard = ({ children }: { children: React.ReactNode }) => {
       const currentPath = window.location.pathname;
 
       // Vérifier si l'URL actuelle est protégée et l'utilisateur n'est pas authentifié
-      if (!isAuthenticated && protectedRoutes.some(route =>
-        currentPath === route || currentPath.startsWith(`${route}/`)
-      )) {
-        router.push('/login');
+      if (
+        !isAuthenticated &&
+        protectedRoutes.some(
+          (route) =>
+            currentPath === route || currentPath.startsWith(`${route}/`)
+        )
+      ) {
+        router.push("/login");
         return;
       }
 
       // Vérifier si l'URL actuelle est réservée à l'authentification et l'utilisateur est authentifié
-      if (isAuthenticated && authRoutes.some(route =>
-        currentPath === route || currentPath.startsWith(`${route}/`)
-      )) {
-        router.push('/');
+      if (
+        isAuthenticated &&
+        authRoutes.some(
+          (route) =>
+            currentPath === route || currentPath.startsWith(`${route}/`)
+        )
+      ) {
+        router.push("/");
         return;
       }
     };
 
     // Écouter l'événement popstate (navigation avec les boutons back/forward du navigateur)
-    window.addEventListener('popstate', handleNavigation);
+    window.addEventListener("popstate", handleNavigation);
 
     // Écouter l'événement personnalisé pour les changements d'URL via pushState
-    window.addEventListener('urlChanged', handleNavigation);
+    window.addEventListener("urlChanged", handleNavigation);
 
     // Nettoyer les écouteurs d'événements
     return () => {
-      window.removeEventListener('popstate', handleNavigation);
-      window.removeEventListener('urlChanged', handleNavigation);
+      window.removeEventListener("popstate", handleNavigation);
+      window.removeEventListener("urlChanged", handleNavigation);
     };
   }, [isAuthenticated, router, protectedRoutes, authRoutes]);
 
   // Afficher le Header seulement pour certaines pages
-  const showHeader = !['/login', '/register-stepper', '/verify', '/dashboard'].includes(pathname);
-
-
+  const showHeader = ![
+    "/login",
+    "/register-stepper",
+    "/verify",
+    "/dashboard",
+  ].includes(pathname);
 
   return (
     <>
       {showHeader && <Header />}
-      <main className="">
+      <main className="mt-32">
         <div className="flex-1 overflow-x-hidden">
           <DesktopEffects />
           <ToastContainer />
@@ -320,15 +335,12 @@ export default function RootLayout({
       </head>
       <body className={montserrat.className}>
         <ReduxProvider>
-          <RouteGuard>
-            {children}
-          </RouteGuard>
+          <RouteGuard>{children}</RouteGuard>
         </ReduxProvider>
       </body>
     </html>
   );
 }
-
 
 function ResponsiveEffects() {
   const { isMobile } = useResponsive();
