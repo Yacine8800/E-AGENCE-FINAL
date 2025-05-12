@@ -10,6 +10,47 @@ import IconFacebook from "../components/icons/iconFacebook";
 import IconGoogle from "../components/icons/iconGoogle";
 import { AuthLayout } from "../authLayout";
 import Title from "../components/title";
+import Script from "next/script";
+import { API_GOOGLE_CLIENT_ID } from "@/config/constants";
+
+// Déclaration des types pour Facebook SDK
+declare global {
+  interface Window {
+    fbAsyncInit: () => void;
+    FB: {
+      init: (options: {
+        appId: string;
+        cookie: boolean;
+        xfbml: boolean;
+        version: string;
+      }) => void;
+      login: (
+        callback: (response: {
+          authResponse?: {
+            accessToken: string;
+            userID: string;
+            expiresIn: number;
+          };
+          status?: string;
+        }) => void,
+        options?: { scope: string }
+      ) => void;
+    };
+    google?: {
+      accounts: {
+        oauth2: {
+          initTokenClient: (config: {
+            client_id: string;
+            scope: string;
+            callback: (response: any) => void;
+          }) => {
+            requestAccessToken: () => void;
+          };
+        };
+      };
+    };
+  }
+}
 
 const Login = () => {
   const { isMobile } = useResponsive();
@@ -76,6 +117,118 @@ const Login = () => {
     } catch (error) {
       console.error("Erreur lors de l'obtention du token d'API:", error);
       throw error;
+    }
+  };
+
+  const handleSocialLogin = async (provider: 'google' | 'facebook', token: string) => {
+    try {
+      setIsLoading(true);
+      const apiToken = await getApiToken();
+
+      const response = await fetch(`${API_URL}/v3/user/client/login/${provider}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiToken}`,
+        },
+        body: JSON.stringify({ token }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.message === "Action éffectuée avec succès") {
+        // Store user info and redirect
+        storeLogin(data.data?.email || data.data?.phone);
+        router.push("/dashboard");
+      } else {
+        console.error(`Erreur de connexion ${provider}:`, data);
+        // Gérer l'erreur de connexion
+      }
+    } catch (error) {
+      console.error(`Erreur lors de la connexion ${provider}:`, error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Chargement des SDKs
+  useEffect(() => {
+    // Charger le SDK Google
+    const loadGoogleSDK = () => {
+      const script = document.createElement("script");
+      script.src = "https://accounts.google.com/gsi/client";
+      script.async = true;
+      script.defer = true;
+      document.body.appendChild(script);
+
+      return () => {
+        document.body.removeChild(script);
+      };
+    };
+
+    // Charger le SDK Facebook
+    const loadFacebookSDK = () => {
+      window.fbAsyncInit = function () {
+        window.FB.init({
+          appId: process.env.NEXT_PUBLIC_FACEBOOK_APP_ID as string,
+          cookie: true,
+          xfbml: true,
+          version: 'v18.0'
+        });
+      };
+
+      const script = document.createElement("script");
+      script.src = "https://connect.facebook.net/en_US/sdk.js";
+      script.async = true;
+      script.defer = true;
+      document.body.appendChild(script);
+
+      return () => {
+        document.body.removeChild(script);
+      };
+    };
+
+    const googleCleanup = loadGoogleSDK();
+    const facebookCleanup = loadFacebookSDK();
+
+    return () => {
+      googleCleanup();
+      facebookCleanup();
+    };
+  }, []);
+
+  // Fonctions pour initialiser les providers sociaux
+  const initGoogleLogin = () => {
+    // Vérifier si le SDK Google est chargé
+    if (typeof window !== 'undefined' && window.google) {
+      const client = window.google.accounts.oauth2.initTokenClient({
+        client_id: API_GOOGLE_CLIENT_ID,
+        scope: 'email profile',
+        callback: (tokenResponse: any) => {
+          if (tokenResponse && tokenResponse.access_token) {
+            handleSocialLogin('google', tokenResponse.access_token);
+          }
+        },
+      });
+
+      client.requestAccessToken();
+    } else {
+      console.error("Le SDK Google n'est pas chargé");
+    }
+  };
+
+  const initFacebookLogin = () => {
+    // Vérifier si le SDK Facebook est chargé
+    if (typeof window !== 'undefined' && window.FB) {
+      window.FB.login((response) => {
+        if (response.authResponse) {
+          handleSocialLogin('facebook', response.authResponse.accessToken);
+        } else {
+          console.log('Connexion Facebook annulée par l\'utilisateur');
+        }
+      }, { scope: 'email,public_profile' });
+    } else {
+      console.error("Le SDK Facebook n'est pas chargé");
     }
   };
 
@@ -201,17 +354,18 @@ const Login = () => {
 
             {/* Réseaux sociaux */}
             <div className="flex gap-5 items-center justify-center">
-              {[
-                { name: "Google", svg: <IconGoogle /> },
-                { name: "Facebook", svg: <IconFacebook /> },
-              ].map(({ name, svg }) => (
-                <button
-                  key={name}
-                  className="flex items-center justify-center rounded-lg py-3 px-7 bg-[#F5F5F5] hover:bg-gray-200"
-                >
-                  {svg}
-                </button>
-              ))}
+              <button
+                onClick={initGoogleLogin}
+                className="flex items-center justify-center rounded-lg py-3 px-7 bg-[#F5F5F5] hover:bg-gray-200"
+              >
+                <IconGoogle />
+              </button>
+              <button
+                onClick={initFacebookLogin}
+                className="flex items-center justify-center rounded-lg py-3 px-7 bg-[#F5F5F5] hover:bg-gray-200"
+              >
+                <IconFacebook />
+              </button>
             </div>
 
             {/* S'inscrire */}
