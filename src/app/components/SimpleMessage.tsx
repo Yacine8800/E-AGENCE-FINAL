@@ -1,11 +1,17 @@
 "use client";
 import { motion } from "framer-motion";
+import { useEffect } from "react";
 
 interface SimpleMessageProps {
   onClose: () => void;
 }
 
 export default function SimpleMessage({ onClose }: SimpleMessageProps) {
+  useEffect(() => {
+    const timer = setTimeout(onClose, 4000);
+    return () => clearTimeout(timer);
+  }, [onClose]);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}

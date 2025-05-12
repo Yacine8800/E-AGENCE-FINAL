@@ -37,11 +37,25 @@ const Page = () => {
     }
   }, []);
 
-  // Ajouter un chiffre au PIN et mélanger le clavier
+  // Fonction pour mélanger aléatoirement un tableau
+  const shuffleArray = (array: string[]) => {
+    const newArray = [...array];
+    for (let i = newArray.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+    }
+    return newArray;
+  };
+
+  // Mélanger les chiffres au chargement initial de la page
+  useEffect(() => {
+    setKeypadDigits(shuffleArray(keypadDigits));
+  }, []);
+
+  // Ajouter un chiffre au PIN
   const handleDigitClick = (digit: string) => {
     if (pin.length < PIN_LENGTH) {
       setPin([...pin, digit]);
-      // Mélanger les chiffres après chaque saisie
     }
   };
 
