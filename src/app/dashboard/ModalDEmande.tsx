@@ -205,7 +205,7 @@ const ModalDEmande = ({ onClose }: { onClose: () => void }) => {
 
       <div className="relative w-full md:w-[600px] bg-[#F8F9F9] h-full shadow-2xl overflow-auto flex flex-col rounded-l-2xl transition-all duration-500">
         {/* HEADER */}
-        <div className="flex items-center justify-between p-4 md:p-6 border-b">
+        <div className="flex items-center justify-between p-6 border-b">
           {selectedDemande === null ? (
             ""
           ) : (
@@ -240,8 +240,8 @@ const ModalDEmande = ({ onClose }: { onClose: () => void }) => {
           <h2 className="text-lg md:text-xl font-semibold text-gray-800 text-center flex-1">
             {selectedDemande
               ? typesDeDemandeParType[
-                  selectedTypeId! as keyof typeof typesDeDemandeParType
-                ]?.find((d) => d.id === selectedDemande)?.label
+                selectedTypeId! as keyof typeof typesDeDemandeParType
+              ]?.find((d) => d.id === selectedDemande)?.label
               : "Demandes"}
           </h2>
           {/* Bouton de fermeture */}
@@ -293,11 +293,10 @@ const ModalDEmande = ({ onClose }: { onClose: () => void }) => {
                   <button
                     key={type.id}
                     onClick={() => setSelectedTypeId(type.id)}
-                    className={`w-full md:flex-1 h-[50px] md:h-[70px] rounded-lg font-bold text-sm md:text-base transition-all duration-300 shadow-sm
-                      ${
-                        selectedTypeId === type.id
-                          ? "bg-red-500 text-white scale-105 shadow-md"
-                          : "bg-white text-gray-800 hover:bg-gray-200"
+                    className={`flex-1 h-[70px] rounded-lg font-bold text-base transition-all duration-300 shadow-sm
+                      ${selectedTypeId === type.id
+                        ? "bg-red-500 text-white scale-105 shadow-md"
+                        : "bg-white text-gray-800 hover:bg-gray-200"
                       }`}
                   >
                     {type.label}
@@ -312,7 +311,7 @@ const ModalDEmande = ({ onClose }: { onClose: () => void }) => {
                 <p className="font-semibold text-gray-800 text-sm md:text-base">
                   Choisissez le type de demande souhaité :
                 </p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6 w-full items-center">
+                <div className="grid grid-cols-2 gap-6 w-full items-center">
                   {typesDeDemandeParType[
                     selectedTypeId as keyof typeof typesDeDemandeParType
                   ]?.map((demande, index, array) => (
@@ -321,22 +320,19 @@ const ModalDEmande = ({ onClose }: { onClose: () => void }) => {
                       onClick={() =>
                         !demande.disabled && setSelectedDemande(demande.id)
                       }
-                      className={`bg-white h-[100px] md:h-[115px] rounded-xl shadow-md flex flex-col items-center justify-center p-4 md:p-5 gap-2 md:gap-3 
-          transition-all duration-300 hover:shadow-lg ${
-            !demande.disabled
-              ? "hover:scale-105"
-              : "cursor-not-allowed opacity-50"
-          }
-          ${
-            selectedDemande === demande.id
-              ? "border-2 border-red-500 scale-105"
-              : "border border-transparent"
-          }
-          ${
-            index === array.length - 1 && array.length % 2 !== 0
-              ? "sm:col-span-2 mx-auto"
-              : ""
-          }
+                      className={`bg-white h-[115px] rounded-xl shadow-md flex flex-col items-center justify-center p-5 gap-3 
+          transition-all duration-300 hover:shadow-lg ${!demande.disabled
+                          ? "hover:scale-105"
+                          : "cursor-not-allowed opacity-50"
+                        }
+          ${selectedDemande === demande.id
+                          ? "border-2 border-red-500 scale-105"
+                          : "border border-transparent"
+                        }
+          ${index === array.length - 1 && array.length % 2 !== 0
+                          ? "col-span-2 mx-auto"
+                          : ""
+                        }
         `}
                     >
                       <Image
@@ -344,14 +340,12 @@ const ModalDEmande = ({ onClose }: { onClose: () => void }) => {
                         alt={demande.label}
                         width={demande.width}
                         height={demande.height}
-                        className={`object-contain ${
-                          demande.disabled ? "opacity-60" : ""
-                        }`}
+                        className={`object-contain ${demande.disabled ? "opacity-60" : ""
+                          }`}
                       />
                       <span
-                        className={`font-medium text-center text-xs md:text-[14px] ${
-                          demande.disabled ? "text-gray-400" : "text-gray-700"
-                        }`}
+                        className={`font-medium text-center text-[14px] ${demande.disabled ? "text-gray-400" : "text-gray-700"
+                          }`}
                       >
                         {demande.label}
                         {demande.disabled && (
