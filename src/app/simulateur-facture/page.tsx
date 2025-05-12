@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import Image from "next/image";
 
 import { Toastify } from "@/utils/toast";
@@ -11,20 +11,31 @@ const TARIFF_CODES: string[] = [
   "15A – Professionnel",
 ];
 
+// Mapping des codes tarifs vers les usages prévus
+const TARIFF_TO_EXPLOIT = {
+  "5A – Tarif social": "Usage domestique",
+  "6A – Tarif résidentiel": "Usage domestique",
+  "15A – Professionnel": "Petite entreprise",
+};
+
 const BRANCH_TYPES: string[] = ["Monophasé", "Triphasé"];
 const POWERS: string[] = ["3 kVA", "6 kVA", "9 kVA", "12 kVA"];
 const EXPLOITS: string[] = ["Usage domestique", "Petite entreprise", "Autre"];
+const EXPLOIT_CODES: string[] = ["021", "022", "023", "051", "052", "053", "071", "072", "073"];
 
 interface StepOneState {
   code: string;
   branch: string;
   power: string;
   exploit: string;
+  exploitCode: string;
 }
 
 interface StepTwoState {
   start: string;
   end: string;
+  oldIndex: string;
+  newIndex: string;
 }
 
 interface ValidationErrors {
@@ -32,8 +43,11 @@ interface ValidationErrors {
   branch?: string;
   power?: string;
   exploit?: string;
+  exploitCode?: string;
   start?: string;
   end?: string;
+  oldIndex?: string;
+  newIndex?: string;
 }
 
 interface Duration {
@@ -122,7 +136,42 @@ const simulateurLabels = {
   "simulateur-facture": "Simulateur de facture"
 };
 
+/* Styles globaux à ajouter pour améliorer l'apparence des inputs date */
+const globalStyles = `
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    background-color: transparent;
+    padding-right: 4px;
+    position: absolute;
+    right: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    opacity: 0.7;
+  }
+  
+  input[type="date"] {
+    position: relative;
+  }
+  
+  input[type="date"]::-webkit-datetime-edit {
+    padding-right: 24px;
+  }
+`;
+
 export default function SimulateurFacturePage() {
+  // Ajouter les styles globaux au composant
+  useEffect(() => {
+    const styleElement = document.createElement('style');
+    styleElement.textContent = globalStyles;
+    document.head.appendChild(styleElement);
+
+    return () => {
+      document.head.removeChild(styleElement);
+    };
+  }, []);
+
   const [isSimulating, setIsSimulating] = useState(false);
   const [isSimulated, setIsSimulated] = useState(false);
   const [loadingStep, setLoadingStep] = useState(0);
@@ -141,8 +190,11 @@ export default function SimulateurFacturePage() {
           branch: "",
           power: "",
           exploit: "",
+          exploitCode: "",
           start: "",
           end: "",
+          oldIndex: "",
+          newIndex: "",
         };
     }
     return {
@@ -150,8 +202,11 @@ export default function SimulateurFacturePage() {
       branch: "",
       power: "",
       exploit: "",
+      exploitCode: "",
       start: "",
       end: "",
+      oldIndex: "",
+      newIndex: "",
     };
   });
 
@@ -169,8 +224,17 @@ export default function SimulateurFacturePage() {
     if (!formData.branch) errors.branch = "Le type de branchement est requis";
     if (!formData.power) errors.power = "La puissance est requise";
     if (!formData.exploit) errors.exploit = "Le type d'exploitation est requis";
+    if (!formData.exploitCode) errors.exploitCode = "Le code d'exploitation est requis";
     if (!formData.start) errors.start = "La date de début est requise";
     if (!formData.end) errors.end = "La date de fin est requise";
+    if (!formData.oldIndex) errors.oldIndex = "L'ancien index est requis";
+    if (!formData.newIndex) errors.newIndex = "Le nouvel index est requis";
+
+    // Check if newIndex is greater than oldIndex
+    if (formData.oldIndex && formData.newIndex && Number(formData.newIndex) <= Number(formData.oldIndex)) {
+      errors.newIndex = "Le nouvel index doit être supérieur à l'ancien index";
+    }
+
     if (formData.start && formData.end && formData.end < formData.start) {
       errors.end = "La date de fin doit être postérieure à la date de début";
     }
@@ -182,6 +246,21 @@ export default function SimulateurFacturePage() {
     (field: string, value: string) => {
       setFormData((prev) => {
         const updated = { ...prev, [field]: value };
+
+        // Si le code tarif change, mettre à jour automatiquement l'exploitation
+        if (field === "code") {
+          updated.exploit = TARIFF_TO_EXPLOIT[value as keyof typeof TARIFF_TO_EXPLOIT] || "";
+        }
+
+        // Si la date de début change, calculer automatiquement la date de fin (+ 2 mois)
+        if (field === "start" && value) {
+          const startDate = new Date(value);
+          const endDate = new Date(startDate);
+          endDate.setMonth(startDate.getMonth() + 2);
+          // Formater la date au format YYYY-MM-DD pour l'input date
+          updated.end = endDate.toISOString().split('T')[0];
+        }
+
         saveToLocalStorage(updated);
         return updated;
       });
@@ -216,8 +295,11 @@ export default function SimulateurFacturePage() {
       branch: "",
       power: "",
       exploit: "",
+      exploitCode: "",
       start: "",
       end: "",
+      oldIndex: "",
+      newIndex: "",
     });
     setIsSimulated(false);
     setValidationErrors({});
@@ -246,6 +328,8 @@ export default function SimulateurFacturePage() {
           {/* Contenu principal - Optimisé pour tenir sur une page */}
           <div className="px-6 py-6 sm:px-8 md:px-10">
             <div className="max-w-6xl mx-auto">
+
+
               {isSimulated ? (
                 // Récapitulatif centré
                 <div className="max-w-4xl mx-auto">
@@ -282,7 +366,7 @@ export default function SimulateurFacturePage() {
                         <div className="flex justify-between items-center">
                           <span className="text-gray-600">Exploitation :</span>
                           <span className="font-medium">
-                            {formData.exploit}
+                            {formData.exploit} ({formData.exploitCode})
                           </span>
                         </div>
                       </div>
@@ -447,19 +531,25 @@ export default function SimulateurFacturePage() {
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                           <div className="flex flex-col items-center">
                             <div className="text-sm text-gray-600 mb-1">Période facturée</div>
-                            <div className="text-md font-medium">04/02/2024 - 04/04/2024</div>
+                            <div className="text-md font-medium">
+                              {new Date(formData.start).toLocaleDateString("fr-FR")} - {new Date(formData.end).toLocaleDateString("fr-FR")}
+                            </div>
                           </div>
                           <div className="flex flex-col items-center">
                             <div className="text-sm text-gray-600 mb-1">Index ancien</div>
-                            <div className="text-xl font-bold text-gray-800">17245</div>
+                            <div className="text-xl font-bold text-gray-800">{formData.oldIndex || "-"}</div>
                           </div>
                           <div className="flex flex-col items-center">
                             <div className="text-sm text-gray-600 mb-1">Index nouveau</div>
-                            <div className="text-xl font-bold text-gray-800">17973</div>
+                            <div className="text-xl font-bold text-gray-800">{formData.newIndex || "-"}</div>
                           </div>
                           <div className="flex flex-col items-center">
                             <div className="text-sm text-gray-600 mb-1">Consommation totale</div>
-                            <div className="text-xl font-bold text-orange">728 kWh</div>
+                            <div className="text-xl font-bold text-orange">
+                              {formData.oldIndex && formData.newIndex ?
+                                `${Number(formData.newIndex) - Number(formData.oldIndex)} kWh` :
+                                "-"}
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -512,229 +602,161 @@ export default function SimulateurFacturePage() {
                   </div>
                 </div>
               ) : (
-                // Formulaire unifié - Optimisé pour tenir sur une page
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                  {/* Sections de formulaire sur 2 colonnes */}
-                  <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-5">
-                    {/* Informations techniques */}
-                    <div className="bg-white/80 backdrop-blur-sm p-5 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-all">
-                      <h3 className="text-xl font-semibold text-noir mb-4 pb-2 border-b border-gray-200 flex items-center">
-                        <span className="h-6 w-6 rounded-full bg-orange/10 flex items-center justify-center mr-2 text-orange text-xs font-bold">1</span>
-                        Informations techniques
-                      </h3>
-                      <div className="space-y-4">
-                        <SelectField
-                          label="Code tarif"
-                          value={formData.code}
-                          onChange={(e) => handleChange("code", e.target.value)}
-                          options={TARIFF_CODES}
-                          error={validationErrors.code}
-                        />
-                        <SelectField
-                          label="Type de branchement"
-                          value={formData.branch}
-                          onChange={(e) =>
-                            handleChange("branch", e.target.value)
-                          }
-                          options={BRANCH_TYPES}
-                          error={validationErrors.branch}
-                        />
-                        <SelectField
-                          label="Puissance souscrite"
-                          value={formData.power}
-                          onChange={(e) =>
-                            handleChange("power", e.target.value)
-                          }
-                          options={POWERS}
-                          error={validationErrors.power}
-                        />
-                      </div>
-                    </div>
-
-                    {/* Combinaison de Type d'exploitation et Période */}
-                    <div className="bg-white/80 backdrop-blur-sm p-5 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-all">
-                      {/* Type d'exploitation */}
-                      <div>
-                        <h3 className="text-xl font-semibold text-noir mb-4 pb-2 border-b border-gray-200 flex items-center">
-                          <span className="h-6 w-6 rounded-full bg-orange/10 flex items-center justify-center mr-2 text-orange text-xs font-bold">2</span>
-                          Type d'exploitation
+                // Formulaire et illustration dans une seule carte
+                <div className="bg-gradient-to-br from-white to-gray-50/90 backdrop-blur-sm p-10 rounded-[24px] shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300">
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-14">
+                    {/* Sections de formulaire sur 2 colonnes */}
+                    <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-12">
+                      {/* Informations techniques */}
+                      <div className="space-y-7">
+                        <h3 className="text-xl font-semibold text-noir mb-7 pb-2 border-b border-gray-200 flex items-center">
+                          <span className="h-7 w-7 rounded-full bg-orange/10 flex items-center justify-center mr-2 text-orange text-xs font-bold">1</span>
+                          Informations techniques
                         </h3>
-                        <SelectField
-                          label="Usage prévu"
-                          value={formData.exploit}
-                          onChange={(e) =>
-                            handleChange("exploit", e.target.value)
-                          }
-                          options={EXPLOITS}
-                          error={validationErrors.exploit}
-                        />
-                      </div>
-
-                      {/* Période de consommation */}
-                      <div className="mt-5">
-                        <h3 className="text-xl font-semibold text-noir mb-4 pb-2 border-b border-gray-200 flex items-center">
-                          <span className="h-6 w-6 rounded-full bg-orange/10 flex items-center justify-center mr-2 text-orange text-xs font-bold">3</span>
-                          Période de consommation
-                        </h3>
-                        <div className="space-y-4">
-                          <DateField
-                            label="Date de début"
-                            value={formData.start}
-                            onChange={(e) =>
-                              handleChange("start", e.target.value)
-                            }
-                            error={validationErrors.start}
+                        <div className="space-y-6">
+                          <SelectField
+                            label="Code tarif"
+                            value={formData.code}
+                            onChange={(e) => handleChange("code", e.target.value)}
+                            options={TARIFF_CODES}
+                            error={validationErrors.code}
                           />
-                          <DateField
-                            label="Date de fin"
-                            value={formData.end}
-                            onChange={(e) => handleChange("end", e.target.value)}
-                            min={typeof window !== 'undefined' ? formData.start : ''}
-                            error={validationErrors.end}
+                          <SelectField
+                            label="Type de branchement"
+                            value={formData.branch}
+                            onChange={(e) =>
+                              handleChange("branch", e.target.value)
+                            }
+                            options={BRANCH_TYPES}
+                            error={validationErrors.branch}
+                          />
+                          <SelectField
+                            label="Puissance souscrite"
+                            value={formData.power}
+                            onChange={(e) =>
+                              handleChange("power", e.target.value)
+                            }
+                            options={POWERS}
+                            error={validationErrors.power}
+                          />
+
+                          <InputField
+                            label="Ancien Index (kWh)"
+                            value={formData.oldIndex}
+                            onChange={(e) => handleChange("oldIndex", e.target.value)}
+                            type="number"
+                            placeholder="Ancien Index (kWh)"
+                            error={validationErrors.oldIndex}
+                          />
+                          <InputField
+                            label="Nouvel Index (kWh)"
+                            value={formData.newIndex}
+                            onChange={(e) => handleChange("newIndex", e.target.value)}
+                            type="number"
+                            placeholder="Nouvel Index (kWh)"
+                            error={validationErrors.newIndex}
                           />
                         </div>
                       </div>
-                    </div>
 
-                    {/* Bouton de simulation - Placement amélioré */}
-                    <div className="md:col-span-2 pt-4 pb-1">
-                      <button
-                        disabled={isSimulating}
-                        onClick={handleSimulate}
-                        className="w-full bg-gradient-to-r from-orange to-orange/90 disabled:opacity-50 hover:from-noir hover:to-noir/90 transition-all duration-300 text-white font-semibold text-lg rounded-full px-10 py-4 shadow-lg hover:shadow-xl disabled:shadow-none relative overflow-hidden group"
-                      >
-                        <span className="relative z-10 flex items-center justify-center">
-                          {isSimulating ? (
-                            <>
-                              <svg className="animate-spin h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                              </svg>
-                              Traitement...
-                            </>
-                          ) : (
-                            <>
-                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5 mr-2">
-                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                              </svg>
-                              Simuler
-                            </>
-                          )}
-                        </span>
-                        <div className="absolute inset-0 bg-gradient-to-r from-orange/20 to-orange/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Aperçu facture - Une colonne pleine hauteur */}
-                  <div className="flex justify-center items-start lg:h-full">
-                    <div className="relative bg-gray-50 rounded-2xl p-4 w-full max-w-md shadow-md border border-gray-100 hover:border-orange/30 transition-all">
-                      <div className="flex items-start justify-between mb-3 pb-2 border-b border-gray-100">
-                        <h3 className="font-semibold text-gray-700 text-sm">Aperçu de facture</h3>
-                        <button
-                          onClick={resetForm}
-                          className="h-8 w-8 bg-white rounded-full shadow flex items-center justify-center text-gray-500 hover:bg-orange hover:text-white transition-all duration-200"
-                          aria-label="Réinitialiser le formulaire"
-                          title="Réinitialiser le formulaire"
-                        >
-                          <svg
-                            className="w-4 h-4"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                      {/* Combinaison de Type d'exploitation et Période */}
+                      <div className="space-y-7">
+                        {/* Type d'exploitation */}
+                        <div>
+                          <h3 className="text-xl font-semibold text-noir mb-7 pb-2 border-b border-gray-200 flex items-center">
+                            <span className="h-7 w-7 rounded-full bg-orange/10 flex items-center justify-center mr-2 text-orange text-xs font-bold">2</span>
+                            Usage
+                          </h3>
+                          <div className="space-y-6">
+                            <div className="relative group">
+                              <label className="block mb-2 text-sm font-medium text-gray-700 group-hover:text-orange transition-colors duration-200">
+                                Usage prévu (déterminé par le code tarif)
+                              </label>
+                              <div className="w-full px-4 py-3 text-sm text-gray-700 bg-gray-100/80 border rounded-xl border-gray-200 shadow-inner">
+                                {formData.exploit || "Sélectionnez d'abord un code tarif"}
+                              </div>
+                            </div>
+                            <SelectField
+                              label="Code d'exploitation"
+                              value={formData.exploitCode}
+                              onChange={(e) => handleChange("exploitCode", e.target.value)}
+                              options={EXPLOIT_CODES}
+                              error={validationErrors.exploitCode}
                             />
-                          </svg>
+                          </div>
+                        </div>
+
+                        {/* Période de consommation */}
+                        <div className="mt-9">
+                          <h3 className="text-xl font-semibold text-noir mb-7 pb-2 border-b border-gray-200 flex items-center">
+                            <span className="h-7 w-7 rounded-full bg-orange/10 flex items-center justify-center mr-2 text-orange text-xs font-bold">3</span>
+                            Période de consommation
+                          </h3>
+                          <div className="space-y-6">
+                            <DateField
+                              label="Date de début"
+                              value={formData.start}
+                              onChange={(e) =>
+                                handleChange("start", e.target.value)
+                              }
+                              error={validationErrors.start}
+                            />
+                            <div className="relative group">
+                              <label className="block mb-2 text-sm font-medium text-gray-700 group-hover:text-orange transition-colors duration-200">
+                                Date de fin
+                              </label>
+                              <div className="w-full px-4 py-3 text-sm text-gray-700 bg-gray-100/80 border rounded-xl border-gray-200 shadow-inner">
+                                {formData.end ? new Date(formData.end).toLocaleDateString("fr-FR") : "Sélectionnez d'abord une date de début"}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Bouton de simulation - Placement amélioré */}
+                      <div className="md:col-span-2 pt-8">
+                        <button
+                          disabled={isSimulating}
+                          onClick={handleSimulate}
+                          className="w-full bg-gradient-to-r from-orange to-orange/90 disabled:opacity-50 hover:from-noir hover:to-noir/90 transition-all duration-300 text-white font-semibold text-lg rounded-full px-10 py-5 shadow-lg hover:shadow-xl disabled:shadow-none relative overflow-hidden group"
+                        >
+                          <span className="relative z-10 flex items-center justify-center">
+                            {isSimulating ? (
+                              <>
+                                <svg className="animate-spin h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                Traitement...
+                              </>
+                            ) : (
+                              <>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5 mr-2">
+                                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                </svg>
+                                Simuler
+                              </>
+                            )}
+                          </span>
+                          <div className="absolute inset-0 bg-gradient-to-r from-orange/20 to-orange/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                         </button>
                       </div>
+                    </div>
 
-                      <div className="flex-1 flex items-center justify-center">
-                        {isSimulating ? (
-                          <div className="flex flex-col items-center justify-center py-6 w-full">
-                            <div className="relative flex items-center justify-center">
-                              <div className="absolute w-16 h-16 border-4 border-gray-200 rounded-full"></div>
-                              <div
-                                className="w-16 h-16 border-4 border-t-transparent border-orange rounded-full animate-spin"
-                                style={{
-                                  boxShadow: "0 0 15px rgba(255, 125, 0, 0.3)",
-                                }}
-                              ></div>
-                              <div className="absolute flex items-center justify-center w-full h-full text-orange font-bold">
-                                {Math.round((loadingStep / 4) * 100)}%
-                              </div>
-                            </div>
-
-                            <div className="mt-4 text-center">
-                              {(() => {
-                                const loadingMessages = [
-                                  "Récupération des données...",
-                                  "Calcul de consommation...",
-                                  "Application des tarifs...",
-                                  "Génération de la facture...",
-                                ];
-                                return (
-                                  <p className="text-gray-800 font-medium text-sm">
-                                    {loadingMessages[loadingStep - 1] || "Initialisation..."}
-                                  </p>
-                                );
-                              })()}
-                              <div className="mt-2 w-full bg-gray-200 rounded-full h-1.5">
-                                <div
-                                  className="bg-orange h-1.5 rounded-full transition-all duration-300"
-                                  style={{ width: `${(loadingStep / 4) * 100}%` }}
-                                ></div>
-                              </div>
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="group relative">
-                            <div className="relative overflow-hidden rounded-lg transition-all duration-300">
-                              <Image
-                                src="/facture/facture.jpeg"
-                                alt="Aperçu facture"
-                                width={500}
-                                height={700}
-                                className={`w-full h-auto rounded-lg my-auto mx-auto block transition-all duration-500 ease-in-out ${isSimulated
-                                  ? ""
-                                  : !formData.code ||
-                                    !formData.branch ||
-                                    !formData.power ||
-                                    !formData.exploit
-                                    ? "blur-sm"
-                                    : "blur-[2px]"
-                                  }`}
-                                style={{
-                                  opacity: typeof window !== 'undefined' ? (isSimulated
-                                    ? 1
-                                    : formData.code &&
-                                      formData.branch &&
-                                      formData.power &&
-                                      formData.exploit
-                                      ? 0.8
-                                      : 0.5) : 0.5,
-                                  boxShadow: typeof window !== 'undefined' ? (isSimulated
-                                    ? "0 10px 25px rgba(0, 0, 0, 0.1)"
-                                    : "none") : "none",
-                                }}
-                              />
-                              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                            </div>
-
-                            {!isSimulated && (
-                              <div className="mt-3 text-center bg-orange/5 rounded-lg p-3 text-xs text-gray-600">
-                                <p>
-                                  <span className="font-medium text-orange">Complétez le formulaire</span> pour obtenir votre simulation de facture personnalisée.
-                                </p>
-                              </div>
-                            )}
-                          </div>
-                        )}
+                    {/* Illustration - Une colonne verticale */}
+                    <div className="lg:col-span-1 flex items-center justify-center relative">
+                      <div className="relative z-10 drop-shadow-xl transform transition-all duration-300 hover:scale-105">
+                        <div className="absolute -inset-1 bg-gradient-to-r from-orange/20 to-orange/5 rounded-3xl blur-lg opacity-70"></div>
+                        <Image
+                          src="/facture/simul.png"
+                          alt="Illustration du simulateur de facture"
+                          width={400}
+                          height={400}
+                          className="max-w-full h-auto relative z-20"
+                        />
                       </div>
+                      <div className="absolute top-0 right-0 w-40 h-40 bg-orange/5 rounded-full filter blur-3xl opacity-60"></div>
+                      <div className="absolute bottom-0 left-0 w-40 h-40 bg-orange/5 rounded-full filter blur-3xl opacity-60"></div>
                     </div>
                   </div>
                 </div>
@@ -854,12 +876,20 @@ function StepOneForm({
         options={POWERS}
         error={errors.power}
       />
+      <div className="relative group">
+        <label className="block mb-1 text-sm font-medium text-gray-700 group-hover:text-orange transition-colors duration-200">
+          Usage prévu (déterminé par le code tarif)
+        </label>
+        <div className="w-full px-4 py-3 text-sm text-gray-700 bg-gray-100/80 border rounded-xl border-gray-200 shadow-inner">
+          {state.exploit || "Sélectionnez d'abord un code tarif"}
+        </div>
+      </div>
       <SelectField
-        label="Exploitation"
-        value={state.exploit}
-        onChange={onChange("exploit")}
-        options={EXPLOITS}
-        error={errors.exploit}
+        label="Code d'exploitation"
+        value={state.exploitCode}
+        onChange={onChange("exploitCode")}
+        options={EXPLOIT_CODES}
+        error={errors.exploitCode}
       />
     </form>
   );
@@ -886,12 +916,29 @@ function StepTwoForm({
         onChange={onChange("start")}
         error={errors.start}
       />
-      <DateField
-        label="Date de fin"
-        value={state.end}
-        onChange={onChange("end")}
-        min={state.start}
-        error={errors.end}
+      <div className="relative group">
+        <label className="block mb-1 text-sm font-medium text-gray-700 group-hover:text-orange transition-colors duration-200">
+          Date de fin (calculée automatiquement, +2 mois)
+        </label>
+        <div className="w-full px-4 py-2.5 text-sm text-gray-700 bg-gray-100 border rounded-xl border-gray-200">
+          {state.end ? new Date(state.end).toLocaleDateString("fr-FR") : "Sélectionnez d'abord une date de début"}
+        </div>
+      </div>
+      <InputField
+        label="Ancien Index (kWh)"
+        value={state.oldIndex}
+        onChange={onChange("oldIndex")}
+        type="number"
+        placeholder="Ancien Index (kWh)"
+        error={errors.oldIndex}
+      />
+      <InputField
+        label="Nouvel Index (kWh)"
+        value={state.newIndex}
+        onChange={onChange("newIndex")}
+        type="number"
+        placeholder="Nouvel Index (kWh)"
+        error={errors.newIndex}
       />
     </form>
   );
@@ -914,14 +961,14 @@ function SelectField({
 }) {
   return (
     <div className="relative group">
-      <label className="block mb-1 text-sm font-medium text-gray-700 group-hover:text-orange transition-colors duration-200">
+      <label className="block mb-2 text-sm font-medium text-gray-700 group-hover:text-orange transition-colors duration-200">
         {label}
       </label>
       <div className="relative">
         <select
           value={value}
           onChange={onChange}
-          className={`w-full px-4 py-2.5 text-sm text-gray-700 bg-white border rounded-xl focus:outline-none focus:ring-1 appearance-none pr-9 cursor-pointer transition-all duration-200 ${error
+          className={`w-full px-5 py-3.5 text-sm text-gray-700 bg-white border rounded-xl focus:outline-none focus:ring-1 appearance-none pr-9 cursor-pointer transition-all duration-200 ${error
             ? "border-red-500 focus:border-red-500 focus:ring-red-500"
             : "border-gray-200 hover:border-orange/30 focus:border-orange focus:ring-orange/20"
             }`}
@@ -992,7 +1039,7 @@ function DateField({
 }) {
   return (
     <div className="relative group">
-      <label className="block mb-1 text-sm font-medium text-gray-700 group-hover:text-orange transition-colors duration-200">
+      <label className="block mb-2 text-sm font-medium text-gray-700 group-hover:text-orange transition-colors duration-200">
         {label}
       </label>
       <div className="relative">
@@ -1001,16 +1048,66 @@ function DateField({
           value={value}
           onChange={onChange}
           min={min || ''}
-          className={`w-full border rounded-xl px-4 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-1 appearance-none transition-all ${error
+          className={`w-full border rounded-xl px-5 py-3.5 text-sm text-gray-700 focus:outline-none focus:ring-1 appearance-none transition-all ${error
+            ? "border-red-500 focus:border-red-500 focus:ring-red-500"
+            : "border-gray-200 hover:border-orange/30 focus:border-orange focus:ring-orange/20"
+            }`}
+          style={{ colorScheme: 'light' }}
+        />
+      </div>
+      {error && (
+        <div className="mt-1 flex items-center gap-1 text-xs text-red-500">
+          <svg
+            className="w-3 h-3"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+          {error}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function InputField({
+  label,
+  value,
+  onChange,
+  type = "text",
+  placeholder,
+  error,
+}: {
+  label: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  type?: string;
+  placeholder?: string;
+  error?: string;
+}) {
+  return (
+    <div className="relative group">
+      <label className="block mb-2 text-sm font-medium text-gray-700 group-hover:text-orange transition-colors duration-200">
+        {label}
+      </label>
+      <div className="relative">
+        <input
+          type={type}
+          value={value}
+          onChange={onChange}
+          placeholder={placeholder || ""}
+          className={`w-full border rounded-xl px-5 py-3.5 text-sm text-gray-700 focus:outline-none focus:ring-1 appearance-none transition-all ${error
             ? "border-red-500 focus:border-red-500 focus:ring-red-500"
             : "border-gray-200 hover:border-orange/30 focus:border-orange focus:ring-orange/20"
             }`}
         />
-        <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 text-gray-400 group-hover:text-orange transition-colors duration-200">
-            <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1z" clipRule="evenodd" />
-          </svg>
-        </div>
       </div>
       {error && (
         <div className="mt-1 flex items-center gap-1 text-xs text-red-500">

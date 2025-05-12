@@ -1,265 +1,265 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import GenericPage from "../components/GenericPage";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
+import {
+  BoltIcon,
+  HomeIcon,
+  BuildingOffice2Icon,
+  UserGroupIcon,
+  BriefcaseIcon,
+  ArrowRightIcon,
+} from "@heroicons/react/24/solid";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { FaDownload, FaEye, FaClock } from "react-icons/fa";
 
-export default function TarifsPage() {
-  const [currentPdfUrl, setCurrentPdfUrl] = useState("/test.pdf");
-  const [isLoading, setIsLoading] = useState(true);
-  const [showAnimation, setShowAnimation] = useState(false);
+/* -- Data ----------------------------------------------------------------- */
+const categories = [
+  {
+    key: "social",
+    label: "Domestique social basse tension",
+    icon: HomeIcon,
+    color: "bg-gradient-to-br from-orange-50 to-orange-100 text-orange-500",
+    hoverColor: "group-hover:from-orange-100 group-hover:to-orange-200",
+    description: "Pour les foyers à faible consommation et revenus modestes",
+    mainColor: "#FF8F2B",
+  },
+  {
+    key: "5a",
+    label: "Domestique général 5A",
+    icon: BoltIcon,
+    color: "bg-gradient-to-br from-vertFonce/5 to-vertFonce/15 text-vertFonce",
+    hoverColor: "group-hover:from-vertFonce/15 group-hover:to-vertFonce/25",
+    description: "Idéal pour les petits logements avec consommation limitée",
+    mainColor: "#FF8F2B",
+  },
+  {
+    key: "10a",
+    label: "Domestique général 10A",
+    icon: BoltIcon,
+    color: "bg-gradient-to-br from-eco/5 to-eco/15 text-eco",
+    hoverColor: "group-hover:from-eco/15 group-hover:to-eco/25",
+    description: "Adapté aux logements de taille moyenne avec équipements standard",
+    mainColor: "#FF8F2B",
+  },
+  {
+    key: "15a",
+    label: "Domestique général 15A et plus",
+    icon: BoltIcon,
+    color: "bg-gradient-to-br from-jaune/5 to-jaune/15 text-jaune",
+    hoverColor: "group-hover:from-jaune/15 group-hover:to-jaune/25",
+    description: "Pour les grands logements avec nombreux équipements électriques",
+    mainColor: "#FF8F2B",
+  },
+  {
+    key: "pro",
+    label: "Professionnel général",
+    icon: BriefcaseIcon,
+    color: "bg-gradient-to-br from-primary/5 to-primary/15 text-primary",
+    hoverColor: "group-hover:from-primary/15 group-hover:to-primary/25",
+    description: "Solutions adaptées aux besoins des entreprises et commerces",
+    mainColor: "#FF8F2B",
+  },
+];
 
+// Types pour les bulles d'énergie
+interface EnergyBubbleProps {
+  id: number;
+  size: number;
+  speed: number;
+  delay: number;
+  color: string;
+  left: number;
+}
 
-  // Historique fictif des tarifs récents (les plus récents uniquement)
-  const recentTarifHistory = [
-    { id: 1, name: "Tarifs 2023", url: "/test.pdf", date: "Janvier 2023", description: "Grille tarifaire pour les clients résidentiels" },
-    { id: 2, name: "Tarifs 2022", url: "/test.pdf", date: "Janvier 2022", description: "Ancienne grille tarifaire (pour référence)" },
-  ];
+// Composant de bulle d'énergie électrique
+const EnergyBubble = ({ delay, size, speed, color, left }: Omit<EnergyBubbleProps, 'id'>) => {
+  return (
+    <div
+      className={`absolute rounded-full ${color} animate-float opacity-70 blur-sm pointer-events-none z-0`}
+      style={{
+        width: `${size}px`,
+        height: `${size}px`,
+        left: `${left}%`,
+        animationDelay: `${delay}s`,
+        animationDuration: `${speed}s`,
+      }}
+    >
+      <div className="absolute inset-0 animate-pulse" style={{ animationDelay: `${delay * 0.5}s` }}></div>
+    </div>
+  );
+};
 
+/* -- Component ------------------------------------------------------------ */
+export default function Page() {
+  const router = useRouter();
+  const [bubbles, setBubbles] = useState<EnergyBubbleProps[]>([]);
+  const [isVisible, setIsVisible] = useState(false);
+
+  // Générer les bulles d'énergie électrique
   useEffect(() => {
-    // Simuler un temps de chargement pour l'effet visuel
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-      setShowAnimation(true);
-    }, 500);
+    const generatedBubbles: EnergyBubbleProps[] = [];
+    const colors = [
+      'bg-orange-200/40',
 
-    return () => clearTimeout(timer);
+    ];
+
+    for (let i = 0; i < 12; i++) {
+      generatedBubbles.push({
+        id: i,
+        size: Math.random() * 60 + 20, // Entre 20 et 80px
+        speed: Math.random() * 8 + 8, // Entre 8 et 16 secondes
+        delay: Math.random() * 5,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        left: Math.random() * 100,
+      });
+    }
+
+    setBubbles(generatedBubbles);
+
+    // Animation de visibilité
+    setIsVisible(true);
   }, []);
 
-  const handleDownload = () => {
-    const link = document.createElement("a");
-    link.href = currentPdfUrl;
-    link.download = "tarifs.pdf";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
-  const handleViewTarif = (url: string) => {
-    setIsLoading(true);
-    setCurrentPdfUrl(url);
-
-    // Scroll vers le haut pour voir l'aperçu principal
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-
-    // Réinitialiser l'état de chargement après un court délai
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 300);
-  };
-
-  // Variants pour les animations
+  // Variantes d'animation pour le container
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
       transition: {
-        duration: 0.5,
-        when: "beforeChildren",
-        staggerChildren: 0.2
+        staggerChildren: 0.1,
+        duration: 0.5
       }
     }
   };
 
-  const itemVariants = {
-    hidden: { y: 20, opacity: 0 },
+  // Variantes d'animation pour les cartes
+  const cardVariants = {
+    hidden: { opacity: 0, y: 30 },
     visible: {
-      y: 0,
       opacity: 1,
-      transition: { duration: 0.5 }
+      y: 0,
+      transition: {
+        duration: 0.5,
+      }
     }
   };
 
   return (
-    <div className="min-h-screen ">
-      <div className="w-full -mt-[290px]">
-        <GenericPage
-          title="Nos Tarifs"
-          description="Consultez les tarifs en vigueur pour tous vos services d'eau et d'assainissement."
-          buttonText="Voir l'historique des tarifs"
-          buttonLink="/historique-tarifs"
-        />
+    <div className="min-h-screen flex justify-center items-start py-24 px-6 lg:px-0  relative overflow-hidden">
+      {/* Bulles d'énergie électrique */}
+      {/* <div className="absolute inset-0 overflow-hidden">
+        {bubbles.map((bubble) => (
+          <EnergyBubble
+            key={bubble.id}
+            size={bubble.size}
+            speed={bubble.speed}
+            delay={bubble.delay}
+            color={bubble.color}
+            left={bubble.left}
+          />
+        ))}
+      </div> */}
 
-        <div className="w-[91%] mx-auto -mt-64">
-          <motion.div
-            initial="hidden"
-            animate="visible"
-            variants={containerVariants}
-            className="mb-12"
-          >
-            <motion.div
-              variants={itemVariants}
-              className="bg-white rounded-2xl overflow-hidden p-6 mb-8 border border-gray-100 hover:border-gray-200 transition-all duration-300"
-              style={{ boxShadow: '0 10px 40px -15px rgba(0, 0, 0, 0.05)' }}
+      {/* Effet d'éclair discret */}
+      <div className="absolute w-[400px] h-[400px] -right-20 top-40 bg-orange-500/5 rounded-full blur-3xl opacity-60 animate-pulse"></div>
+      <div className="absolute w-[300px] h-[300px] -left-10 bottom-40 bg-vertFonce/5 rounded-full blur-3xl opacity-60 animate-pulse" style={{ animationDelay: '2s' }}></div>
+
+      <div className="max-w-6xl w-full relative z-10">
+        {/* Titre --------------------------------------------------------- */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: isVisible ? 1 : 0, y: isVisible ? 0 : 20 }}
+          transition={{ duration: 0.6 }}
+          className="text-center mb-16"
+        >
+
+
+
+          <h1 className="text-4xl font-bold tracking-tight text-noir mb-4">
+            Nos <span className="text-orange-500 relative">tarifs</span>
+          </h1>
+
+          <p className="text-smallText max-w-2xl mx-auto">
+            Sélectionnez la catégorie qui correspond à vos besoins pour découvrir nos offres
+          </p>
+
+
+        </motion.div>
+
+        {/* Grille -------------------------------------------------------- */}
+        <motion.ul
+          variants={containerVariants}
+          initial="hidden"
+          animate={isVisible ? "visible" : "hidden"}
+          className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3 relative z-10"
+        >
+          {categories.map(({ key, label, icon: Icon, color, hoverColor, description, mainColor }, index) => (
+            <motion.li
+              key={key}
+              variants={cardVariants}
+              custom={index}
+              onClick={() => router.push(`/tarifs/${key}`)}
+              className="group relative cursor-pointer rounded-3xl bg-white/90 backdrop-blur-md shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-gray-100/80 overflow-hidden"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
             >
-              <div className="flex items-center mb-7">
-                <div className="w-11 h-11 flex items-center justify-center rounded-full bg-gradient-to-r from-vert/10 to-vert/5 mr-4">
-                  <svg className="w-5 h-5 text-vert" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                  </svg>
-                </div>
-                <h2 className="text-2xl font-bold text-noir">Tarifs en vigueur</h2>
-              </div>
+              {/* Ligne décorative colorée en haut */}
+              <div className="absolute top-0 left-0 right-0 h-1.5" style={{ backgroundColor: mainColor }}></div>
 
-              <div className="flex flex-col lg:flex-row gap-10">
-                {/* PDF Preview */}
-                <div className="w-full lg:w-3/4 relative">
-                  <div className="relative h-[600px] rounded-xl overflow-hidden bg-gray-50 border border-gray-100 transition-all duration-300"
-                    style={{ boxShadow: '0 10px 30px -10px rgba(0, 0, 0, 0.05)' }}>
-                    {isLoading && (
-                      <div className="absolute inset-0 flex items-center justify-center bg-gray-50 z-10">
-                        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-vert"></div>
-                      </div>
-                    )}
-                    <iframe
-                      src={`${currentPdfUrl}#toolbar=0`}
-                      className="w-full h-full"
-                      title="Aperçu des tarifs"
-                      style={{ opacity: isLoading ? 0 : 1, transition: 'opacity 0.3s ease-in-out' }}
-                    />
-                  </div>
-                  <div className="absolute top-3 right-3 z-20 bg-white/90 backdrop-blur-sm rounded-lg px-3 py-1.5 text-sm text-gray-700 font-medium border border-white/60">
-                    Document officiel
-                  </div>
-                </div>
-
-                {/* Actions */}
-                <div className="w-full lg:w-1/4">
-                  <div className="bg-gradient-to-br from-[#FAFBFF] to-[#F7F9FD] p-7 rounded-xl border border-gray-100 transition-all duration-300"
-                    style={{ boxShadow: '0 10px 30px -15px rgba(0, 0, 0, 0.03)' }}>
-                    <h3 className="text-xl font-semibold mb-6 text-noir">Actions</h3>
-
-                    <div className="space-y-4">
-                      <button
-                        onClick={handleDownload}
-                        className="w-full bg-gradient-to-r from-orange to-orange/90 hover:from-orange/95 hover:to-orange/85 text-white font-semibold py-3.5 px-4 rounded-xl flex items-center justify-center transition-all duration-300"
-                        style={{ boxShadow: '0 5px 15px -5px rgba(255, 153, 0, 0.3)' }}
-                      >
-                        <FaDownload className="w-5 h-5 mr-2" />
-                        Télécharger le PDF
-                      </button>
-
-                      <Link
-                        href="/historique-tarifs"
-                        className="w-full block bg-white hover:bg-gray-50 text-noir font-medium py-3.5 px-4 rounded-xl flex items-center justify-center transition-all duration-300 border border-gray-200"
-                        style={{ boxShadow: '0 5px 15px -8px rgba(0, 0, 0, 0.05)' }}
-                      >
-                        <FaClock className="w-5 h-5 mr-2 text-vert" />
-                        Historique complet
-                      </Link>
-                    </div>
-
-                    <div className="mt-9 pt-6 border-t border-gray-100">
-                      <h4 className="font-medium text-gray-700 mb-4">Informations</h4>
-                      <ul className="space-y-3 text-sm">
-                        <li className="flex items-start">
-                          <div className="w-6 h-6 flex items-center justify-center bg-vert/5 rounded-full mr-2.5 mt-0.5">
-                            <svg className="w-3.5 h-3.5 text-vert" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                          </div>
-                          <span className="text-gray-600">Les tarifs sont mis à jour chaque année</span>
-                        </li>
-                        <li className="flex items-start">
-                          <div className="w-6 h-6 flex items-center justify-center bg-vert/5 rounded-full mr-2.5 mt-0.5">
-                            <svg className="w-3.5 h-3.5 text-vert" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                          </div>
-                          <span className="text-gray-600">Document validé par les autorités de régulation</span>
-                        </li>
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-
-            {/* Aperçu des tarifs récents */}
-            <motion.div
-              variants={itemVariants}
-              className="bg-white rounded-2xl p-6 mb-8 border border-gray-100 hover:border-gray-200 transition-all duration-300"
-              style={{ boxShadow: '0 10px 40px -15px rgba(0, 0, 0, 0.05)' }}
-            >
-              <div className="flex justify-between items-center mb-8">
-                <div className="flex items-center">
-                  <div className="w-11 h-11 flex items-center justify-center rounded-full bg-gradient-to-r from-orange/10 to-orange/5 mr-4">
-                    <svg className="w-5 h-5 text-orange" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                  </div>
-                  <h2 className="text-2xl font-bold text-noir">Tarifs récents</h2>
-                </div>
-                <Link
-                  href="/historique-tarifs"
-                  className="text-vert hover:text-vert/80 font-medium flex items-center transition-all duration-300 group"
+              {/* Contenu de la carte ---------------------------------- */}
+              <div className="p-7 flex flex-col gap-5 h-full">
+                {/* Icone */}
+                <div
+                  className={`w-14 h-14 ${color} ${hoverColor} rounded-2xl grid place-content-center shadow-sm transition-all duration-300`}
+                  style={{ boxShadow: `0 4px 14px ${mainColor}15` }}
                 >
-                  Voir tout l'historique
-                  <svg className="w-5 h-5 ml-2 transform group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-                  </svg>
-                </Link>
+                  <Icon className="w-7 h-7 transition-transform duration-300 group-hover:scale-110" />
+                </div>
+
+                {/* Libellé */}
+                <h3 className="text-xl font-semibold text-noir leading-snug group-hover:text-orange-500 transition-colors duration-300">
+                  {label}
+                </h3>
+
+                {/* Description */}
+                <p className="text-base text-smallText/90 leading-relaxed">
+                  {description}
+                </p>
+
+                {/* Bouton ------------------------------------------ */}
+                <div className="mt-auto pt-4 flex justify-end">
+                  <div className="flex items-center gap-2 text-orange-500 font-medium text-sm">
+                    <span className="opacity-0 -translate-x-2 transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-0">
+                      Voir les détails
+                    </span>
+                    <div className="w-8 h-8 rounded-full bg-orange-50 grid place-content-center transition-all duration-300 group-hover:bg-orange-500 group-hover:text-white">
+                      <ArrowRightIcon className="w-4 h-4" />
+                    </div>
+                  </div>
+                </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {recentTarifHistory.map((tarif, index) => (
-                  <motion.div
-                    key={tarif.id}
-                    variants={itemVariants}
-                    initial="hidden"
-                    animate={showAnimation ? "visible" : "hidden"}
-                    transition={{ delay: index * 0.1 }}
-                    className="bg-gradient-to-br from-[#FCFCFC] to-[#F8F9FB] rounded-xl overflow-hidden border border-gray-100 hover:border-gray-200 group transition-all duration-300"
-                    style={{ boxShadow: '0 10px 30px -15px rgba(0, 0, 0, 0.05)' }}
-                  >
-                    <div className="relative">
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/25 to-transparent z-10"></div>
-                      <div className="absolute bottom-3 left-3 z-20 bg-white/90 backdrop-blur-sm rounded-lg px-3 py-1.5 text-sm text-gray-800 font-medium border border-white/60">
-                        {tarif.date}
-                      </div>
-                      {/* Aperçu du PDF miniature */}
-                      <div className="w-full h-[200px] overflow-hidden bg-white">
-                        <iframe
-                          src={`${tarif.url}#toolbar=0&view=FitH&scrollbar=0`}
-                          className="w-full h-full"
-                          title={`Aperçu de ${tarif.name}`}
-                        />
-                      </div>
-                    </div>
+              {/* Effet de surbrillance subtil sur hover */}
+              <div className="absolute inset-0 bg-gradient-to-tr from-transparent to-orange-50/10 opacity-0 group-hover:opacity-100 rounded-3xl transition-opacity duration-300 pointer-events-none" />
 
-                    <div className="p-6">
-                      <h3 className="text-lg font-semibold text-noir mb-2">{tarif.name}</h3>
-                      <p className="text-gray-600 text-sm mb-7">{tarif.description}</p>
+              {/* Décoration au fond */}
+              <div
+                className="absolute -bottom-8 -right-8 w-32 h-32 rounded-full opacity-5 transition-opacity duration-300 group-hover:opacity-10"
+                style={{ backgroundColor: mainColor }}
+              ></div>
+            </motion.li>
+          ))}
+        </motion.ul>
 
-                      <div className="flex items-center justify-between">
-                        <button
-                          onClick={() => handleViewTarif(tarif.url)}
-                          className="px-5 py-2.5 bg-vert hover:bg-vert/90 text-white rounded-lg flex items-center transition-all duration-300"
-                          style={{ boxShadow: '0 4px 12px -4px rgba(37, 160, 120, 0.3)' }}
-                        >
-                          <FaEye className="w-4 h-4 mr-2" />
-                          Afficher
-                        </button>
-                        <a
-                          href={tarif.url}
-                          download={`${tarif.name}.pdf`}
-                          className="px-5 py-2.5 bg-orange hover:bg-orange/90 text-white rounded-lg flex items-center transition-all duration-300"
-                          style={{ boxShadow: '0 4px 12px -4px rgba(255, 153, 0, 0.3)' }}
-                        >
-                          <FaDownload className="w-4 h-4 mr-2" />
-                          Télécharger
-                        </a>
-                      </div>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            </motion.div>
-          </motion.div>
-        </div>
+        {/* Indication légale */}
+
       </div>
     </div>
   );
 }
+
+// Ajouter l'animation float au fichier globals.css
+// @keyframes float {
+//   0% { transform: translateY(100vh); }
+//   100% { transform: translateY(-100px); }
+// }
