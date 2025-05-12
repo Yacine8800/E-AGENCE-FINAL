@@ -1,12 +1,11 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import Image from "next/image";
+import { AnimatePresence, motion } from "framer-motion";
 import dynamic from "next/dynamic";
-import { AdviceIcon } from "./components/icons/AdviceIcon";
-import { CarouselIcon } from "./components/icons/CarouselIcon";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
+import { CarouselIcon } from "./components/icons/CarouselIcon";
 
 const VideoCarousel = dynamic(() => import("./components/VideoCarousel"), {
   ssr: false,
@@ -778,10 +777,11 @@ export default function Home() {
             w-[300px] sm:w-[400px] md:w-[600px]
             h-auto object-contain
             transition-all duration-500
-            ${activeSlide === 0
+            ${
+              activeSlide === 0
                 ? "opacity-10 scale-100 rotate-0"
                 : "opacity-0 scale-95 rotate-6"
-              }
+            }
           `}
           />
           <motion.img
@@ -793,10 +793,11 @@ export default function Home() {
             w-[300px] sm:w-[400px] md:w-[600px]
             h-auto object-contain
             transition-all duration-500
-            ${activeSlide === 1
+            ${
+              activeSlide === 1
                 ? "opacity-10 scale-100 rotate-0"
                 : "opacity-0 scale-95 rotate-6"
-              }
+            }
           `}
           />
           <motion.img
@@ -808,10 +809,11 @@ export default function Home() {
             w-[300px] sm:w-[400px] md:w-[600px]
             h-auto object-contain
             transition-all duration-500
-            ${activeSlide === 2
+            ${
+              activeSlide === 2
                 ? "opacity-10 scale-100 rotate-0"
                 : "opacity-0 scale-95 rotate-6"
-              }
+            }
           `}
           />
           <motion.img
@@ -823,10 +825,11 @@ export default function Home() {
             w-[300px] sm:w-[400px] md:w-[600px]
             h-auto object-contain
             transition-all duration-500
-            ${activeSlide === 3
+            ${
+              activeSlide === 3
                 ? "opacity-10 scale-100 rotate-0"
                 : "opacity-0 scale-95 rotate-6"
-              }
+            }
           `}
           />
 
@@ -846,7 +849,7 @@ export default function Home() {
                 transition={{
                   duration: 0.8,
                   ease: "easeInOut",
-                  type: "tween"
+                  type: "tween",
                 }}
                 style={{ willChange: "transform" }}
                 className="absolute left-0 top-1/2 -translate-y-1/2"
@@ -856,19 +859,19 @@ export default function Home() {
                     {activeSlide === 0
                       ? "Adopter les bons gestes"
                       : activeSlide === 1
-                        ? "Maîtriser ma consommation"
-                        : activeSlide === 2
-                          ? "Simuler ma facture"
-                          : "Réaliser les économies"}
+                      ? "Maîtriser ma consommation"
+                      : activeSlide === 2
+                      ? "Simuler ma facture"
+                      : "Réaliser les économies"}
                   </h3>
                   <p className="text-sm text-white/60">
                     {activeSlide === 0
                       ? "Changez vos réflexes, économisez votre énergie"
                       : activeSlide === 1
-                        ? "Suivez votre consommation en temps réel"
-                        : activeSlide === 2
-                          ? "Estimez le montant de votre facture"
-                          : "Réduisez votre consommation"}
+                      ? "Suivez votre consommation en temps réel"
+                      : activeSlide === 2
+                      ? "Estimez le montant de votre facture"
+                      : "Réduisez votre consommation"}
                   </p>
                 </div>
               </motion.div>
@@ -883,7 +886,7 @@ export default function Home() {
                   transition={{
                     duration: 0.5,
                     ease: "easeOut",
-                    type: "tween"
+                    type: "tween",
                   }}
                   style={{ willChange: "transform" }}
                   className="
@@ -977,7 +980,7 @@ export default function Home() {
                   transition={{
                     duration: 0.5,
                     ease: "easeOut",
-                    type: "tween"
+                    type: "tween",
                   }}
                   style={{ willChange: "transform" }}
                   className="
@@ -1055,7 +1058,7 @@ export default function Home() {
                   transition={{
                     duration: 0.5,
                     ease: "easeOut",
-                    type: "tween"
+                    type: "tween",
                   }}
                   style={{ willChange: "transform" }}
                   className="
@@ -1132,7 +1135,7 @@ export default function Home() {
                   transition={{
                     duration: 0.5,
                     ease: "easeOut",
-                    type: "tween"
+                    type: "tween",
                   }}
                   style={{ willChange: "transform" }}
                   className="
@@ -1210,7 +1213,7 @@ export default function Home() {
               transition={{
                 duration: 0.8,
                 ease: "easeInOut",
-                type: "tween"
+                type: "tween",
               }}
               style={{ willChange: "transform" }}
               className="absolute right-0 top-1/2 -translate-y-1/2"
@@ -1220,19 +1223,19 @@ export default function Home() {
                   {activeSlide === 0
                     ? "Simuler ma facture"
                     : activeSlide === 1
-                      ? "Réaliser les économies"
-                      : activeSlide === 2
-                        ? "Adopter les bons gestes"
-                        : "Maîtriser ma consommation"}
+                    ? "Réaliser les économies"
+                    : activeSlide === 2
+                    ? "Adopter les bons gestes"
+                    : "Maîtriser ma consommation"}
                 </h3>
                 <p className="text-sm text-white/60">
                   {activeSlide === 0
                     ? "Estimez le montant de votre facture"
                     : activeSlide === 1
-                      ? "Réduisez votre consommation"
-                      : activeSlide === 2
-                        ? "Changez vos réflexes"
-                        : "Suivez votre consommation en temps réel"}
+                    ? "Réduisez votre consommation"
+                    : activeSlide === 2
+                    ? "Changez vos réflexes"
+                    : "Suivez votre consommation en temps réel"}
                 </p>
               </div>
             </motion.div>
@@ -1266,8 +1269,20 @@ export default function Home() {
             transition={{ type: "tween", duration: 0.2 }}
             className="w-8 h-8 flex items-center justify-center"
           >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M15 18L9 12L15 6" stroke="#47B5B0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M15 18L9 12L15 6"
+                stroke="#47B5B0"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
             </svg>
           </motion.button>
 
@@ -1284,10 +1299,11 @@ export default function Home() {
               rounded-full 
               transition-all 
               duration-300 
-              ${activeSlide === index
+              ${
+                activeSlide === index
                   ? "w-10 sm:w-14 bg-[#47B5B0] shadow-md"
                   : "w-3 bg-gray-300 hover:bg-gray-400"
-                }
+              }
             `}
             />
           ))}
@@ -1300,8 +1316,20 @@ export default function Home() {
             transition={{ type: "tween", duration: 0.2 }}
             className="w-8 h-8 flex items-center justify-center"
           >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M9 6L15 12L9 18" stroke="#47B5B0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M9 6L15 12L9 18"
+                stroke="#47B5B0"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
             </svg>
           </motion.button>
         </div>
@@ -1400,18 +1428,19 @@ export default function Home() {
           </div>
         </motion.section>
 
-        {/* Separated bottom part to create the curved cutout effect */}
-        <div
-          className="absolute bottom-0 left-0 right-0 mx-auto bg-white"
+        {/* <div
+          className="absolute bottom-0 left-0 right-0 mx-auto"
           style={{
-            height: '100px',
-            width: '25%',
-            borderTopLeftRadius: '150px',
-            borderTopRightRadius: '150px',
-            transform: 'translateY(40px)',
-            zIndex: 10
+            width: "40%",
+            height: "60px",
+            backgroundImage: `url("data:image/svg+xml,%3Csvg%20width%3D%22400%22%20height%3D%2260%22%20viewBox%3D%220%200%20400%2060%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%20%20%20%20%3Cpath%20d%3D%22M0%2C60%20Q20%2C30%2040%2C0%20L360%2C0%20Q380%2C30%20400%2C60%20Z%22%20fill%3D%22white%22%20%2F%3E%0A%20%20%3C%2Fsvg%3E")`,
+            backgroundRepeat: "no-repeat",
+            backgroundPosition: "center",
+            backgroundSize: "contain",
+            transform: "translateY(50%)",
+            zIndex: 10,
           }}
-        />
+        /> */}
       </div>
     </div>
   );
