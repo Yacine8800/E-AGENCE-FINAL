@@ -234,18 +234,16 @@ const Header = () => {
       </style>
 
       <div
-        className={`fixed w-full z-[9999] transition-all duration-200 ease-in-out ${
-          hasScrolled || isMobile
+        className={`fixed w-full z-50 transition-all duration-200 ease-in-out ${hasScrolled || isMobile
             ? "top-0 px-0"
             : "top-6 px-2 sm:px-4 md:px-6 lg:px-[40px] xl:px-[80px]"
-        }`}
+          }`}
       >
         <motion.header
-          className={`bg-[#F5F5F5] w-full overflow-hidden transition-all duration-200 ease-in-out ${
-            hasScrolled || isMobile
-              ? "rounded-none shadow"
+          className={`bg-[#F5F5F5] w-full overflow-hidden transition-all duration-200 ease-in-out ${hasScrolled || isMobile
+              ? "rounded-b-[10px] sm:rounded-b-[20px] md:rounded-b-[40px] shadow-sm"
               : "rounded-[10px] sm:rounded-[20px] md:rounded-[40px]"
-          }`}
+            }`}
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
@@ -274,17 +272,16 @@ const Header = () => {
                     (tab) => (
                       <button
                         key={tab}
-                        className={`relative text-sm xs:text-base sm:text-lg md:text-xl text-noir hover:text-orange transition-all duration-300 ${
-                          activeTab === tab ? "font-semibold" : ""
-                        }`}
+                        className={`relative text-sm xs:text-base sm:text-lg md:text-xl text-noir hover:text-orange transition-all duration-300 ${activeTab === tab ? "font-semibold" : ""
+                          }`}
                         onClick={() => handleTabClick(tab)}
                         onMouseEnter={() => handleTabHover(tab)}
                       >
                         {tab === "particulier"
                           ? "Particulier"
                           : tab === "business"
-                          ? "Business"
-                          : "Institution"}
+                            ? "Business"
+                            : "Institution"}
                         {activeTab === tab && (
                           <motion.div
                             layoutId="underline"
@@ -311,10 +308,9 @@ const Header = () => {
                 <Link
                   href={isAuthenticated ? "/dashboard" : "/login"}
                   className={`
-                    ${
-                      isAuthenticated && user && user.firstname && user.lastname
-                        ? "bg-gradient-to-r from-[#F47D02] via-[#F9B234] to-[#F47D02] border-none text-white"
-                        : "bg-orange text-white"
+                    ${isAuthenticated && user && user.firstname && user.lastname
+                      ? "bg-gradient-to-r from-[#F47D02] via-[#F9B234] to-[#F47D02] border-none text-white"
+                      : "bg-orange text-white"
                     }
                     hover:bg-noir hover:text-white
                     font-semibold 
@@ -330,17 +326,16 @@ const Header = () => {
                     gap-[6px] sm:gap-[10px]
                     hover:scale-105 hover:shadow-lg
                     truncate shrink-0
-                    ${
-                      isAuthenticated && user && user.firstname && user.lastname
-                        ? "shadow-md shadow-orange/30"
-                        : ""
+                    ${isAuthenticated && user && user.firstname && user.lastname
+                      ? "shadow-md shadow-orange/30"
+                      : ""
                     }
                   `}
                 >
                   {isAuthenticated &&
-                  user &&
-                  user.firstname &&
-                  user.lastname ? (
+                    user &&
+                    user.firstname &&
+                    user.lastname ? (
                     <>
                       <div className="relative group shrink-0">
                         <div className="h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white font-bold ring-2 ring-white/50 group-hover:ring-white/80 transition-all">
@@ -411,8 +406,8 @@ const Header = () => {
                     {activeTab === "particulier"
                       ? "Vous êtes particulier professionnel ou particulier domicile"
                       : activeTab === "business"
-                      ? "Vous êtes domestique HT ou professionnel HT?"
-                      : "Vous êtes une administration?"}
+                        ? "Vous êtes domestique HT ou professionnel HT?"
+                        : "Vous êtes une administration?"}
                   </p>
                 </div>
 
@@ -434,11 +429,10 @@ const Header = () => {
                       initial={{ opacity: 0, x: 20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.2 }}
-                      className={`border-2 p-2 sm:p-3 md:p-5 gap-2 sm:gap-4 md:gap-8 ${
-                        pathname === "/mes-demandes"
+                      className={`border-2 p-2 sm:p-3 md:p-5 gap-2 sm:gap-4 md:gap-8 ${pathname === "/mes-demandes"
                           ? "border-orange bg-orange/5"
                           : "border-white"
-                      } rounded-[20px] sm:rounded-[30px] md:rounded-[50px] w-full flex max-w-md justify-center items-center hover:bg-gray-100 transition-all duration-300 hover:shadow-md cursor-pointer`}
+                        } rounded-[20px] sm:rounded-[30px] md:rounded-[50px] w-full flex max-w-md justify-center items-center hover:bg-gray-100 transition-all duration-300 hover:shadow-md cursor-pointer`}
                       onClick={() => (window.location.href = "/mes-demandes")}
                     >
                       <div>
