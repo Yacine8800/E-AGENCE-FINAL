@@ -389,41 +389,56 @@ const Login = () => {
                   </p>
                   <div className="pt-7">
                     <button
-                      onClick={() => router.push("/register-stepper")}
-                      className="w-full rounded-full text-primary border-2 border-primary font-semibold py-4 hover:bg-gray-100"
+                      onClick={initFacebookLogin}
+                      className="flex items-center justify-center rounded-lg py-3 px-7 bg-[#F5F5F5] hover:bg-gray-200"
                     >
-                      S&apos;inscrire
+                      <IconFacebook />
                     </button>
                   </div>
-                </div>
-              </div>
 
-              {/* Séparateur vertical sur desktop */}
-              {!isMobile && (
-                <div className="h-96 w-px mx-8 border border-gray-100"></div>
-              )}
-
-              {/* QR Code */}
-              <div className="w-full mt-12 text-center">
-                <div className="inline-block">
-                  <Image
-                    src="/qrcode/qrcode.png"
-                    alt="QR Code"
-                    width={150}
-                    height={150}
-                    className="rounded-lg"
-                  />
+                  {/* S'inscrire */}
+                  <div className="w-full pt-10">
+                    <p className="text-sm text-smallText text-center">
+                      Je n&apos;ai pas de compte ?
+                    </p>
+                    <div className="pt-7">
+                      <button
+                        onClick={() => router.push("/register-stepper")}
+                        className="w-full rounded-full text-primary border-2 border-primary font-semibold py-4 hover:bg-gray-100"
+                      >
+                        S&apos;inscrire
+                      </button>
+                    </div>
+                  </div>
                 </div>
-                <h3 className="text-base font-bold text-gray-700 mt-4">
-                  Se connecter avec QR code
-                </h3>
-                <p className="text-sm text-smallText mt-1">
-                  Scan ce code avec ton téléphone pour te connecter instantanément
-                </p>
+
+                {/* Séparateur vertical sur desktop */}
+                {!isMobile && (
+                  <div className="h-96 w-px mx-8 border border-gray-100"></div>
+                )}
+
+                {/* QR Code */}
+                <div className="w-full mt-12 text-center">
+                  <div className="inline-block">
+                    <Image
+                      src="/qrcode/qrcode.png"
+                      alt="QR Code"
+                      width={150}
+                      height={150}
+                      className="rounded-lg"
+                    />
+                  </div>
+                  <h3 className="text-base font-bold text-gray-700 mt-4">
+                    Se connecter avec QR code
+                  </h3>
+                  <p className="text-sm text-smallText mt-1">
+                    Scan ce code avec ton téléphone pour te connecter instantanément
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
 
+          </div>
         </div>
       </>
     </AuthLayout>
