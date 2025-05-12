@@ -4,8 +4,7 @@ import { API_URL } from "@/src/app/config/constants";
 
 export async function GET(request: NextRequest, context: any) {
   try {
-    const { params } = await context;
-    const path = params?.path?.join("/") ?? "";
+    const path = context?.params?.path?.join("/") ?? "";
     const searchParams = request.nextUrl.searchParams;
     const headers = new Headers(request.headers);
 
@@ -31,8 +30,7 @@ export async function GET(request: NextRequest, context: any) {
 
 export async function POST(request: NextRequest, context: any) {
   try {
-    const { params } = await context;
-    const path = params?.path?.join("/") ?? "";
+    const path = context?.params?.path?.join("/") ?? "";
     const body = await request.json();
     const headers = new Headers(request.headers);
     headers.set("Content-Type", "application/json");
