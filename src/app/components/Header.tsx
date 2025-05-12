@@ -234,7 +234,7 @@ const Header = () => {
       </style>
 
       <div
-        className={`fixed w-full z-50 transition-all duration-200 ease-in-out ${
+        className={`fixed w-full z-[9999] transition-all duration-200 ease-in-out ${
           hasScrolled || isMobile
             ? "top-0 px-0"
             : "top-6 px-2 sm:px-4 md:px-6 lg:px-[40px] xl:px-[80px]"
@@ -243,7 +243,7 @@ const Header = () => {
         <motion.header
           className={`bg-[#F5F5F5] w-full overflow-hidden transition-all duration-200 ease-in-out ${
             hasScrolled || isMobile
-              ? "rounded-b-[10px] sm:rounded-b-[20px] md:rounded-b-[40px] shadow-sm"
+              ? "rounded-none shadow"
               : "rounded-[10px] sm:rounded-[20px] md:rounded-[40px]"
           }`}
           initial={{ opacity: 0, y: -20 }}
