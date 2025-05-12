@@ -1,17 +1,16 @@
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion";
-import Link from "next/link";
-import Image from "next/image";
-import UserSolo from "./icons/UserSolo";
-import AssistanceIcon from "./icons/AssistanceIcon";
-import Ecostore from "./icons/EcoStore";
-import { useState, useEffect, useRef, useCallback } from "react";
-import { usePathname } from "next/navigation";
 import { useAuth } from "@/src/hooks/useAuth";
+import { AnimatePresence, motion } from "framer-motion";
+import Image from "next/image";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
+import Ecostore from "./icons/EcoStore";
+import UserSolo from "./icons/UserSolo";
 
-import Column from "./Column";
 import { TAB_CONTENT } from "../utils/headerData";
+import Column from "./Column";
 
 // Styles pour assurer que la position sticky fonctionne correctement
 // sans causer de saut de page quand le header devient sticky
@@ -38,7 +37,9 @@ const Header = () => {
   const [isMobile, setIsMobile] = useState(false);
   const [isTablet, setIsTablet] = useState(false);
   // État pour stocker le sous-menu actif
-  const [activeSubmenuPath, setActiveSubmenuPath] = useState<string | null>(null);
+  const [activeSubmenuPath, setActiveSubmenuPath] = useState<string | null>(
+    null
+  );
 
   // Récupérer l'état d'authentification
   const { isAuthenticated, user } = useAuth();
@@ -58,7 +59,7 @@ const Header = () => {
       for (const column of columns) {
         // Pour chaque lien dans la colonne
         for (const link of column.links) {
-          if (path === link.href || path.startsWith(link.href + '/')) {
+          if (path === link.href || path.startsWith(link.href + "/")) {
             return tab;
           }
         }
@@ -66,11 +67,23 @@ const Header = () => {
     }
 
     // Si aucun sous-menu ne correspond, utilise la détection par parties du chemin
-    if (path.includes('/simulateur-facture') || path.includes('/simulateur-puissance') || path.includes('/mes-demandes')) {
+    if (
+      path.includes("/simulateur-facture") ||
+      path.includes("/simulateur-puissance") ||
+      path.includes("/mes-demandes")
+    ) {
       return "particulier";
-    } else if (path.includes('/business') || path.includes('/pro') || path.includes('/entreprise')) {
+    } else if (
+      path.includes("/business") ||
+      path.includes("/pro") ||
+      path.includes("/entreprise")
+    ) {
       return "business";
-    } else if (path.includes('/institution') || path.includes('/administration') || path.includes('/collectivite')) {
+    } else if (
+      path.includes("/institution") ||
+      path.includes("/administration") ||
+      path.includes("/collectivite")
+    ) {
       return "institution";
     }
 
@@ -101,15 +114,17 @@ const Header = () => {
 
   // Nouvelle fonction pour sauvegarder l'onglet actif
   const saveActiveTab = useCallback((tab: TabType) => {
-    if (typeof window !== 'undefined') {
-      sessionStorage.setItem('lastActiveTab', tab);
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem("lastActiveTab", tab);
     }
   }, []);
 
   // Nouvelle fonction pour récupérer l'onglet précédemment actif
   const getSavedActiveTab = useCallback((): TabType | null => {
-    if (typeof window !== 'undefined') {
-      const savedTab = sessionStorage.getItem('lastActiveTab') as TabType | null;
+    if (typeof window !== "undefined") {
+      const savedTab = sessionStorage.getItem(
+        "lastActiveTab"
+      ) as TabType | null;
       return savedTab;
     }
     return null;
@@ -136,7 +151,9 @@ const Header = () => {
     setActiveSubmenuPath(activeSubmenu);
 
     // Log pour le débogage
-    console.log(`Page changed: ${pathname} → Saved Tab: ${savedTab} → Path Tab: ${tabFromPath} → Final Tab: ${finalTab} → Active submenu: ${activeSubmenu}`);
+    console.log(
+      `Page changed: ${pathname} → Saved Tab: ${savedTab} → Path Tab: ${tabFromPath} → Final Tab: ${finalTab} → Active submenu: ${activeSubmenu}`
+    );
 
     // Si un sous-menu est actif, ouvrir le menu correspondant automatiquement sur desktop
     if (activeSubmenu && finalTab && !isMobile) {
@@ -170,7 +187,9 @@ const Header = () => {
 
   // Gestion du clic sur un onglet
   const handleTabClick = (tab: TabType) => {
-    console.log(`Tab clicked: ${tab}, current active: ${activeTab}, menu open: ${isMenuOpen}`);
+    console.log(
+      `Tab clicked: ${tab}, current active: ${activeTab}, menu open: ${isMenuOpen}`
+    );
 
     if (hoverTimeout) clearTimeout(hoverTimeout);
 
@@ -193,9 +212,11 @@ const Header = () => {
 
     // Si la souris quitte la zone, fermer le menu après un délai
     if (!tab) {
-      setHoverTimeout(setTimeout(() => {
-        setIsMenuOpen(false);
-      }, 300));
+      setHoverTimeout(
+        setTimeout(() => {
+          setIsMenuOpen(false);
+        }, 300)
+      );
     }
     // Sinon, ouvrir le menu sans changer l'onglet actif
     else if (activeTab) {
@@ -208,14 +229,23 @@ const Header = () => {
   return (
     <>
       {/* Styles globaux pour le header */}
-      <style jsx global>{headerStyles}</style>
+      <style jsx global>
+        {headerStyles}
+      </style>
 
-      <div className="px-2 sm:px-4 md:px-6 lg:px-[40px] xl:px-[80px] pt-2 sm:pt-4 md:pt-6 sticky-header-container">
+      <div
+        className={`fixed w-full z-50 transition-all duration-200 ease-in-out ${
+          hasScrolled || isMobile
+            ? "top-0 px-0"
+            : "top-6 px-2 sm:px-4 md:px-6 lg:px-[40px] xl:px-[80px]"
+        }`}
+      >
         <motion.header
-          className={`bg-[#F5F5F5] w-full rounded-[10px] sm:rounded-[20px] md:rounded-[40px] overflow-hidden shadow-sm transition-all duration-300 ease-in-out ${hasScrolled
-            ? "fixed top-0 left-0 right-0 z-[9999] rounded-none shadow-lg"
-            : ""
-            }`}
+          className={`bg-[#F5F5F5] w-full overflow-hidden transition-all duration-200 ease-in-out ${
+            hasScrolled || isMobile
+              ? "rounded-b-[10px] sm:rounded-b-[20px] md:rounded-b-[40px] shadow-sm"
+              : "rounded-[10px] sm:rounded-[20px] md:rounded-[40px]"
+          }`}
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
@@ -244,16 +274,17 @@ const Header = () => {
                     (tab) => (
                       <button
                         key={tab}
-                        className={`relative text-sm xs:text-base sm:text-lg md:text-xl text-noir hover:text-orange transition-all duration-300 ${activeTab === tab ? "font-semibold" : ""
-                          }`}
+                        className={`relative text-sm xs:text-base sm:text-lg md:text-xl text-noir hover:text-orange transition-all duration-300 ${
+                          activeTab === tab ? "font-semibold" : ""
+                        }`}
                         onClick={() => handleTabClick(tab)}
                         onMouseEnter={() => handleTabHover(tab)}
                       >
                         {tab === "particulier"
                           ? "Particulier"
                           : tab === "business"
-                            ? "Business"
-                            : "Institution"}
+                          ? "Business"
+                          : "Institution"}
                         {activeTab === tab && (
                           <motion.div
                             layoutId="underline"
@@ -280,9 +311,10 @@ const Header = () => {
                 <Link
                   href={isAuthenticated ? "/dashboard" : "/login"}
                   className={`
-                    ${isAuthenticated && user && user.firstname && user.lastname
-                      ? "bg-gradient-to-r from-[#F47D02] via-[#F9B234] to-[#F47D02] border-none text-white"
-                      : "bg-orange text-white"
+                    ${
+                      isAuthenticated && user && user.firstname && user.lastname
+                        ? "bg-gradient-to-r from-[#F47D02] via-[#F9B234] to-[#F47D02] border-none text-white"
+                        : "bg-orange text-white"
                     }
                     hover:bg-noir hover:text-white
                     font-semibold 
@@ -298,13 +330,17 @@ const Header = () => {
                     gap-[6px] sm:gap-[10px]
                     hover:scale-105 hover:shadow-lg
                     truncate shrink-0
-                    ${isAuthenticated && user && user.firstname && user.lastname
-                      ? "shadow-md shadow-orange/30"
-                      : ""
+                    ${
+                      isAuthenticated && user && user.firstname && user.lastname
+                        ? "shadow-md shadow-orange/30"
+                        : ""
                     }
                   `}
                 >
-                  {isAuthenticated && user && user.firstname && user.lastname ? (
+                  {isAuthenticated &&
+                  user &&
+                  user.firstname &&
+                  user.lastname ? (
                     <>
                       <div className="relative group shrink-0">
                         <div className="h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white font-bold ring-2 ring-white/50 group-hover:ring-white/80 transition-all">
@@ -313,8 +349,12 @@ const Header = () => {
                         <div className="absolute -bottom-1 -right-1 h-2 w-2 sm:h-3 sm:w-3 bg-green-400 rounded-full border-[1px] sm:border-2 border-white"></div>
                       </div>
                       <div className="flex flex-col items-start leading-tight">
-                        <span className="font-bold text-[9px] xs:text-[10px] sm:text-xs">{user.firstname}</span>
-                        <span className="font-medium text-[8px] xs:text-[9px] sm:text-[11px] opacity-90">{user.lastname}</span>
+                        <span className="font-bold text-[9px] xs:text-[10px] sm:text-xs">
+                          {user.firstname}
+                        </span>
+                        <span className="font-medium text-[8px] xs:text-[9px] sm:text-[11px] opacity-90">
+                          {user.lastname}
+                        </span>
                       </div>
                     </>
                   ) : (
@@ -371,21 +411,22 @@ const Header = () => {
                     {activeTab === "particulier"
                       ? "Vous êtes particulier professionnel ou particulier domicile"
                       : activeTab === "business"
-                        ? "Vous êtes domestique HT ou professionnel HT?"
-                        : "Vous êtes une administration?"}
+                      ? "Vous êtes domestique HT ou professionnel HT?"
+                      : "Vous êtes une administration?"}
                   </p>
                 </div>
 
                 {/* Grille de colonnes */}
                 <div className="bg-[#f1f1f1] flex flex-col md:flex-row items-start gap-4 sm:gap-6 md:gap-8 p-3 sm:p-4 md:p-6 rounded-lg sm:rounded-xl shadow-sm">
-                  {activeTab && TAB_CONTENT[activeTab].map((col, idx) => (
-                    <Column
-                      key={col.title}
-                      {...col}
-                      activeSubmenuPath={activeSubmenuPath}
-                      showSeparator={idx < TAB_CONTENT[activeTab].length - 1}
-                    />
-                  ))}
+                  {activeTab &&
+                    TAB_CONTENT[activeTab].map((col, idx) => (
+                      <Column
+                        key={col.title}
+                        {...col}
+                        activeSubmenuPath={activeSubmenuPath}
+                        showSeparator={idx < TAB_CONTENT[activeTab].length - 1}
+                      />
+                    ))}
 
                   {/* Bloc "Mes demandes" exclusif Particulier */}
                   {activeTab === "particulier" && (
@@ -393,7 +434,11 @@ const Header = () => {
                       initial={{ opacity: 0, x: 20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.2 }}
-                      className={`border-2 p-2 sm:p-3 md:p-5 gap-2 sm:gap-4 md:gap-8 ${pathname === "/mes-demandes" ? "border-orange bg-orange/5" : "border-white"} rounded-[20px] sm:rounded-[30px] md:rounded-[50px] w-full flex max-w-md justify-center items-center hover:bg-gray-100 transition-all duration-300 hover:shadow-md cursor-pointer`}
+                      className={`border-2 p-2 sm:p-3 md:p-5 gap-2 sm:gap-4 md:gap-8 ${
+                        pathname === "/mes-demandes"
+                          ? "border-orange bg-orange/5"
+                          : "border-white"
+                      } rounded-[20px] sm:rounded-[30px] md:rounded-[50px] w-full flex max-w-md justify-center items-center hover:bg-gray-100 transition-all duration-300 hover:shadow-md cursor-pointer`}
                       onClick={() => (window.location.href = "/mes-demandes")}
                     >
                       <div>
