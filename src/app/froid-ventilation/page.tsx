@@ -1,4 +1,5 @@
 import GenericPage from "../components/GenericPage";
+import PageWrapper from "../components/PageWrapper";
 
 export default function FroidVentilationPage() {
   const description = `Spécialistes en systèmes de climatisation, ventilation et réfrigération pour particuliers et professionnels.
@@ -6,8 +7,7 @@ Nous assurons l'installation, la maintenance et le dépannage de tous types d'é
 Solutions sur mesure adaptées à vos besoins et à votre budget.`;
 
   return (
-    <div className="overflow-hidden mt-[-150px] sm:-mt-[120px] md:-mt-[140px] lg:-mt-[160px] mb-[-170px] sm:-mb-[120px] md:-mb-[140px] lg:-mb-[160px]">
-
+    <PageWrapper>
       <GenericPage
         title="Froid et ventilation"
         description={description}
@@ -18,6 +18,6 @@ Solutions sur mesure adaptées à vos besoins et à votre budget.`;
         imageRight="/depannage/climatisation.png"
         highlightWord="ventilation"
       />
-    </div>
+    </PageWrapper>
   );
 }

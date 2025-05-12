@@ -3,6 +3,7 @@
 import { useState } from "react";
 import GenericPage from "../components/GenericPage";
 import EntretienTransfoModal from "../components/EntretienTransfoModal";
+import PageWrapper from "../components/PageWrapper";
 
 export default function SolutionPage() {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -13,8 +14,7 @@ export default function SolutionPage() {
 
     return (
         <>
-            <div className="overflow-hidden mt-[-40px] sm:-mt-[120px] md:-mt-[140px] lg:-mt-[160px] mb-[-80px] sm:-mb-[120px] md:-mb-[140px] lg:-mb-[160px]">
-
+            <PageWrapper>
                 <GenericPage title="Solutions d’efficacité énergétique"
                     description="Un problème avec votre équipement ou votre installation ? Pas de panique. Nos équipes techniques sont disponibles pour vous accompagner rapidement et efficacement. Nous mettons tout en œuvre pour rétablir votre confort dans les meilleurs délais."
                     buttonText="Faire une demande"
@@ -23,9 +23,8 @@ export default function SolutionPage() {
                     secondButtonLink="#"
                     imageRight="/depannage/depannage.png"
                     onButtonClick={handleButtonClick}
-
-                />;
-            </div>
+                />
+            </PageWrapper>
             <EntretienTransfoModal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}

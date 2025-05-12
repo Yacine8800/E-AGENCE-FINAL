@@ -1,4 +1,5 @@
 import GenericPage from "../components/GenericPage";
+import PageWrapper from "../components/PageWrapper";
 
 export default function AuditConsoPage() {
   const description = `Respectez les distances autour des lignes électriques :
@@ -7,9 +8,7 @@ export default function AuditConsoPage() {
 18 m pour les 225 kV  ⚠️ Tenez compte des objets manipulés (outils, perches...).  Ne touchez jamais aux pylônes, poteaux ou câbles, même de loin.`;
 
   return (
-
-    <div className="overflow-hidden mt-[40px] sm:-mt-[120px] md:-mt-[140px] lg:-mt-[160px] mb-[40px] sm:-mb-[120px] md:-mb-[140px] lg:-mb-[160px]">
-
+    <PageWrapper>
       <GenericPage
         title="Audit de consommation électrique"
         description={description}
@@ -19,7 +18,6 @@ export default function AuditConsoPage() {
         secondButtonLink="#"
         imageRight="/depannage/audit.png"
       />
-    </div>
-
+    </PageWrapper>
   );
 } 
