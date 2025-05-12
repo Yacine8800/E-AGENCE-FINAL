@@ -9,18 +9,18 @@ import Documents from "./demandes/Documents";
 // Définition des étapes par type de demande
 const stepsByType = {
   mutation: [
+    "Joindre les documents",
     "Infos de l'ancien client",
     "Infos de l'ancien client",
     "Infos du nouveau client",
     "Infos sur le branchement",
-    "Joindre les documents",
   ],
   reabonnement: [
+    "Joindre les documents",
     "Infos de l'ancien client",
     "Infos de l'ancien client",
     "Infos du nouveau client",
     "Infos sur le branchement",
-    "Joindre les documents",
   ],
   branchement: [
     "Joindre les documents du demandeur",
@@ -32,24 +32,20 @@ const stepsByType = {
 // Définition des composants à utiliser pour chaque étape et type
 const componentsByType = {
   mutation: [
+    Documents,
     InfoClient,
     InfoClientSuite,
     InfoDemandeur,
     InfoBranchement,
-    Documents,
   ],
   reabonnement: [
+    Documents,
     InfoClient,
     InfoClientSuite,
     InfoDemandeur,
     InfoBranchement,
-    Documents,
   ],
-  branchement: [
-    Documents,
-    InfoDemandeur,
-    InfoBranchement,
-  ],
+  branchement: [Documents, InfoDemandeur, InfoBranchement],
 };
 
 interface StepperProps {
@@ -68,7 +64,11 @@ const Stepper: React.FC<StepperProps> = ({ type, closeModal }) => {
       const StepComponent = components[currentStep];
       return <StepComponent endpoint={type} />;
     }
-    return <p className="text-gray-600 text-sm">Formulaire de l'étape {currentStep + 1}</p>;
+    return (
+      <p className="text-gray-600 text-sm">
+        Formulaire de l'étape {currentStep + 1}
+      </p>
+    );
   };
 
   return (
@@ -86,8 +86,8 @@ const Stepper: React.FC<StepperProps> = ({ type, closeModal }) => {
                   currentStep > index
                     ? "bg-primary text-white border-primary"
                     : currentStep === index
-                      ? "bg-primary text-white border-primary"
-                      : "border-primary text-primary bg-white"
+                    ? "bg-primary text-white border-primary"
+                    : "border-primary text-primary bg-white"
                 )}
               >
                 {currentStep > index ? "✔" : index + 1}
@@ -115,32 +115,35 @@ const Stepper: React.FC<StepperProps> = ({ type, closeModal }) => {
       </div>
 
       {/* Contenu Dynamique - occupe l'espace du milieu avec défilement masqué */}
-      <div className="flex-grow overflow-y-auto py-6 scrollbar-hide" 
-           style={{ 
-             scrollbarWidth: 'none', 
-             msOverflowStyle: 'none',
-             WebkitOverflowScrolling: 'touch'
-           }}>
+      <div
+        className="flex-grow overflow-y-auto py-6 scrollbar-hide"
+        style={{
+          scrollbarWidth: "none",
+          msOverflowStyle: "none",
+          WebkitOverflowScrolling: "touch",
+        }}
+      >
         {renderStepContent()}
       </div>
 
       {/* Boutons de navigation - fixés en bas en colonne */}
       <div className="mt-auto pt-6 pb-6 flex flex-row gap-4 px-6 border-t bg-white">
         <button
-          className="w-full rounded-full bg-primary text-white font-semibold py-4 hover:bg-red-600"
-          onClick={() =>
-            currentStep === steps.length - 1 ? closeModal() : setCurrentStep((prev) => Math.min(steps.length - 1, prev + 1))
-          }
-        >
-          {currentStep === steps.length - 1 ? "Enregistrer" : "Suivant"}
-        </button>
-
-        <button
           className="w-full rounded-full text-primary border-2 border-primary font-semibold py-4 hover:bg-gray-100"
           disabled={currentStep === 0}
           onClick={() => setCurrentStep((prev) => Math.max(0, prev - 1))}
         >
           Précédent
+        </button>
+        <button
+          className="w-full rounded-full bg-primary text-white font-semibold py-4 hover:bg-red-600"
+          onClick={() =>
+            currentStep === steps.length - 1
+              ? closeModal()
+              : setCurrentStep((prev) => Math.min(steps.length - 1, prev + 1))
+          }
+        >
+          {currentStep === steps.length - 1 ? "Enregistrer" : "Suivant"}
         </button>
       </div>
     </div>
