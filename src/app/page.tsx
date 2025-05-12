@@ -195,10 +195,9 @@ export default function Home() {
           <div
             ref={carouselRef}
             className={`
-              ${
-                isMobile
-                  ? "flex overflow-x-auto snap-x snap-mandatory hide-scrollbar pb-6"
-                  : "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3"
+              ${isMobile
+                ? "flex overflow-x-auto snap-x snap-mandatory hide-scrollbar pb-6"
+                : "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3"
               }
               gap-y-12 gap-x-8 sm:gap-x-10 md:gap-x-12 mx-auto px-4 sm:px-6
             `}
@@ -217,10 +216,9 @@ export default function Home() {
                   group rounded-xl overflow-hidden text-center 
                   cursor-pointer relative bg-white shadow-sm hover:shadow-xl
                   transition-all duration-300
-                  ${
-                    isMobile
-                      ? "flex-shrink-0 w-[85vw] max-w-[300px] snap-center"
-                      : ""
+                  ${isMobile
+                    ? "flex-shrink-0 w-[85vw] max-w-[300px] snap-center"
+                    : ""
                   }
                   ${service.className || ""}
                 `}
@@ -1341,11 +1339,10 @@ export default function Home() {
             w-[300px] sm:w-[400px] md:w-[600px]
             h-auto object-contain
             transition-all duration-500
-            ${
-              activeSlide === 0
+            ${activeSlide === 0
                 ? "opacity-10 scale-100 rotate-0"
                 : "opacity-0 scale-95 rotate-6"
-            }
+              }
           `}
           />
           <motion.img
@@ -1357,11 +1354,10 @@ export default function Home() {
             w-[300px] sm:w-[400px] md:w-[600px]
             h-auto object-contain
             transition-all duration-500
-            ${
-              activeSlide === 1
+            ${activeSlide === 1
                 ? "opacity-10 scale-100 rotate-0"
                 : "opacity-0 scale-95 rotate-6"
-            }
+              }
           `}
           />
           <motion.img
@@ -1373,11 +1369,10 @@ export default function Home() {
             w-[300px] sm:w-[400px] md:w-[600px]
             h-auto object-contain
             transition-all duration-500
-            ${
-              activeSlide === 2
+            ${activeSlide === 2
                 ? "opacity-10 scale-100 rotate-0"
                 : "opacity-0 scale-95 rotate-6"
-            }
+              }
           `}
           />
           <motion.img
@@ -1389,11 +1384,10 @@ export default function Home() {
             w-[300px] sm:w-[400px] md:w-[600px]
             h-auto object-contain
             transition-all duration-500
-            ${
-              activeSlide === 3
+            ${activeSlide === 3
                 ? "opacity-10 scale-100 rotate-0"
                 : "opacity-0 scale-95 rotate-6"
-            }
+              }
           `}
           />
 
@@ -1423,19 +1417,19 @@ export default function Home() {
                     {activeSlide === 0
                       ? "Adopter les bons gestes"
                       : activeSlide === 1
-                      ? "Maîtriser ma consommation"
-                      : activeSlide === 2
-                      ? "Simuler ma facture"
-                      : "Réaliser les économies"}
+                        ? "Maîtriser ma consommation"
+                        : activeSlide === 2
+                          ? "Simuler ma facture"
+                          : "Réaliser les économies"}
                   </h3>
                   <p className="text-sm text-white/60">
                     {activeSlide === 0
                       ? "Changez vos réflexes, économisez votre énergie"
                       : activeSlide === 1
-                      ? "Suivez votre consommation en temps réel"
-                      : activeSlide === 2
-                      ? "Estimez le montant de votre facture"
-                      : "Réduisez votre consommation"}
+                        ? "Suivez votre consommation en temps réel"
+                        : activeSlide === 2
+                          ? "Estimez le montant de votre facture"
+                          : "Réduisez votre consommation"}
                   </p>
                 </div>
               </motion.div>
@@ -1787,19 +1781,19 @@ export default function Home() {
                   {activeSlide === 0
                     ? "Simuler ma facture"
                     : activeSlide === 1
-                    ? "Réaliser les économies"
-                    : activeSlide === 2
-                    ? "Adopter les bons gestes"
-                    : "Maîtriser ma consommation"}
+                      ? "Réaliser les économies"
+                      : activeSlide === 2
+                        ? "Adopter les bons gestes"
+                        : "Maîtriser ma consommation"}
                 </h3>
                 <p className="text-sm text-white/60">
                   {activeSlide === 0
                     ? "Estimez le montant de votre facture"
                     : activeSlide === 1
-                    ? "Réduisez votre consommation"
-                    : activeSlide === 2
-                    ? "Changez vos réflexes"
-                    : "Suivez votre consommation en temps réel"}
+                      ? "Réduisez votre consommation"
+                      : activeSlide === 2
+                        ? "Changez vos réflexes"
+                        : "Suivez votre consommation en temps réel"}
                 </p>
               </div>
             </motion.div>
@@ -1863,11 +1857,10 @@ export default function Home() {
               rounded-full 
               transition-all 
               duration-300 
-              ${
-                activeSlide === index
+              ${activeSlide === index
                   ? "w-10 sm:w-14 bg-[#47B5B0] shadow-md"
                   : "w-3 bg-gray-300 hover:bg-gray-400"
-              }
+                }
             `}
             />
           ))}
