@@ -7,18 +7,22 @@ interface InputTypePieceProps {
   onChange?: (typePiece: string, imageBase64: string | null) => void;
   initialImage?: string | null;
   initialType?: string;
+  required?: boolean;
 }
 
-const InputTypePiece: React.FC<InputTypePieceProps> = ({ onChange, initialImage, initialType }) => {
+const InputTypePiece: React.FC<InputTypePieceProps> = ({ onChange, initialImage, initialType, required = false }) => {
   const [typePiece, setTypePiece] = useState<string>(initialType || '');
   const [imagePreview, setImagePreview] = useState<string | null>(initialImage || null);
 
+  // Mettre à jour les états quand les props changent
   useEffect(() => {
-    if ((initialType || initialImage) && onChange) {
-      onChange(initialType || '', initialImage || null);
+    if (initialType !== undefined) {
+      setTypePiece(initialType);
     }
-    // eslint-disable-next-line
-  }, []);
+    if (initialImage !== undefined) {
+      setImagePreview(initialImage);
+    }
+  }, [initialType, initialImage]);
 
   const handleTypePieceChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
@@ -34,9 +38,10 @@ const InputTypePiece: React.FC<InputTypePieceProps> = ({ onChange, initialImage,
       const reader = new FileReader();
       reader.onload = (event) => {
         if (event.target) {
-          setImagePreview(event.target.result as string);
+          const newImage = event.target.result as string;
+          setImagePreview(newImage);
           if (onChange) {
-            onChange(typePiece, event.target.result as string);
+            onChange(typePiece, newImage);
           }
         }
       };
@@ -59,7 +64,7 @@ const InputTypePiece: React.FC<InputTypePieceProps> = ({ onChange, initialImage,
         className="flex-grow border-none p-3 outline-none bg-white text-gray-700"
         value={typePiece}
         onChange={handleTypePieceChange}
-        required
+        required={required}
       >
         <option value="">Sélectionnez un type de pièce</option>
         <option value="cni">CNI</option>
@@ -81,6 +86,7 @@ const InputTypePiece: React.FC<InputTypePieceProps> = ({ onChange, initialImage,
               className="rounded-md"
             />
             <button
+              type="button"
               onClick={handleRemoveImage}
               className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs"
             >
@@ -88,7 +94,7 @@ const InputTypePiece: React.FC<InputTypePieceProps> = ({ onChange, initialImage,
             </button>
           </div>
         ) : (
-          <label className="flex flex-col items-center cursor-pointer">
+          <label className={`flex flex-col items-center ${!typePiece ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}>
             <Image src="/demande/basil_camera-solid.png" alt="" width={20} height={20} />
             <span className="text-xs font-semibold text-[#858FA0]">Photo</span>
             <input
@@ -96,6 +102,7 @@ const InputTypePiece: React.FC<InputTypePieceProps> = ({ onChange, initialImage,
               accept="image/*"
               className="hidden"
               onChange={handleImageUpload}
+              disabled={!typePiece}
             />
           </label>
         )}
