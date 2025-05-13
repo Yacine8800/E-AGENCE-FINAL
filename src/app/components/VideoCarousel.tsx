@@ -67,7 +67,7 @@ const VideoCarousel = () => {
   };
 
   return (
-    <div className="relative px-4 sm:px-6 md:px-12 lg:px-[80px] w-full h-[450px] sm:h-[550px] md:h-[650px] lg:h-[850px] overflow-hidden">
+    <div className="relative px-4 sm:px-6 md:px-12 lg:px-[80px] w-full h-[650px] sm:h-[550px] md:h-[650px] lg:h-[850px] overflow-hidden">
       {/* Vidéo de fond */}
       <video
         ref={videoRef}
@@ -132,7 +132,7 @@ const VideoCarousel = () => {
           Votre agence évolue pour mieux vous servir !{" "}
           <strong className="font-semibold">Explorez</strong> dès maintenant nos{" "}
           <strong className="font-semibold">nouveaux services en ligne</strong>{" "}
-          et profitez d'une expérience simplifiée et{" "}
+          et profitez d&apos;une expérience simplifiée et{" "}
           <strong className="font-semibold">plus efficace</strong>.
         </motion.p>
 
