@@ -23,7 +23,7 @@ import ChatBot from "../chat/ChatBot";
 import Portal from "../components/Portal";
 import LogoutIcon from "../components/icons/LogoutIcon";
 import { useAuth } from "@/src/hooks/useAuth";
-import Loader from "../components/animation/loader";
+import { useLoader } from "@/src/contexts/LoaderContext";
 
 
 const Navbar = () => {
@@ -61,7 +61,8 @@ const Navbar = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState<number>(-1);
 
   // Hook d'auth pour la déconnexion
-  const { logout: handleLogout, isLogoutLoading } = useAuth();
+  const { logout: handleLogout } = useAuth();
+  const { showLoader, hideLoader } = useLoader();
 
   useEffect(() => {
     const handleEscapeKey = (e: KeyboardEvent) => {
@@ -218,12 +219,15 @@ const Navbar = () => {
                 <button
                   onClick={async () => {
                     setShowLogoutConfirm(false);
-                    setIsLoading(true);
+                    showLoader('Déconnexion en cours...');
                     try {
                       await handleLogout();
+                      // Redirection vers la page de login
+                      window.location.href = "/login";
                     } catch (error) {
                       console.error("Erreur lors de la déconnexion:", error);
-                      window.location.href = "/";
+                      hideLoader(); // On cache le loader uniquement en cas d'erreur
+                      window.location.href = "/login";
                     }
                   }}
                   className="flex-1 py-2 px-4 bg-rouge text-white rounded-xl text-sm font-medium"
@@ -1267,9 +1271,6 @@ const Navbar = () => {
           </div>
         </div>
       )}
-
-      {/* Loader pour la déconnexion */}
-      {(isLoading || isLogoutLoading) && <Loader context="logout" />}
     </>
   );
 };

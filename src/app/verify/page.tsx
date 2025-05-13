@@ -8,6 +8,7 @@ import { bebas_beue } from "@/utils/globalFunction";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { API_URL } from "../config/constants";
+import { useLoader } from "@/src/contexts/LoaderContext";
 
 const Page = () => {
   const PIN_LENGTH = 6; // Longueur du code PIN
@@ -29,6 +30,7 @@ const Page = () => {
   const [error, setError] = useState<string | null>(null);
   const [currentLogin, setCurrentLogin] = useState<string>("");
   const [redirecting, setRedirecting] = useState(false); // Ajout d'un état pour suivre la redirection
+  const { showLoader, hideLoader } = useLoader();
 
   // Initialiser avec la valeur du localStorage une fois que le composant est monté côté client
   useEffect(() => {
@@ -84,12 +86,11 @@ const Page = () => {
   // Fonction asynchrone pour gérer la connexion
   const processLogin = async (passcode: string) => {
     try {
-      setIsLoading(true);
+      showLoader('Connexion en cours...');
 
       const api_token = localStorage.getItem("api_token");
       const myHeaders = new Headers();
       myHeaders.append("Content-Type", "application/json");
-      // Le token d'authentification pour l'API de login
       myHeaders.append("Authorization", `Bearer ${api_token}`);
 
       const raw = JSON.stringify({
@@ -109,52 +110,37 @@ const Page = () => {
         requestOptions
       );
 
-      console.log(response, "responseLogin");
-
       if (!response.ok) {
         throw new Error(`Erreur: ${response.status}`);
       }
 
       const data = await response.json();
 
-      console.log(data, "responseLogin");
-
       if (data.message === "Action éffectuée avec succès" && data.data) {
-        // Marquer que nous sommes en train de rediriger
         setRedirecting(true);
         
-        // Créer un objet avec les données de l'utilisateur
         const userData = {
           token: data.data.token,
           refreshToken: data.data.refreshToken,
           user: data.data.user
         };
 
-        // 1. Stocker dans sessionStorage pour un accès immédiat et synchrone
         sessionStorage.setItem("authData", JSON.stringify(userData));
-        
-        // 2. Stocker dans localStorage pour persistance à long terme
         localStorage.setItem("token", data.data.token);
         localStorage.setItem("refreshToken", data.data.refreshToken);
         localStorage.setItem("user", JSON.stringify(data.data.user));
 
-        // 3. Pré-initialiser le dashboard avec les données utilisateur
-        // via l'URL avec données en paramètres encodées
         const userDataForUrl = btoa(JSON.stringify({
           firstname: data.data.user.firstname,
           lastname: data.data.user.lastname,
           userId: data.data.user._id
         }));
 
-        // Redirection vers le tableau de bord avec données utilisateur
-        // Utiliser un court délai pour éviter de multiples redirections
-        setTimeout(() => {
-          window.location.href = `/dashboard?udata=${userDataForUrl}`;
-        }, 100);
-        
+        // Ne pas cacher le loader ici, il sera masqué automatiquement lors de la redirection
+        window.location.href = `/dashboard?udata=${userDataForUrl}`;
         return true;
       } else {
-        // Animation d'erreur et réinitialisation
+        hideLoader();
         setError(data.message || "Identifiants incorrects");
         setShakeAnimation(true);
         setPin([]);
@@ -165,6 +151,7 @@ const Page = () => {
       }
     } catch (err) {
       console.error("Erreur pendant la connexion:", err);
+      hideLoader();
       setError("Une erreur est survenue. Veuillez réessayer.");
       setShakeAnimation(true);
       setPin([]);
@@ -172,12 +159,6 @@ const Page = () => {
         setShakeAnimation(false);
       }, 500);
       return false;
-    } finally {
-      // Ne réinitialiser les états que si nous ne sommes pas en train de rediriger
-      if (!redirecting) {
-        setIsLoading(false);
-        requestSentRef.current = false;
-      }
     }
   };
 
@@ -197,57 +178,12 @@ const Page = () => {
   return (
     <AuthLayout>
       <>
-        {/* Styles pour les animations personnalisées */}
+        {/* Styles pour les animations d'erreur uniquement */}
         <style jsx>{`
-          @keyframes progressBar {
-            0% {
-              width: 0%;
-            }
-            100% {
-              width: 100%;
-            }
-          }
-
-          @keyframes moveLeftRight {
-            0% {
-              transform: translateX(-100px);
-            }
-            50% {
-              transform: translateX(100px);
-            }
-            100% {
-              transform: translateX(-100px);
-            }
-          }
-
-          @keyframes blink {
-            0%,
-            100% {
-              opacity: 0;
-            }
-            50% {
-              opacity: 1;
-            }
-          }
-
           @keyframes shake {
-            0%,
-            100% {
-              transform: translateX(0);
-            }
-            10%,
-            30%,
-            50%,
-            70%,
-            90% {
-              transform: translateX(-10px);
-            }
-            20%,
-            40%,
-            60%,
-            80% {
-              transform: translateX(10px);
-            }
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
+            20%, 40%, 60%, 80% { transform: translateX(10px); }
           }
 
           @keyframes fade-in {
@@ -261,18 +197,6 @@ const Page = () => {
             }
           }
 
-          .animate-progressBar {
-            animation: progressBar 1.5s cubic-bezier(0.45, 0, 0.55, 1) forwards;
-          }
-
-          .animate-moveLeftRight {
-            animation: moveLeftRight 3s ease-in-out infinite;
-          }
-
-          .animate-blink {
-            animation: blink 1s ease-in-out infinite;
-          }
-
           .animate-shake {
             animation: shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
           }
@@ -282,96 +206,6 @@ const Page = () => {
           }
         `}</style>
 
-        {/* Loader overlay - Design moderne */}
-        {isLoading && (
-          <div className="fixed inset-0 bg-white z-50 flex flex-col items-center justify-center">
-            {/* Container principal */}
-            <div className="relative w-full max-w-md px-6 py-10">
-              {/* Barre de progression */}
-              <div className="w-full h-1 bg-gray-100 rounded-full mb-8 overflow-hidden">
-                <div className="h-full bg-gradient-to-r from-[#EC4F48] to-[#FFBE20] animate-progressBar"></div>
-              </div>
-
-              {/* Animations d'électricité moderne */}
-              <div className="relative h-40 flex items-center justify-center mb-8">
-                {/* Lignes d'énergie */}
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="w-[200px] h-[1px] bg-gradient-to-r from-transparent via-[#EC4F48] to-transparent animate-pulse"></div>
-                </div>
-                <div className="absolute inset-0 flex items-center justify-center transform rotate-45">
-                  <div className="w-[200px] h-[1px] bg-gradient-to-r from-transparent via-[#FFBE20] to-transparent animate-pulse"></div>
-                </div>
-                <div className="absolute inset-0 flex items-center justify-center transform rotate-90">
-                  <div className="w-[200px] h-[1px] bg-gradient-to-r from-transparent via-[#EC4F48] to-transparent animate-pulse"></div>
-                </div>
-                <div className="absolute inset-0 flex items-center justify-center transform rotate-135">
-                  <div className="w-[200px] h-[1px] bg-gradient-to-r from-transparent via-[#FFBE20] to-transparent animate-pulse"></div>
-                </div>
-
-                {/* Cercle central avec éclair */}
-                <div className="relative z-10 bg-white rounded-full p-4 shadow-[0_0_30px_rgba(236,79,72,0.3)]">
-                  <div className="bg-gradient-to-br from-[#EC4F48] to-[#FFBE20] rounded-full p-5">
-                    <svg
-                      className="w-10 h-10 text-white"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M13 2L4.5 12.5H11L9 22L17.5 11.5H11L13 2Z"
-                        fill="currentColor"
-                        stroke="currentColor"
-                        strokeWidth="0.5"
-                      />
-                    </svg>
-                  </div>
-                </div>
-
-                {/* Points d'énergie qui se déplacent le long des lignes */}
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="w-2 h-2 rounded-full bg-[#EC4F48] absolute animate-moveLeftRight"></div>
-                </div>
-                <div className="absolute inset-0 flex items-center justify-center transform rotate-45">
-                  <div
-                    className="w-2 h-2 rounded-full bg-[#FFBE20] absolute animate-moveLeftRight"
-                    style={{ animationDelay: "0.4s" }}
-                  ></div>
-                </div>
-                <div className="absolute inset-0 flex items-center justify-center transform rotate-90">
-                  <div
-                    className="w-2 h-2 rounded-full bg-[#EC4F48] absolute animate-moveLeftRight"
-                    style={{ animationDelay: "0.8s" }}
-                  ></div>
-                </div>
-                <div className="absolute inset-0 flex items-center justify-center transform rotate-135">
-                  <div
-                    className="w-2 h-2 rounded-full bg-[#FFBE20] absolute animate-moveLeftRight"
-                    style={{ animationDelay: "1.2s" }}
-                  ></div>
-                </div>
-              </div>
-
-              {/* Texte moderne */}
-              <div className="text-center">
-                <h3 className="text-[#1F2937] text-xl font-bold mb-2">
-                  Connexion en cours
-                </h3>
-                <p className="text-[#6B7280] text-sm font-medium">
-                  Chargement de votre espace énergie
-                  <span className="inline-block w-1 h-1 bg-[#EC4F48] rounded-full ml-1 animate-blink"></span>
-                  <span
-                    className="inline-block w-1 h-1 bg-[#EC4F48] rounded-full ml-1 animate-blink"
-                    style={{ animationDelay: "0.2s" }}
-                  ></span>
-                  <span
-                    className="inline-block w-1 h-1 bg-[#EC4F48] rounded-full ml-1 animate-blink"
-                    style={{ animationDelay: "0.4s" }}
-                  ></span>
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
         <div
           className={`flex items-center justify-center px-4 ${
             isMobile ? "flex-col pt-10 gap-5 px-10" : ""

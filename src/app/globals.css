@@ -215,18 +215,12 @@ body {
   animation: shimmer 2s infinite;
 }
 
-@keyframes float {
-  0% {
-    transform: translateY(100vh);
-  }
-  100% {
-    transform: translateY(-100px);
-  }
+/* Classe pour masquer la barre de défilement */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
 }
 
-.animate-float {
-  animation-name: float;
-  animation-duration: 10s;
-  animation-timing-function: linear;
-  animation-iteration-count: infinite;
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;  /* Chrome, Safari and Opera */
 }

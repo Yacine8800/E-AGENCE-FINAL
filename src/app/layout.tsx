@@ -17,6 +17,7 @@ import FloatingBot from "./components/FloatingBot";
 import Footer from "./components/Footer";
 import Header from "./components/Header";
 import "./globals.css";
+import { LoaderProvider } from "@/src/contexts/LoaderContext";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -354,7 +355,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       </head>
       <body className={montserrat.className}>
         <ReduxProvider>
-          <RouteGuard>{children}</RouteGuard>
+          <LoaderProvider>
+            <RouteGuard>
+              {children}
+            </RouteGuard>
+          </LoaderProvider>
         </ReduxProvider>
       </body>
     </html>
