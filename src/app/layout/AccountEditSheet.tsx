@@ -15,9 +15,9 @@ interface AccountEditSheetProps {
     lastname?: string;
     profileImage?: string;
   };
-  onSubmit: (data: { 
-    phone?: string; 
-    email?: string; 
+  onSubmit: (data: {
+    phone?: string;
+    email?: string;
     idFile?: string;
     firstname?: string;
     lastname?: string;
@@ -46,6 +46,13 @@ const AccountEditSheet: React.FC<AccountEditSheetProps> = ({ open, onClose, mode
   const [isEmailVerified, setIsEmailVerified] = useState(emailVerified || false);
   const [isIdUploaded, setIsIdUploaded] = useState(idVerified || false);
   const [isProfileVerified, setIsProfileVerified] = useState(false);
+  const [showOtpInput, setShowOtpInput] = useState(false);
+  const [otpCode, setOtpCode] = useState('');
+  const [showEmailOtpInput, setShowEmailOtpInput] = useState(false);
+  const [emailOtpCode, setEmailOtpCode] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [isOtpRequesting, setIsOtpRequesting] = useState(false);
+  const [isIdSubmitting, setIsIdSubmitting] = useState(false);
 
   // Charger les valeurs depuis localStorage au montage et quand le modal s'ouvre
   useEffect(() => {
@@ -70,7 +77,7 @@ const AccountEditSheet: React.FC<AccountEditSheetProps> = ({ open, onClose, mode
           }
           // Mettre à jour l'état de vérification
           setIsProfileVerified(!!parsed.profileVerified);
-        } catch {}
+        } catch { }
       } else {
         // Si pas de localStorage, utiliser les valeurs initiales
         setFormValues({
@@ -98,7 +105,7 @@ const AccountEditSheet: React.FC<AccountEditSheetProps> = ({ open, onClose, mode
           const parsed = JSON.parse(status);
           storedIdFile = parsed.idFileValue || null;
           storedIdType = parsed.idTypeValue || '';
-        } catch {}
+        } catch { }
       }
     }
     if (initialValues?.idFile) {
@@ -126,7 +133,7 @@ const AccountEditSheet: React.FC<AccountEditSheetProps> = ({ open, onClose, mode
           setIsEmailVerified(parsed.emailVerified || false);
           setIsIdUploaded(parsed.idVerified || false);
           setIsProfileVerified(parsed.profileVerified || false);
-        } catch {}
+        } catch { }
       }
     }
   }, [open]);
@@ -153,11 +160,11 @@ const AccountEditSheet: React.FC<AccountEditSheetProps> = ({ open, onClose, mode
       if (status) {
         try {
           parsed = JSON.parse(status);
-        } catch {}
+        } catch { }
       }
-      
-      parsed = { 
-        ...parsed, 
+
+      parsed = {
+        ...parsed,
         [`${name}Value`]: value
       };
       localStorage.setItem('accountStatus', JSON.stringify(parsed));
@@ -173,7 +180,7 @@ const AccountEditSheet: React.FC<AccountEditSheetProps> = ({ open, onClose, mode
         const result = reader.result as string;
         setProfileImage(result);
         setIsProfileVerified(false);
-        
+
         // Sauvegarder dans localStorage
         if (typeof window !== 'undefined') {
           const status = localStorage.getItem('accountStatus');
@@ -181,10 +188,10 @@ const AccountEditSheet: React.FC<AccountEditSheetProps> = ({ open, onClose, mode
           if (status) {
             try {
               parsed = JSON.parse(status);
-            } catch {}
+            } catch { }
           }
-          parsed = { 
-            ...parsed, 
+          parsed = {
+            ...parsed,
             profileImageValue: result,
             profileVerified: false
           };
@@ -208,13 +215,13 @@ const AccountEditSheet: React.FC<AccountEditSheetProps> = ({ open, onClose, mode
       if (status) {
         try {
           parsed = JSON.parse(status);
-        } catch {}
+        } catch { }
       }
-      parsed = { 
-        ...parsed, 
-        idFileValue: image, 
+      parsed = {
+        ...parsed,
+        idFileValue: image,
         idTypeValue: type,
-        idVerified: false 
+        idVerified: false
       };
       localStorage.setItem('accountStatus', JSON.stringify(parsed));
     }
@@ -222,18 +229,85 @@ const AccountEditSheet: React.FC<AccountEditSheetProps> = ({ open, onClose, mode
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const data: { 
-      phone?: string; 
-      email?: string; 
+
+    // Si on est en mode phone et qu'on n'a pas encore montré l'OTP, on le montre
+    if (mode === "phone" && !showOtpInput) {
+      setIsOtpRequesting(true);
+
+      // Simuler un délai d'envoi du code OTP
+      setTimeout(() => {
+        setIsOtpRequesting(false);
+        setShowOtpInput(true);
+      }, 1500);
+
+      return;
+    }
+
+    // Si on est en mode email et qu'on n'a pas encore montré l'OTP, on le montre
+    if (mode === "email" && !showEmailOtpInput) {
+      setIsOtpRequesting(true);
+
+      // Simuler un délai d'envoi du code OTP
+      setTimeout(() => {
+        setIsOtpRequesting(false);
+        setShowEmailOtpInput(true);
+      }, 1500);
+
+      return;
+    }
+
+    // Si on est en mode id, on soumet directement avec un loader
+    if (mode === "id" && pieceImage) {
+      setIsIdSubmitting(true);
+
+      // Simulation d'un délai pour l'envoi de la pièce d'identité
+      setTimeout(() => {
+        setIsIdSubmitting(false);
+        setIsIdUploaded(true);
+
+        // On met à jour le localStorage
+        const currentStatus = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('accountStatus') || '{}') : {};
+        currentStatus.idVerified = true;
+        localStorage.setItem('accountStatus', JSON.stringify(currentStatus));
+
+        // On soumet les données
+        onSubmit({ idFile: pieceImage });
+
+        // On ferme le modal
+        onClose();
+      }, 2000);
+
+      return;
+    }
+
+    // Afficher le loader lors de la soumission
+    if ((mode === "phone" && showOtpInput) || (mode === "email" && showEmailOtpInput)) {
+      setIsLoading(true);
+
+      // Simulation d'un délai d'appel API (à remplacer par votre vraie logique API)
+      setTimeout(() => {
+        if (mode === "phone") {
+          verifyOtp();
+        } else if (mode === "email") {
+          verifyEmailOtp();
+        }
+      }, 1500); // Délai simulé de 1.5 secondes
+
+      return;
+    }
+
+    const data: {
+      phone?: string;
+      email?: string;
       idFile?: string;
       firstname?: string;
       lastname?: string;
       profileImage?: string;
     } = {};
-    
+
     // Sauvegarder les valeurs dans localStorage
     const currentStatus = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('accountStatus') || '{}') : {};
-    
+
     if (mode === "all") {
       // En mode 'all', on marque comme non vérifié les champs modifiés
       if (formValues.phone !== initialValues?.phone) {
@@ -255,9 +329,9 @@ const AccountEditSheet: React.FC<AccountEditSheetProps> = ({ open, onClose, mode
         currentStatus.idVerified = false;
         setIsIdUploaded(false);
       }
-      if (formValues.firstname !== initialValues?.firstname || 
-          formValues.lastname !== initialValues?.lastname || 
-          profileImage !== initialValues?.profileImage) {
+      if (formValues.firstname !== initialValues?.firstname ||
+        formValues.lastname !== initialValues?.lastname ||
+        profileImage !== initialValues?.profileImage) {
         data.firstname = formValues.firstname;
         data.lastname = formValues.lastname;
         data.profileImage = profileImage;
@@ -338,6 +412,70 @@ const AccountEditSheet: React.FC<AccountEditSheetProps> = ({ open, onClose, mode
     }, 100);
   };
 
+  // Gestionnaire pour le changement de l'OTP
+  const handleOtpChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setOtpCode(e.target.value);
+  };
+
+  // Gestionnaire pour le changement de l'OTP email
+  const handleEmailOtpChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEmailOtpCode(e.target.value);
+  };
+
+  // Gestionnaire pour la vérification de l'OTP
+  const verifyOtp = () => {
+    // Ici, vous pouvez ajouter la logique de vérification du code OTP
+    // Pour l'exemple, nous considérons que le code est correct si non vide
+    if (otpCode.trim() !== '') {
+      // Si le code est valide, on marque le téléphone comme vérifié
+      setIsPhoneVerified(true);
+
+      // On met à jour le localStorage
+      const currentStatus = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('accountStatus') || '{}') : {};
+      currentStatus.phoneVerified = true;
+      localStorage.setItem('accountStatus', JSON.stringify(currentStatus));
+
+      // On soumet les données
+      onSubmit({ phone: formValues.phone });
+
+      // Fin du chargement
+      setIsLoading(false);
+
+      // On ferme le modal
+      onClose();
+    } else {
+      // En cas d'erreur, arrêter le loader
+      setIsLoading(false);
+    }
+  };
+
+  // Gestionnaire pour la vérification de l'OTP email
+  const verifyEmailOtp = () => {
+    // Ici, vous pouvez ajouter la logique de vérification du code OTP
+    // Pour l'exemple, nous considérons que le code est correct si non vide
+    if (emailOtpCode.trim() !== '') {
+      // Si le code est valide, on marque l'email comme vérifié
+      setIsEmailVerified(true);
+
+      // On met à jour le localStorage
+      const currentStatus = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('accountStatus') || '{}') : {};
+      currentStatus.emailVerified = true;
+      localStorage.setItem('accountStatus', JSON.stringify(currentStatus));
+
+      // On soumet les données
+      onSubmit({ email: formValues.email });
+
+      // Fin du chargement
+      setIsLoading(false);
+
+      // On ferme le modal
+      onClose();
+    } else {
+      // En cas d'erreur, arrêter le loader
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-[9999] flex justify-end">
       {/* BACKDROP */}
@@ -366,20 +504,22 @@ const AccountEditSheet: React.FC<AccountEditSheetProps> = ({ open, onClose, mode
           {mode !== 'all' && (
             <div className="bg-gray-50 p-4 rounded-lg mb-2">
               {mode === 'phone' && (
-                <p className="text-sm text-gray-600">
-                  Pour vérifier votre numéro de téléphone, veuillez confirmer ou modifier le numéro ci-dessous. 
-                  Une fois validé, ce numéro sera utilisé pour vos communications importantes.
-                </p>
+                <div>
+                  <p className="text-sm text-gray-600">
+                    Pour vérifier votre numéro de téléphone, veuillez confirmer ou modifier le numéro ci-dessous.
+                    Une fois validé, ce numéro sera utilisé pour vos communications importantes.
+                  </p>
+                </div>
               )}
               {mode === 'email' && (
                 <p className="text-sm text-gray-600">
-                  Pour vérifier votre adresse email, veuillez confirmer ou modifier l'adresse ci-dessous. 
+                  Pour vérifier votre adresse email, veuillez confirmer ou modifier l'adresse ci-dessous.
                   Cette adresse sera utilisée pour vos notifications et communications importantes.
                 </p>
               )}
               {mode === 'id' && (
                 <p className="text-sm text-gray-600">
-                  Pour enregistrer votre pièce d'identité, veuillez sélectionner un document valide. 
+                  Pour enregistrer votre pièce d'identité, veuillez sélectionner un document valide.
                   Format accepté : PDF, JPG, PNG. Taille maximale : 5MB.
                 </p>
               )}
@@ -416,7 +556,7 @@ const AccountEditSheet: React.FC<AccountEditSheetProps> = ({ open, onClose, mode
               {isProfileVerified && (
                 <span className="flex items-center gap-1 text-green-600 text-xs font-normal">
                   <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path fillRule="evenodd" clipRule="evenodd" d="M8 15.5513C8.98491 15.5513 9.96018 15.3573 10.8701 14.9804C11.7801 14.6035 12.6069 14.051 13.3033 13.3546C13.9997 12.6581 14.5522 11.8313 14.9291 10.9214C15.306 10.0115 15.5 9.03618 15.5 8.05127C15.5 7.06636 15.306 6.09109 14.9291 5.18114C14.5522 4.2712 13.9997 3.44441 13.3033 2.74797C12.6069 2.05153 11.7801 1.49908 10.8701 1.12217C9.96018 0.745263 8.98491 0.55127 8 0.55127C6.01088 0.55127 4.10322 1.34145 2.6967 2.74797C1.29018 4.15449 0.5 6.06215 0.5 8.05127C0.5 10.0404 1.29018 11.948 2.6967 13.3546C4.10322 14.7611 6.01088 15.5513 8 15.5513ZM7.80667 11.0846L11.9733 6.0846L10.6933 5.01794L7.11 9.3171L5.25583 7.4621L4.0775 8.64044L6.5775 11.1404L7.2225 11.7854L7.80667 11.0846Z" fill="#2DAE9F"/>
+                    <path fillRule="evenodd" clipRule="evenodd" d="M8 15.5513C8.98491 15.5513 9.96018 15.3573 10.8701 14.9804C11.7801 14.6035 12.6069 14.051 13.3033 13.3546C13.9997 12.6581 14.5522 11.8313 14.9291 10.9214C15.306 10.0115 15.5 9.03618 15.5 8.05127C15.5 7.06636 15.306 6.09109 14.9291 5.18114C14.5522 4.2712 13.9997 3.44441 13.3033 2.74797C12.6069 2.05153 11.7801 1.49908 10.8701 1.12217C9.96018 0.745263 8.98491 0.55127 8 0.55127C6.01088 0.55127 4.10322 1.34145 2.6967 2.74797C1.29018 4.15449 0.5 6.06215 0.5 8.05127C0.5 10.0404 1.29018 11.948 2.6967 13.3546C4.10322 14.7611 6.01088 15.5513 8 15.5513ZM7.80667 11.0846L11.9733 6.0846L10.6933 5.01794L7.11 9.3171L5.25583 7.4621L4.0775 8.64044L6.5775 11.1404L7.2225 11.7854L7.80667 11.0846Z" fill="#2DAE9F" />
                   </svg>
                   Profil vérifié
                 </span>
@@ -433,7 +573,7 @@ const AccountEditSheet: React.FC<AccountEditSheetProps> = ({ open, onClose, mode
                   {isProfileVerified && (
                     <span className="flex items-center gap-1 text-green-600 text-xs font-normal">
                       <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path fillRule="evenodd" clipRule="evenodd" d="M8 15.5513C8.98491 15.5513 9.96018 15.3573 10.8701 14.9804C11.7801 14.6035 12.6069 14.051 13.3033 13.3546C13.9997 12.6581 14.5522 11.8313 14.9291 10.9214C15.306 10.0115 15.5 9.03618 15.5 8.05127C15.5 7.06636 15.306 6.09109 14.9291 5.18114C14.5522 4.2712 13.9997 3.44441 13.3033 2.74797C12.6069 2.05153 11.7801 1.49908 10.8701 1.12217C9.96018 0.745263 8.98491 0.55127 8 0.55127C6.01088 0.55127 4.10322 1.34145 2.6967 2.74797C1.29018 4.15449 0.5 6.06215 0.5 8.05127C0.5 10.0404 1.29018 11.948 2.6967 13.3546C4.10322 14.7611 6.01088 15.5513 8 15.5513ZM7.80667 11.0846L11.9733 6.0846L10.6933 5.01794L7.11 9.3171L5.25583 7.4621L4.0775 8.64044L6.5775 11.1404L7.2225 11.7854L7.80667 11.0846Z" fill="#2DAE9F"/>
+                        <path fillRule="evenodd" clipRule="evenodd" d="M8 15.5513C8.98491 15.5513 9.96018 15.3573 10.8701 14.9804C11.7801 14.6035 12.6069 14.051 13.3033 13.3546C13.9997 12.6581 14.5522 11.8313 14.9291 10.9214C15.306 10.0115 15.5 9.03618 15.5 8.05127C15.5 7.06636 15.306 6.09109 14.9291 5.18114C14.5522 4.2712 13.9997 3.44441 13.3033 2.74797C12.6069 2.05153 11.7801 1.49908 10.8701 1.12217C9.96018 0.745263 8.98491 0.55127 8 0.55127C6.01088 0.55127 4.10322 1.34145 2.6967 2.74797C1.29018 4.15449 0.5 6.06215 0.5 8.05127C0.5 10.0404 1.29018 11.948 2.6967 13.3546C4.10322 14.7611 6.01088 15.5513 8 15.5513ZM7.80667 11.0846L11.9733 6.0846L10.6933 5.01794L7.11 9.3171L5.25583 7.4621L4.0775 8.64044L6.5775 11.1404L7.2225 11.7854L7.80667 11.0846Z" fill="#2DAE9F" />
                       </svg>
                     </span>
                   )}
@@ -454,7 +594,7 @@ const AccountEditSheet: React.FC<AccountEditSheetProps> = ({ open, onClose, mode
                   {isProfileVerified && (
                     <span className="flex items-center gap-1 text-green-600 text-xs font-normal">
                       <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path fillRule="evenodd" clipRule="evenodd" d="M8 15.5513C8.98491 15.5513 9.96018 15.3573 10.8701 14.9804C11.7801 14.6035 12.6069 14.051 13.3033 13.3546C13.9997 12.6581 14.5522 11.8313 14.9291 10.9214C15.306 10.0115 15.5 9.03618 15.5 8.05127C15.5 7.06636 15.306 6.09109 14.9291 5.18114C14.5522 4.2712 13.9997 3.44441 13.3033 2.74797C12.6069 2.05153 11.7801 1.49908 10.8701 1.12217C9.96018 0.745263 8.98491 0.55127 8 0.55127C6.01088 0.55127 4.10322 1.34145 2.6967 2.74797C1.29018 4.15449 0.5 6.06215 0.5 8.05127C0.5 10.0404 1.29018 11.948 2.6967 13.3546C4.10322 14.7611 6.01088 15.5513 8 15.5513ZM7.80667 11.0846L11.9733 6.0846L10.6933 5.01794L7.11 9.3171L5.25583 7.4621L4.0775 8.64044L6.5775 11.1404L7.2225 11.7854L7.80667 11.0846Z" fill="#2DAE9F"/>
+                        <path fillRule="evenodd" clipRule="evenodd" d="M8 15.5513C8.98491 15.5513 9.96018 15.3573 10.8701 14.9804C11.7801 14.6035 12.6069 14.051 13.3033 13.3546C13.9997 12.6581 14.5522 11.8313 14.9291 10.9214C15.306 10.0115 15.5 9.03618 15.5 8.05127C15.5 7.06636 15.306 6.09109 14.9291 5.18114C14.5522 4.2712 13.9997 3.44441 13.3033 2.74797C12.6069 2.05153 11.7801 1.49908 10.8701 1.12217C9.96018 0.745263 8.98491 0.55127 8 0.55127C6.01088 0.55127 4.10322 1.34145 2.6967 2.74797C1.29018 4.15449 0.5 6.06215 0.5 8.05127C0.5 10.0404 1.29018 11.948 2.6967 13.3546C4.10322 14.7611 6.01088 15.5513 8 15.5513ZM7.80667 11.0846L11.9733 6.0846L10.6933 5.01794L7.11 9.3171L5.25583 7.4621L4.0775 8.64044L6.5775 11.1404L7.2225 11.7854L7.80667 11.0846Z" fill="#2DAE9F" />
                       </svg>
                     </span>
                   )}
@@ -479,7 +619,7 @@ const AccountEditSheet: React.FC<AccountEditSheetProps> = ({ open, onClose, mode
                 {isPhoneVerified ? (
                   <span className="flex items-center gap-1 text-green-600 text-xs font-normal">
                     <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path fillRule="evenodd" clipRule="evenodd" d="M8 15.5513C8.98491 15.5513 9.96018 15.3573 10.8701 14.9804C11.7801 14.6035 12.6069 14.051 13.3033 13.3546C13.9997 12.6581 14.5522 11.8313 14.9291 10.9214C15.306 10.0115 15.5 9.03618 15.5 8.05127C15.5 7.06636 15.306 6.09109 14.9291 5.18114C14.5522 4.2712 13.9997 3.44441 13.3033 2.74797C12.6069 2.05153 11.7801 1.49908 10.8701 1.12217C9.96018 0.745263 8.98491 0.55127 8 0.55127C6.01088 0.55127 4.10322 1.34145 2.6967 2.74797C1.29018 4.15449 0.5 6.06215 0.5 8.05127C0.5 10.0404 1.29018 11.948 2.6967 13.3546C4.10322 14.7611 6.01088 15.5513 8 15.5513ZM7.80667 11.0846L11.9733 6.0846L10.6933 5.01794L7.11 9.3171L5.25583 7.4621L4.0775 8.64044L6.5775 11.1404L7.2225 11.7854L7.80667 11.0846Z" fill="#2DAE9F"/>
+                      <path fillRule="evenodd" clipRule="evenodd" d="M8 15.5513C8.98491 15.5513 9.96018 15.3573 10.8701 14.9804C11.7801 14.6035 12.6069 14.051 13.3033 13.3546C13.9997 12.6581 14.5522 11.8313 14.9291 10.9214C15.306 10.0115 15.5 9.03618 15.5 8.05127C15.5 7.06636 15.306 6.09109 14.9291 5.18114C14.5522 4.2712 13.9997 3.44441 13.3033 2.74797C12.6069 2.05153 11.7801 1.49908 10.8701 1.12217C9.96018 0.745263 8.98491 0.55127 8 0.55127C6.01088 0.55127 4.10322 1.34145 2.6967 2.74797C1.29018 4.15449 0.5 6.06215 0.5 8.05127C0.5 10.0404 1.29018 11.948 2.6967 13.3546C4.10322 14.7611 6.01088 15.5513 8 15.5513ZM7.80667 11.0846L11.9733 6.0846L10.6933 5.01794L7.11 9.3171L5.25583 7.4621L4.0775 8.64044L6.5775 11.1404L7.2225 11.7854L7.80667 11.0846Z" fill="#2DAE9F" />
                     </svg>
                     Vérifier
                   </span>
@@ -502,6 +642,57 @@ const AccountEditSheet: React.FC<AccountEditSheetProps> = ({ open, onClose, mode
                 className="w-full border border-[#EDEDED] rounded-lg p-3"
                 placeholder="Votre numéro de téléphone"
               />
+
+              {/* Affichage du loader pendant la demande d'OTP */}
+              {mode === 'phone' && isOtpRequesting && (
+                <div className="mt-4 p-6 bg-gray-50 rounded-lg flex flex-col items-center justify-center">
+                  <svg className="animate-spin h-8 w-8 text-primary mb-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  <p className="text-sm text-gray-600">Envoi du code de vérification...</p>
+                </div>
+              )}
+
+              {/* Section OTP pour téléphone */}
+              {mode === 'phone' && showOtpInput && (
+                <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+                  <p className="text-sm text-gray-600 mb-3">
+                    Un code de vérification a été envoyé au {formValues.phone}.
+                    Veuillez saisir ce code pour vérifier votre numéro de téléphone.
+                  </p>
+                  <div className="flex flex-col gap-2">
+                    <label htmlFor="otp" className="text-sm font-semibold">
+                      Code de vérification
+                    </label>
+                    <input
+                      id="otp"
+                      name="otp"
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={6}
+                      value={otpCode}
+                      onChange={handleOtpChange}
+                      className="w-full border border-[#EDEDED] rounded-lg p-3 text-center text-xl tracking-wider"
+                      placeholder="_ _ _ _ _ _"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      Vous n'avez pas reçu le code?
+                      <button
+                        type="button"
+                        className="text-primary ml-1 hover:underline"
+                        onClick={() => {
+                          // Reset OTP input and trigger a new send
+                          setOtpCode('');
+                          // Logic to resend the OTP would go here
+                        }}
+                      >
+                        Renvoyer
+                      </button>
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
           )}
           {(mode === "all" || mode === "email") && (
@@ -511,7 +702,7 @@ const AccountEditSheet: React.FC<AccountEditSheetProps> = ({ open, onClose, mode
                 {isEmailVerified ? (
                   <span className="flex items-center gap-1 text-green-600 text-xs font-normal">
                     <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path fillRule="evenodd" clipRule="evenodd" d="M8 15.5513C8.98491 15.5513 9.96018 15.3573 10.8701 14.9804C11.7801 14.6035 12.6069 14.051 13.3033 13.3546C13.9997 12.6581 14.5522 11.8313 14.9291 10.9214C15.306 10.0115 15.5 9.03618 15.5 8.05127C15.5 7.06636 15.306 6.09109 14.9291 5.18114C14.5522 4.2712 13.9997 3.44441 13.3033 2.74797C12.6069 2.05153 11.7801 1.49908 10.8701 1.12217C9.96018 0.745263 8.98491 0.55127 8 0.55127C6.01088 0.55127 4.10322 1.34145 2.6967 2.74797C1.29018 4.15449 0.5 6.06215 0.5 8.05127C0.5 10.0404 1.29018 11.948 2.6967 13.3546C4.10322 14.7611 6.01088 15.5513 8 15.5513ZM7.80667 11.0846L11.9733 6.0846L10.6933 5.01794L7.11 9.3171L5.25583 7.4621L4.0775 8.64044L6.5775 11.1404L7.2225 11.7854L7.80667 11.0846Z" fill="#2DAE9F"/>
+                      <path fillRule="evenodd" clipRule="evenodd" d="M8 15.5513C8.98491 15.5513 9.96018 15.3573 10.8701 14.9804C11.7801 14.6035 12.6069 14.051 13.3033 13.3546C13.9997 12.6581 14.5522 11.8313 14.9291 10.9214C15.306 10.0115 15.5 9.03618 15.5 8.05127C15.5 7.06636 15.306 6.09109 14.9291 5.18114C14.5522 4.2712 13.9997 3.44441 13.3033 2.74797C12.6069 2.05153 11.7801 1.49908 10.8701 1.12217C9.96018 0.745263 8.98491 0.55127 8 0.55127C6.01088 0.55127 4.10322 1.34145 2.6967 2.74797C1.29018 4.15449 0.5 6.06215 0.5 8.05127C0.5 10.0404 1.29018 11.948 2.6967 13.3546C4.10322 14.7611 6.01088 15.5513 8 15.5513ZM7.80667 11.0846L11.9733 6.0846L10.6933 5.01794L7.11 9.3171L5.25583 7.4621L4.0775 8.64044L6.5775 11.1404L7.2225 11.7854L7.80667 11.0846Z" fill="#2DAE9F" />
                     </svg>
                     Vérifier
                   </span>
@@ -534,6 +725,57 @@ const AccountEditSheet: React.FC<AccountEditSheetProps> = ({ open, onClose, mode
                 className="w-full border border-[#EDEDED] rounded-lg p-3"
                 placeholder="Votre email"
               />
+
+              {/* Affichage du loader pendant la demande d'OTP */}
+              {mode === 'email' && isOtpRequesting && (
+                <div className="mt-4 p-6 bg-gray-50 rounded-lg flex flex-col items-center justify-center">
+                  <svg className="animate-spin h-8 w-8 text-primary mb-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  <p className="text-sm text-gray-600">Envoi du code de vérification...</p>
+                </div>
+              )}
+
+              {/* Section OTP pour email */}
+              {mode === 'email' && showEmailOtpInput && (
+                <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+                  <p className="text-sm text-gray-600 mb-3">
+                    Un code de vérification a été envoyé à {formValues.email}.
+                    Veuillez saisir ce code pour vérifier votre adresse email.
+                  </p>
+                  <div className="flex flex-col gap-2">
+                    <label htmlFor="emailOtp" className="text-sm font-semibold">
+                      Code de vérification
+                    </label>
+                    <input
+                      id="emailOtp"
+                      name="emailOtp"
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={6}
+                      value={emailOtpCode}
+                      onChange={handleEmailOtpChange}
+                      className="w-full border border-[#EDEDED] rounded-lg p-3 text-center text-xl tracking-wider"
+                      placeholder="_ _ _ _ _ _"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      Vous n'avez pas reçu le code?
+                      <button
+                        type="button"
+                        className="text-primary ml-1 hover:underline"
+                        onClick={() => {
+                          // Reset OTP input and trigger a new send
+                          setEmailOtpCode('');
+                          // Logic to resend the OTP would go here
+                        }}
+                      >
+                        Renvoyer
+                      </button>
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
           )}
           {(mode === "all" || mode === "id") && (
@@ -543,7 +785,7 @@ const AccountEditSheet: React.FC<AccountEditSheetProps> = ({ open, onClose, mode
                 {isIdUploaded ? (
                   <span className="flex items-center gap-1 text-green-600 text-xs font-normal">
                     <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path fillRule="evenodd" clipRule="evenodd" d="M8 15.5513C8.98491 15.5513 9.96018 15.3573 10.8701 14.9804C11.7801 14.6035 12.6069 14.051 13.3033 13.3546C13.9997 12.6581 14.5522 11.8313 14.9291 10.9214C15.306 10.0115 15.5 9.03618 15.5 8.05127C15.5 7.06636 15.306 6.09109 14.9291 5.18114C14.5522 4.2712 13.9997 3.44441 13.3033 2.74797C12.6069 2.05153 11.7801 1.49908 10.8701 1.12217C9.96018 0.745263 8.98491 0.55127 8 0.55127C6.01088 0.55127 4.10322 1.34145 2.6967 2.74797C1.29018 4.15449 0.5 6.06215 0.5 8.05127C0.5 10.0404 1.29018 11.948 2.6967 13.3546C4.10322 14.7611 6.01088 15.5513 8 15.5513ZM7.80667 11.0846L11.9733 6.0846L10.6933 5.01794L7.11 9.3171L5.25583 7.4621L4.0775 8.64044L6.5775 11.1404L7.2225 11.7854L7.80667 11.0846Z" fill="#2DAE9F"/>
+                      <path fillRule="evenodd" clipRule="evenodd" d="M8 15.5513C8.98491 15.5513 9.96018 15.3573 10.8701 14.9804C11.7801 14.6035 12.6069 14.051 13.3033 13.3546C13.9997 12.6581 14.5522 11.8313 14.9291 10.9214C15.306 10.0115 15.5 9.03618 15.5 8.05127C15.5 7.06636 15.306 6.09109 14.9291 5.18114C14.5522 4.2712 13.9997 3.44441 13.3033 2.74797C12.6069 2.05153 11.7801 1.49908 10.8701 1.12217C9.96018 0.745263 8.98491 0.55127 8 0.55127C6.01088 0.55127 4.10322 1.34145 2.6967 2.74797C1.29018 4.15449 0.5 6.06215 0.5 8.05127C0.5 10.0404 1.29018 11.948 2.6967 13.3546C4.10322 14.7611 6.01088 15.5513 8 15.5513ZM7.80667 11.0846L11.9733 6.0846L10.6933 5.01794L7.11 9.3171L5.25583 7.4621L4.0775 8.64044L6.5775 11.1404L7.2225 11.7854L7.80667 11.0846Z" fill="#2DAE9F" />
                     </svg>
                     Vérifier
                   </span>
@@ -558,21 +800,51 @@ const AccountEditSheet: React.FC<AccountEditSheetProps> = ({ open, onClose, mode
                 )}
               </label>
               {/* Utilisation de l'input custom avec le bon callback */}
-              <InputTypePiece 
-                initialImage={pieceImage} 
-                initialType={pieceType} 
+              <InputTypePiece
+                initialImage={pieceImage}
+                initialType={pieceType}
                 onChange={handlePieceChange}
-                required={mode === 'id'} 
+                required={mode === 'id'}
               />
+
+              {/* Affichage du loader pendant la soumission de la pièce d'identité */}
+              {mode === 'id' && isIdSubmitting && (
+                <div className="mt-4 p-6 bg-gray-50 rounded-lg flex flex-col items-center justify-center">
+                  <svg className="animate-spin h-8 w-8 text-primary mb-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  <p className="text-sm text-gray-600">Enregistrement de votre pièce d'identité...</p>
+                </div>
+              )}
             </div>
           )}
-          <button 
-            type="submit" 
-            className="bg-primary text-white rounded-lg px-4 py-3 font-semibold mt-4"
-            disabled={isSubmitDisabled}
-            style={isSubmitDisabled ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
+          <button
+            type="submit"
+            className="bg-primary text-white rounded-lg px-4 py-3 font-semibold mt-4 relative"
+            disabled={(mode === 'phone' && showOtpInput && otpCode.trim() === '') ||
+              (mode === 'email' && showEmailOtpInput && emailOtpCode.trim() === '') ||
+              (mode === 'id' && (!pieceType || !pieceImage)) ||
+              isSubmitDisabled || isLoading || isOtpRequesting || isIdSubmitting}
+            style={(mode === 'phone' && showOtpInput && otpCode.trim() === '') ||
+              (mode === 'email' && showEmailOtpInput && emailOtpCode.trim() === '') ||
+              (mode === 'id' && (!pieceType || !pieceImage)) ||
+              isSubmitDisabled || isLoading || isOtpRequesting || isIdSubmitting ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
           >
-            {mode === 'all' ? 'Modifier' : 'Vérifier'}
+            {isLoading || isOtpRequesting || isIdSubmitting ? (
+              <div className="flex items-center justify-center">
+                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                {isOtpRequesting ? "Envoi en cours..." : isIdSubmitting ? "Enregistrement en cours..." : "Vérification en cours..."}
+              </div>
+            ) : (
+              mode === 'all' ? 'Modifier' :
+                (mode === 'phone' && showOtpInput) ? 'Vérifier le code' :
+                  (mode === 'email' && showEmailOtpInput) ? 'Vérifier le code' :
+                    'Vérifier'
+            )}
           </button>
         </form>
       </div>
