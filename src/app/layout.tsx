@@ -2,6 +2,7 @@
 
 import { API_EAGENCE } from "@/config/constants";
 import { ReduxProvider } from "@/src/store/provider";
+import { LoaderProvider } from "@/src/contexts/LoaderContext";
 import { Montserrat } from "next/font/google";
 import { usePathname, useRouter } from "next/navigation";
 import Script from "next/script";
@@ -361,7 +362,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       </head>
       <body className={montserrat.className}>
         <ReduxProvider>
-          <RouteGuard>{children}</RouteGuard>
+          <LoaderProvider>
+            <RouteGuard>{children}</RouteGuard>
+          </LoaderProvider>
         </ReduxProvider>
       </body>
     </html>
