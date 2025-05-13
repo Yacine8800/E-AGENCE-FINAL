@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { CarouselIcon } from "./components/icons/CarouselIcon";
 
 const VideoCarousel = dynamic(() => import("./components/VideoCarousel"), {
@@ -42,6 +42,44 @@ export default function Home() {
   const [activeSlide, setActiveSlide] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [activeSection, setActiveSection] = useState("froid");
+  const [isMobile, setIsMobile] = useState(false);
+  const carouselRef = useRef<HTMLDivElement | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
+
+  // Détecter si on est sur mobile
+  useEffect(() => {
+    const checkIfMobile = () => {
+      setIsMobile(window.innerWidth < 640);
+    };
+
+    checkIfMobile();
+    window.addEventListener("resize", checkIfMobile);
+
+    return () => {
+      window.removeEventListener("resize", checkIfMobile);
+    };
+  }, []);
+
+  // Gestion du défilement tactile
+  const handleMouseDown = (e) => {
+    if (!isMobile || !carouselRef.current) return;
+    setIsDragging(true);
+    setStartX(e.pageX - carouselRef.current.offsetLeft);
+    setScrollLeft(carouselRef.current.scrollLeft);
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const handleMouseMove = (e) => {
+    if (!isDragging || !carouselRef.current) return;
+    const x = e.pageX - carouselRef.current.offsetLeft;
+    const walk = (x - startX) * 2; // Vitesse du défilement
+    carouselRef.current.scrollLeft = scrollLeft - walk;
+  };
 
   const router = useRouter();
 
@@ -94,62 +132,131 @@ export default function Home() {
       </div>
 
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-12 sm:space-y-16 mb-4 sm:mb-6">
-        {/* Section 1 */}
+        {/* Section 1 - Titre avec animation améliorée */}
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.4, ease: "easeOut" }}
+          viewport={{ once: true, margin: "-100px" }}
           className="text-center px-2 sm:px-0"
         >
-          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-semibold mb-4 sm:mb-6">
-            Nos Offres d&apos;abonnement
-          </h2>
+          <motion.div
+            className="relative inline-block"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
+            viewport={{ once: true }}
+          >
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-semibold mb-4 sm:mb-6 relative z-10">
+              Nos Offres d&apos;abonnement
+            </h2>
+            <motion.div
+              className="absolute -bottom-1 left-0 h-3 bg-amber-200 w-full opacity-50 z-0"
+              initial={{ width: "0%" }}
+              whileInView={{ width: "100%" }}
+              transition={{ duration: 0.8, delay: 0.6 }}
+              viewport={{ once: true }}
+            />
+          </motion.div>
           <p className="max-w-2xl mx-auto text-sm sm:text-base md:text-lg">
             Sélectionnez le profil qui reflète vos habitudes de consommation
             pour une facture précise et un suivi optimisé de votre énergie.
           </p>
         </motion.section>
 
-        {/* Section 2 */}
+        {/* Section 2 - Carrousel/Grid amélioré */}
         <motion.section
           initial={{ opacity: 0, y: 50 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.4, ease: "easeOut" }}
-          className="mb-6 sm:mb-8"
+          viewport={{ once: true }}
+          className="mb-6 sm:mb-8 relative"
         >
-          {/* Grid responsive : 1 colonne sur mobile, 3 à partir de md */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-y-12 gap-x-8 sm:gap-x-10 md:gap-x-12 mx-auto px-4 sm:px-6">
+          {/* Indicateur de défilement sur mobile */}
+          {isMobile && (
+            <div className="flex justify-center space-x-1 mb-4">
+              <div className="h-1 w-16 bg-gray-300 rounded-full">
+                <motion.div
+                  className="h-full bg-black rounded-full"
+                  initial={{ width: "0%" }}
+                  animate={{ width: "100%" }}
+                  transition={{
+                    duration: 1.5,
+                    repeat: Infinity,
+                    repeatType: "reverse",
+                  }}
+                />
+              </div>
+              <span className="text-xs text-gray-500">Faites défiler</span>
+            </div>
+          )}
+
+          {/* Conteneur avec défilement horizontal sur mobile, grid sur desktop */}
+          <div
+            ref={carouselRef}
+            className={`
+              ${
+                isMobile
+                  ? "flex overflow-x-auto snap-x snap-mandatory hide-scrollbar pb-6"
+                  : "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3"
+              }
+              gap-y-12 gap-x-8 sm:gap-x-10 md:gap-x-12 mx-auto px-4 sm:px-6
+            `}
+            onMouseDown={handleMouseDown}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={handleMouseUp}
+            onMouseMove={handleMouseMove}
+            onTouchStart={(e) => handleMouseDown(e.touches[0])}
+            onTouchEnd={handleMouseUp}
+            onTouchMove={(e) => handleMouseMove(e.touches[0])}
+          >
             {services.map((service, index) => (
               <motion.div
                 key={index}
                 className={`
-                group rounded-xl overflow-hidden text-center 
-                cursor-pointer relative bg-transparent
-                ${service.className || ""}
-              `}
-                initial={{ scale: 1 }}
-                whileHover={{ scale: 1.02 }}
-                transition={{ duration: 0.3 }}
+                  group rounded-xl overflow-hidden text-center 
+                  cursor-pointer relative bg-white shadow-sm hover:shadow-xl
+                  transition-all duration-300
+                  ${
+                    isMobile
+                      ? "flex-shrink-0 w-[85vw] max-w-[300px] snap-center"
+                      : ""
+                  }
+                  ${service.className || ""}
+                `}
+                initial={{ opacity: 0.6, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{
+                  duration: 0.1,
+                  delay: isMobile ? 0 : index * 0.1,
+                  ease: "easeOut",
+                }}
+                viewport={{ once: true, margin: "-50px" }}
+                whileHover={{ y: -8 }}
               >
                 {/* Conteneur qui limite la taille de l'image et la rend responsive */}
-                <div className="relative w-full h-[180px] sm:h-[200px] md:h-[220px] mx-auto rounded-lg overflow-hidden">
+                <div className="relative w-full h-[180px] sm:h-[200px] md:h-[220px] mx-auto rounded-t-lg overflow-hidden bg-gray-50">
+                  <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-5 transition-opacity duration-500 z-10" />
+
                   <Image
                     src={service.image}
                     alt={service.title}
                     fill
-                    sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 33vw"
-                    className="object-contain grayscale group-hover:grayscale-0 transition-all duration-500"
+                    sizes="(max-width: 640px) 85vw, (max-width: 768px) 50vw, 33vw"
+                    className="object-cover grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-500"
                     priority
                   />
 
-                  <button
+                  <motion.button
                     className="
-                    absolute bottom-3 left-1/2 transform -translate-x-1/2 
-                    bg-black hover:bg-vert text-white py-1.5 px-3 rounded-full 
-                    opacity-0 group-hover:opacity-100 shadow-lg 
-                    text-xs sm:text-sm font-medium transition-all duration-300 ease-in-out 
-                    w-28 sm:w-32 flex items-center justify-center gap-1
-                  "
+                      absolute bottom-3 left-1/2 transform -translate-x-1/2 
+                      bg-black hover:bg-blue-600 text-white py-2 px-4 rounded-full 
+                      opacity-0 group-hover:opacity-100 shadow-lg 
+                      text-xs sm:text-sm font-medium transition-all duration-300 ease-in-out 
+                      w-32 flex items-center justify-center gap-1
+                    "
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.98 }}
                   >
                     <span>Découvrir</span>
                     <svg
@@ -158,6 +265,7 @@ export default function Home() {
                       viewBox="0 0 24 24"
                       fill="none"
                       xmlns="http://www.w3.org/2000/svg"
+                      className="transition-transform duration-300 group-hover:translate-x-0.5"
                     >
                       <path
                         d="M5 12H19M19 12L12 5M19 12L12 19"
@@ -167,20 +275,43 @@ export default function Home() {
                         strokeLinejoin="round"
                       />
                     </svg>
-                  </button>
+                  </motion.button>
                 </div>
 
-                <h3 className="text-base sm:text-lg font-semibold mt-3 text-black">
-                  {service.title}
-                </h3>
-                {service.description && (
-                  <p className="mt-1.5 opacity-0 group-hover:opacity-100 transition-all duration-300 text-black text-xs max-w-[90%] mx-auto">
-                    {service.description}
-                  </p>
-                )}
+                <div className="px-4 py-4 bg-white">
+                  <h3 className="text-base sm:text-lg font-semibold text-black">
+                    {service.title}
+                  </h3>
+                  {service.description && (
+                    <motion.p
+                      className="mt-2 text-black text-xs max-w-[90%] mx-auto line-clamp-2 group-hover:line-clamp-none"
+                      initial={{ opacity: 0.7 }}
+                      whileHover={{ opacity: 1 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      {service.description}
+                    </motion.p>
+                  )}
+                </div>
+
+                {/* Effet de ligne au survol */}
+                <motion.div
+                  className="absolute bottom-0 left-0 right-0 h-1 bg-blue-500"
+                  initial={{ scaleX: 0 }}
+                  whileHover={{ scaleX: 1 }}
+                  transition={{ duration: 0.3 }}
+                />
               </motion.div>
             ))}
           </div>
+
+          {/* Ombres de défilement pour mobile */}
+          {isMobile && (
+            <>
+              <div className="absolute top-0 bottom-0 left-0 w-8 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none" />
+              <div className="absolute top-0 bottom-0 right-0 w-8 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none" />
+            </>
+          )}
         </motion.section>
       </div>
       {/* Section 2 : Bannière arrondie + image main */}
@@ -316,150 +447,545 @@ export default function Home() {
           </svg>
         </div>
 
-        {/* Contenu au premier plan */}
+        {/* Contenu au premier plan - Version modernisée avec actions contextuelles */}
         <div className="relative w-full max-w-6xl mx-auto text-center px-2 sm:px-0">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mt-6 sm:mt-8 md:mt-12 lg:mt-16 mb-4 sm:mb-6 md:mb-10">
-            Besoin d&apos;assistance ?
-          </h2>
-          <p className="text-sm sm:text-base md:text-lg lg:text-xl text-white mb-6 sm:mb-8 md:mb-16">
+          {/* Titre avec animation de soulignement */}
+          <div className="relative inline-block mb-2">
+            <motion.h2
+              className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mt-6 sm:mt-8 md:mt-12 lg:mt-16 mb-4 sm:mb-6"
+              initial={{ opacity: 0, y: -10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              viewport={{ once: true }}
+            >
+              Besoin d&apos;assistance ?
+            </motion.h2>
+            <motion.div
+              className="absolute -bottom-1 left-0 right-0 h-1.5 bg-white opacity-60 rounded-full"
+              initial={{ width: 0, x: "50%" }}
+              whileInView={{ width: "100%", x: 0 }}
+              transition={{ duration: 0.7, delay: 0.3 }}
+              viewport={{ once: true }}
+            />
+          </div>
+
+          {/* Sous-titre amélioré */}
+          <motion.p
+            className="text-sm sm:text-base md:text-lg lg:text-xl text-white mb-6 sm:mb-8 md:mb-12"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            viewport={{ once: true }}
+          >
             Des services disponibles{" "}
-            <span className="font-semibold text-black">24h/24</span> et{" "}
-            <span className="font-semibold text-black">7j/7</span>
-          </p>
-
-          {/* Grille responsive pour les 3 cartes */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 md:gap-8 w-full max-w-4xl mx-auto px-2 sm:px-4">
-            {/* Carte 1 */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              whileHover={{
-                y: "-10%",
-                height: "100%",
-                scale: 1.02,
-                transition: { duration: 0.4, ease: [0.4, 0, 0.2, 1] },
-              }}
-              className="
-              bg-white 
-              rounded-xl sm:rounded-2xl  
-              shadow-md 
-              hover:shadow-xl 
-              transition-all 
-              duration-300 
-              flex 
-              flex-col 
-              items-center 
-              justify-center 
-              relative 
-              cursor-pointer 
-              transform-gpu 
-              min-h-[160px] sm:min-h-[200px]
-              p-3 sm:p-4
-            "
+            <motion.span
+              className="inline-block font-semibold text-black bg-white bg-opacity-30 backdrop-blur-sm px-2 py-0.5 rounded-lg mx-1"
+              whileHover={{ scale: 1.05 }}
+              transition={{ type: "spring", stiffness: 400, damping: 10 }}
             >
-              <motion.img
-                src="assistance/centre.png"
-                alt="179"
-                className="w-12 h-12 sm:w-16 sm:h-16 object-contain"
-                whileHover={{ scale: 1.1 }}
-                transition={{ duration: 0.2 }}
-              />
-              <p className="text-gray-800 font-medium text-sm sm:text-base">
-                Appelez-nous au <span className="font-bold">179</span>
-              </p>
-            </motion.div>
-
-            {/* Carte 2 */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              whileHover={{
-                y: "-15%",
-                height: "100%",
-                scale: 1.02,
-                transition: { duration: 0.4, ease: [0.4, 0, 0.2, 1] },
-              }}
-              className="
-              bg-white 
-              rounded-xl sm:rounded-2xl 
-              shadow-md 
-              hover:shadow-xl 
-              transition-all 
-              duration-300 
-              flex 
-              flex-col 
-              items-center 
-              justify-center 
-              relative 
-              cursor-pointer 
-              transform-gpu 
-              min-h-[160px] sm:min-h-[200px]
-              p-3 sm:p-4
-            "
+              24h/24
+            </motion.span>
+            et{" "}
+            <motion.span
+              className="inline-block font-semibold text-black bg-white bg-opacity-30 backdrop-blur-sm px-2 py-0.5 rounded-lg mx-1"
+              whileHover={{ scale: 1.05 }}
+              transition={{ type: "spring", stiffness: 400, damping: 10 }}
             >
-              <div className="flex items-center gap-2 sm:gap-4">
+              7j/7
+            </motion.span>
+          </motion.p>
+
+          {/* Indicateur de statut en temps réel */}
+          <motion.div
+            className="flex flex-wrap justify-center items-center gap-3 mb-8"
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+            viewport={{ once: true }}
+          >
+            <div className="flex items-center gap-1.5 bg-white bg-opacity-20 backdrop-blur-sm px-3 py-1.5 rounded-full">
+              <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+              <span className="text-xs text-white font-medium">
+                42 opérateurs en ligne
+              </span>
+            </div>
+            <div className="h-4 w-px bg-white opacity-30 hidden sm:block" />
+            <div className="bg-white bg-opacity-20 backdrop-blur-sm px-3 py-1.5 rounded-full">
+              <span className="text-xs text-white font-medium">
+                Temps d'attente estimé: <span className="font-bold">2 min</span>
+              </span>
+            </div>
+          </motion.div>
+
+          {/* Grille responsive pour les 3 cartes - Actions contextuelles */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 md:gap-8 w-full max-w-4xl mx-auto px-2 sm:px-4">
+            {/* Carte 1 - Service téléphonique - Action contextuelle d'appel */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              viewport={{ once: true }}
+              className="
+        group
+        bg-white 
+        rounded-xl sm:rounded-2xl  
+        shadow-md 
+        hover:shadow-xl 
+        transition-all 
+        duration-300 
+        flex 
+        flex-col 
+        items-center 
+        justify-between 
+        relative 
+        transform-gpu 
+        min-h-[200px] sm:min-h-[240px]
+        p-5 sm:p-6
+        overflow-hidden
+      "
+            >
+              {/* Barre d'accent supérieure */}
+              <div className="absolute top-0 left-0 right-0 h-1 bg-amber-500 transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-300" />
+
+              {/* Indicateur visuel en arrière-plan */}
+              <div className="absolute -top-10 -right-10 w-20 h-20 bg-amber-100 rounded-full opacity-0 group-hover:opacity-30 transition-opacity duration-300" />
+
+              {/* En-tête de la carte */}
+              <div className="w-full text-center">
                 <motion.img
-                  src="assistance/wha.png"
-                  alt="WhatsApp"
-                  className="w-8 h-8 sm:w-10 sm:h-10"
-                  whileHover={{ scale: 1.1 }}
-                  transition={{ duration: 0.2 }}
+                  src="assistance/centre.png"
+                  alt="179"
+                  className="w-14 h-14 sm:w-18 sm:h-18 object-contain mb-4 mx-auto"
+                  whileHover={{
+                    scale: 1.2,
+                    rotateZ: [0, -10, 10, 0],
+                  }}
+                  transition={{
+                    duration: 0.5,
+                    times: [0, 0.3, 0.6, 1],
+                  }}
                 />
-                <motion.img
-                  src="assistance/fb.png"
-                  alt="Facebook"
-                  className="w-6 h-6 sm:w-8 sm:h-8"
-                  whileHover={{ scale: 1.1 }}
-                  transition={{ duration: 0.2 }}
-                />
+
+                <h3 className="font-semibold text-gray-800 text-base sm:text-lg mb-1">
+                  Service Clientèle
+                </h3>
+
+                <p className="text-gray-700 text-sm">
+                  Support direct avec nos conseillers
+                </p>
               </div>
-              <p className="text-gray-800 font-medium text-sm sm:text-base">
-                Écrivez-nous sur nos
-                <br />
-                réseaux sociaux
-              </p>
+
+              {/* Statut du service */}
+              <div className="flex items-center gap-2 my-2">
+                <span className="inline-flex h-2.5 w-2.5 relative">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
+                </span>
+                <span className="text-xs text-gray-500">
+                  Disponible maintenant
+                </span>
+              </div>
+
+              {/* Action contextuelle */}
+              <a
+                href="tel:179"
+                className="
+          mt-2
+          py-3 
+          px-5
+          w-full
+          flex 
+          items-center 
+          justify-center 
+          gap-2 
+          bg-amber-500 
+          hover:bg-amber-600
+          text-white 
+          font-medium 
+          rounded-lg
+          transition-all 
+          duration-200
+          transform
+          translate-y-0
+          hover:-translate-y-1
+          focus:outline-none
+          focus:ring-2
+          focus:ring-amber-500
+          focus:ring-opacity-50
+        "
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+                  />
+                </svg>
+                <span>Appeler le 179</span>
+              </a>
+
+              <motion.div className="absolute bottom-0 left-0 right-0 h-1 bg-amber-500 transform origin-right scale-x-0 group-hover:scale-x-100 transition-transform duration-300" />
             </motion.div>
 
-            {/* Carte 3 */}
+            {/* Carte 2 - Réseaux sociaux - Actions contextuelles de messagerie */}
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              whileHover={{
-                y: "-15%",
-                height: "100%",
-                scale: 1.02,
-                transition: { duration: 0.4, ease: [0.4, 0, 0.2, 1] },
-              }}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              viewport={{ once: true }}
               className="
-              bg-white 
-              rounded-2xl 
-              shadow-md 
-              hover:shadow-xl 
-              transition-all 
-              duration-300 
-              flex 
-              flex-col 
-              items-center 
-              justify-center 
-              relative 
-              cursor-pointer 
-              transform-gpu 
-              min-h-[160px] sm:min-h-[200px]
-              p-3 sm:p-4
-            "
+        group
+        bg-white 
+        rounded-xl sm:rounded-2xl 
+        shadow-md 
+        hover:shadow-xl 
+        transition-all 
+        duration-300 
+        flex 
+        flex-col 
+        items-center
+        justify-between
+        relative 
+        transform-gpu 
+        min-h-[200px] sm:min-h-[240px]
+        p-5 sm:p-6
+        overflow-hidden
+        border border-white border-opacity-70
+      "
             >
-              <motion.img
-                src="assistance/bot.png"
-                alt="ClemBot"
-                className="w-12 h-12 sm:w-16 sm:h-16 object-contain"
-                whileHover={{ scale: 1.1 }}
-                transition={{ duration: 0.2 }}
-              />
-              <p className="text-gray-800 font-medium text-sm sm:text-base">
-                Discutez avec <span className="font-bold">Clem&apos;Bot</span>
-              </p>
+              {/* Badge recommandé */}
+              <div className="absolute -top-1 -right-8 w-32 bg-amber-400 text-xs font-bold text-center py-1 rotate-45">
+                RECOMMANDÉ
+              </div>
+
+              {/* Barre d'accent supérieure */}
+              <div className="absolute top-0 left-0 right-0 h-1 bg-blue-500 transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-300" />
+
+              {/* En-tête de la carte */}
+              <div className="w-full text-center">
+                <div className="flex items-center justify-center gap-3 sm:gap-5 mb-4">
+                  <motion.div
+                    className="relative"
+                    whileHover={{
+                      scale: 1.2,
+                      rotateZ: [0, -8, 8, 0],
+                    }}
+                    transition={{
+                      duration: 0.4,
+                      times: [0, 0.3, 0.6, 1],
+                    }}
+                  >
+                    <div className="absolute inset-0 bg-blue-300 opacity-0 group-hover:opacity-30 blur-md rounded-full scale-150 transition-opacity duration-500" />
+                    <motion.img
+                      src="assistance/wha.png"
+                      alt="WhatsApp"
+                      className="w-10 h-10 sm:w-12 sm:h-12 relative z-10"
+                    />
+                  </motion.div>
+
+                  <motion.div
+                    className="relative"
+                    whileHover={{
+                      scale: 1.2,
+                      rotateZ: [0, -8, 8, 0],
+                    }}
+                    transition={{
+                      duration: 0.4,
+                      times: [0, 0.3, 0.6, 1],
+                    }}
+                  >
+                    <div className="absolute inset-0 bg-blue-300 opacity-0 group-hover:opacity-30 blur-md rounded-full scale-150 transition-opacity duration-500" />
+                    <motion.img
+                      src="assistance/fb.png"
+                      alt="Facebook"
+                      className="w-8 h-8 sm:w-10 sm:h-10 relative z-10"
+                    />
+                  </motion.div>
+                </div>
+
+                <h3 className="font-semibold text-gray-800 text-base sm:text-lg mb-1">
+                  Réseaux Sociaux
+                </h3>
+
+                <p className="text-gray-700 text-sm">
+                  Support via messagerie instantanée
+                </p>
+              </div>
+
+              {/* Statut du service */}
+              <div className="flex items-center gap-2 my-2">
+                <span className="bg-blue-100 text-blue-800 text-xs px-2 py-0.5 rounded-full">
+                  Réponse rapide
+                </span>
+              </div>
+
+              {/* Actions contextuelles */}
+              <div className="flex flex-col sm:flex-row gap-2 w-full mt-2">
+                <a
+                  href="https://wa.me/1234567890"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="
+            py-2.5
+            flex-1
+            flex 
+            items-center 
+            justify-center 
+            gap-1.5
+            bg-green-500
+            hover:bg-green-600
+            text-white 
+            text-sm
+            font-medium 
+            rounded-lg
+            transition-all 
+            duration-200
+            transform
+            translate-y-0
+            hover:-translate-y-1
+            focus:outline-none
+            focus:ring-2
+            focus:ring-green-500
+          "
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-4 w-4"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
+                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+                  </svg>
+                  <span>WhatsApp</span>
+                </a>
+
+                <a
+                  href="https://m.me/companyfacebook"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="
+            py-2.5
+            flex-1
+            flex 
+            items-center 
+            justify-center 
+            gap-1.5
+            bg-blue-600
+            hover:bg-blue-700
+            text-white 
+            text-sm
+            font-medium 
+            rounded-lg
+            transition-all 
+            duration-200
+            transform
+            translate-y-0
+            hover:-translate-y-1
+            focus:outline-none
+            focus:ring-2
+            focus:ring-blue-500
+          "
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-4 w-4"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
+                    <path d="M12 0c-6.627 0-12 4.975-12 11.111 0 3.497 1.745 6.616 4.472 8.652v4.237l4.086-2.242c1.09.301 2.246.464 3.442.464 6.627 0 12-4.974 12-11.111 0-6.136-5.373-11.111-12-11.111zm1.193 14.963l-3.056-3.259-5.963 3.259 6.559-6.963 3.13 3.259 5.889-3.259-6.559 6.963z" />
+                  </svg>
+                  <span>Messenger</span>
+                </a>
+              </div>
+
+              <motion.div className="absolute bottom-0 left-0 right-0 h-1 bg-blue-500 transform origin-right scale-x-0 group-hover:scale-x-100 transition-transform duration-300" />
+            </motion.div>
+
+            {/* Carte 3 - Chatbot - Action contextuelle de chat */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+              viewport={{ once: true }}
+              className="
+        group
+        bg-white 
+        rounded-xl sm:rounded-2xl 
+        shadow-md 
+        hover:shadow-xl 
+        transition-all 
+        duration-300 
+        flex 
+        flex-col 
+        items-center 
+        justify-between
+        relative 
+        transform-gpu 
+        min-h-[200px] sm:min-h-[240px]
+        p-5 sm:p-6
+        overflow-hidden
+      "
+            >
+              {/* Indicateur temps de réponse */}
+              <div className="absolute top-3 right-3 bg-green-100 text-green-800 text-xs px-2 py-0.5 rounded-full">
+                Réponse en 5 sec
+              </div>
+
+              {/* Barre d'accent supérieure */}
+              <div className="absolute top-0 left-0 right-0 h-1 bg-green-500 transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-300" />
+
+              {/* Indicateur visuel en arrière-plan */}
+              <div className="absolute -bottom-8 -left-8 w-20 h-20 bg-green-100 rounded-full opacity-0 group-hover:opacity-30 transition-opacity duration-300" />
+
+              {/* En-tête de la carte */}
+              <div className="w-full text-center">
+                <motion.div className="relative mb-4">
+                  <motion.div className="absolute inset-0 bg-green-300 opacity-0 group-hover:opacity-30 blur-md rounded-full scale-150 transition-opacity duration-500" />
+                  <motion.img
+                    src="assistance/bot.png"
+                    alt="ClemBot"
+                    className="w-14 h-14 sm:w-18 sm:h-18 object-contain relative z-10 mx-auto"
+                    whileHover={{
+                      scale: 1.2,
+                      rotate: [0, -5, 5, 0],
+                    }}
+                    transition={{
+                      duration: 0.5,
+                      times: [0, 0.3, 0.6, 1],
+                    }}
+                  />
+                </motion.div>
+
+                <h3 className="font-semibold text-gray-800 text-base sm:text-lg mb-1">
+                  Assistant Virtuel
+                </h3>
+
+                <p className="text-gray-700 text-sm">
+                  Intelligence artificielle à votre service
+                </p>
+              </div>
+
+              {/* Fréquence d'utilisation */}
+              <div className="flex gap-0.5 my-2">
+                <div className="flex -space-x-1">
+                  {[1, 2, 3].map((user) => (
+                    <div
+                      key={user}
+                      className="w-6 h-6 rounded-full bg-gray-100 border border-white flex items-center justify-center text-xs text-gray-500 overflow-hidden"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-4 w-4"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    </div>
+                  ))}
+                </div>
+                <span className="text-xs text-gray-500 ml-1">
+                  +2K utilisateurs aujourd'hui
+                </span>
+              </div>
+
+              {/* Action contextuelle */}
+              <button
+                onClick={() => {
+                  // Ouvrir la fenêtre de chat
+                  window.open("/chat-bot", "chatbot", "width=400,height=600");
+                }}
+                className="
+                      mt-2
+                      py-3
+                      px-5
+                      w-full
+                      flex 
+                      items-center 
+                      justify-center 
+                      gap-2 
+                      bg-green-500 
+                      hover:bg-green-600 
+                      text-white 
+                      font-medium 
+                      rounded-lg
+                      transition-all 
+                      duration-200
+                      transform
+                      translate-y-0
+                      hover:-translate-y-1
+                      focus:outline-none
+                      focus:ring-2
+                      focus:ring-green-500
+                    "
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                  />
+                </svg>
+                <span>Démarrer le chat</span>
+              </button>
+
+              <motion.div className="absolute bottom-0 left-0 right-0 h-1 bg-green-500 transform origin-right scale-x-0 group-hover:scale-x-100 transition-transform duration-300" />
             </motion.div>
           </div>
+
+          {/* Badge de satisfaction avec action */}
+          <motion.div
+            className="mt-10 sm:mt-12 inline-flex items-center gap-2 bg-white bg-opacity-10 backdrop-blur-sm px-4 py-2 rounded-full"
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.6 }}
+            viewport={{ once: true }}
+          >
+            <span className="text-white text-xs sm:text-sm">
+              Satisfaction client:{" "}
+            </span>
+            <div className="flex items-center">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <svg
+                  key={star}
+                  className="w-4 h-4 text-yellow-400 fill-current"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                </svg>
+              ))}
+            </div>
+            <span className="text-white text-xs font-medium">
+              93% cette semaine
+            </span>
+            <button
+              onClick={() => {
+                // Action pour voir les avis
+                window.open("/avis-clients", "_blank");
+              }}
+              className="ml-1 text-xs bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-2 py-0.5 rounded-full transition-colors duration-200"
+            >
+              Voir les avis
+            </button>
+          </motion.div>
         </div>
       </motion.section>
 

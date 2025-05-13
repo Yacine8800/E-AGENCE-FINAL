@@ -5,7 +5,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Ecostore from "./icons/EcoStore";
 import UserSolo from "./icons/UserSolo";
 
@@ -112,59 +112,19 @@ const Header = () => {
     return null;
   };
 
-  // Nouvelle fonction pour sauvegarder l'onglet actif
-  const saveActiveTab = useCallback((tab: TabType) => {
-    if (typeof window !== "undefined") {
-      sessionStorage.setItem("lastActiveTab", tab);
-    }
-  }, []);
-
-  // Nouvelle fonction pour récupérer l'onglet précédemment actif
-  const getSavedActiveTab = useCallback((): TabType | null => {
-    if (typeof window !== "undefined") {
-      const savedTab = sessionStorage.getItem(
-        "lastActiveTab"
-      ) as TabType | null;
-      return savedTab;
-    }
-    return null;
-  }, []);
-
   /* ──────────────────────────  Effects  ────────────────────────── */
 
   // Initialisation et changement de page
   useEffect(() => {
-    // Déterminer l'onglet actif en fonction du chemin ou récupérer celui sauvegardé
-    const tabFromPath = getTabFromPath(pathname);
-    const savedTab = getSavedActiveTab();
-
-    // Priorité à l'onglet enregistré s'il existe, sinon utiliser celui détecté par l'URL
-    const finalTab = savedTab || tabFromPath;
-
-    // Ne mettre à jour l'onglet actif que s'il est défini
-    if (finalTab) {
-      setActiveTab(finalTab);
-    }
-
     // Déterminer le sous-menu actif
     const activeSubmenu = findActiveSubmenu(pathname);
     setActiveSubmenuPath(activeSubmenu);
-
-    // Log pour le débogage
-    console.log(
-      `Page changed: ${pathname} → Saved Tab: ${savedTab} → Path Tab: ${tabFromPath} → Final Tab: ${finalTab} → Active submenu: ${activeSubmenu}`
-    );
-
-    // Si un sous-menu est actif, ouvrir le menu correspondant automatiquement sur desktop
-    if (activeSubmenu && finalTab && !isMobile) {
-      setIsMenuOpen(true);
-    }
 
     // Sur mobile, nous ne gardons pas le menu ouvert automatiquement
     if (isMobile) {
       setIsMenuOpen(false);
     }
-  }, [pathname, isMobile, getSavedActiveTab]);
+  }, [pathname, isMobile]);
 
   // Détecter scroll + mobile
   useEffect(() => {
@@ -185,23 +145,16 @@ const Header = () => {
 
   /* ──────────────────────────  Handlers  ────────────────────────── */
 
-  // Gestion du clic sur un onglet
+  // Gestion du clic sur un onglet (sur mobile uniquement)
   const handleTabClick = (tab: TabType) => {
-    console.log(
-      `Tab clicked: ${tab}, current active: ${activeTab}, menu open: ${isMenuOpen}`
-    );
-
-    if (hoverTimeout) clearTimeout(hoverTimeout);
-
-    // Si on clique sur l'onglet actif, on bascule juste l'état du menu
-    if (tab === activeTab) {
-      setIsMenuOpen(!isMenuOpen);
-    }
-    // Sinon, on active le nouvel onglet et on ouvre le menu
-    else {
-      setActiveTab(tab);
-      saveActiveTab(tab);
-      setIsMenuOpen(true);
+    if (isMobile) {
+      // Sur mobile, on bascule juste l'état du menu
+      if (tab === activeTab) {
+        setIsMenuOpen(!isMenuOpen);
+      } else {
+        setActiveTab(tab);
+        setIsMenuOpen(true);
+      }
     }
   };
 
@@ -215,11 +168,13 @@ const Header = () => {
       setHoverTimeout(
         setTimeout(() => {
           setIsMenuOpen(false);
+          setActiveTab(null); // Réinitialiser l'onglet actif lorsque le menu se ferme
         }, 300)
       );
     }
-    // Sinon, ouvrir le menu sans changer l'onglet actif
-    else if (activeTab) {
+    // Sinon, ouvrir le menu et définir l'onglet actif
+    else {
+      setActiveTab(tab);
       setIsMenuOpen(true);
     }
   };
@@ -235,13 +190,13 @@ const Header = () => {
 
       <div
         className={`fixed w-full z-[9999] transition-all duration-200 ease-in-out ${hasScrolled || isMobile
-            ? "top-0 px-0"
-            : "top-6 px-2 sm:px-4 md:px-6 lg:px-[40px] xl:px-[80px]"
+          ? "top-0 px-0"
+          : "top-6 px-2 sm:px-4 md:px-6 lg:px-[40px] xl:px-[80px]"
           }`}
       >
         <motion.header
-          className={`bg-[#F5F5F5] w-full overflow-hidden transition-all duration-200 ease-in-out ${hasScrolled || isMobile
-              ? "rounded-none shadow"
+          className={`bg-[#F5F5F5] w-full overflow-hidden rounded-[10px] sm:rounded-[20px] md:rounded-[40px] transition-all duration-200 ease-in-out ${hasScrolled || isMobile
+              ? "shadow rounded-tl-[0px] rounded-tr-[0px] rounded-bl-[0px] rounded-br-[0px]"
               : "rounded-[10px] sm:rounded-[20px] md:rounded-[40px]"
             }`}
           initial={{ opacity: 0, y: -20 }}
