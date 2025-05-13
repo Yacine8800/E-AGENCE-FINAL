@@ -407,6 +407,30 @@ const Login = () => {
               Scan ce code avec ton téléphone pour te connecter instantanément
             </p>
           </div>
+
+          {/* Séparateur vertical sur desktop */}
+          {!isMobile && (
+            <div className="h-96 w-px mx-8 border border-gray-100"></div>
+          )}
+
+          {/* QR Code */}
+          <div className="w-full mt-12 text-center">
+            <div className="inline-block">
+              <Image
+                src="/qrcode/qrcode.png"
+                alt="QR Code"
+                width={150}
+                height={150}
+                className="rounded-lg"
+              />
+            </div>
+            <h3 className="text-base font-bold text-gray-700 mt-4">
+              Se connecter avec QR code
+            </h3>
+            <p className="text-sm text-smallText mt-1">
+              Scan ce code avec ton téléphone pour te connecter instantanément
+            </p>
+          </div>
         </div>
       </>
     </AuthLayout>
