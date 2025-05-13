@@ -495,28 +495,6 @@ export default function Home() {
             </motion.span>
           </motion.p>
 
-          {/* Indicateur de statut en temps réel */}
-          <motion.div
-            className="flex flex-wrap justify-center items-center gap-3 mb-8"
-            initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-            viewport={{ once: true }}
-          >
-            <div className="flex items-center gap-1.5 bg-white bg-opacity-20 backdrop-blur-sm px-3 py-1.5 rounded-full">
-              <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-              <span className="text-xs text-white font-medium">
-                42 opérateurs en ligne
-              </span>
-            </div>
-            <div className="h-4 w-px bg-white opacity-30 hidden sm:block" />
-            <div className="bg-white bg-opacity-20 backdrop-blur-sm px-3 py-1.5 rounded-full">
-              <span className="text-xs text-white font-medium">
-                Temps d'attente estimé: <span className="font-bold">2 min</span>
-              </span>
-            </div>
-          </motion.div>
-
           {/* Grille responsive pour les 3 cartes - Actions contextuelles */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 md:gap-8 w-full max-w-4xl mx-auto px-2 sm:px-4">
             {/* Carte 1 - Service téléphonique - Action contextuelle d'appel */}
@@ -660,11 +638,6 @@ export default function Home() {
         border border-white border-opacity-70
       "
             >
-              {/* Badge recommandé */}
-              <div className="absolute -top-1 -right-8 w-32 bg-amber-400 text-xs font-bold text-center py-1 rotate-45">
-                RECOMMANDÉ
-              </div>
-
               {/* Barre d'accent supérieure */}
               <div className="absolute top-0 left-0 right-0 h-1 bg-blue-500 transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-300" />
 
@@ -719,7 +692,6 @@ export default function Home() {
                 </p>
               </div>
 
-              {/* Statut du service */}
               <div className="flex items-center gap-2 my-2">
                 <span className="bg-blue-100 text-blue-800 text-xs px-2 py-0.5 rounded-full">
                   Réponse rapide
@@ -833,11 +805,6 @@ export default function Home() {
         overflow-hidden
       "
             >
-              {/* Indicateur temps de réponse */}
-              <div className="absolute top-3 right-3 bg-green-100 text-green-800 text-xs px-2 py-0.5 rounded-full">
-                Réponse en 5 sec
-              </div>
-
               {/* Barre d'accent supérieure */}
               <div className="absolute top-0 left-0 right-0 h-1 bg-green-500 transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-300" />
 
@@ -872,31 +839,9 @@ export default function Home() {
                 </p>
               </div>
 
-              {/* Fréquence d'utilisation */}
-              <div className="flex gap-0.5 my-2">
-                <div className="flex -space-x-1">
-                  {[1, 2, 3].map((user) => (
-                    <div
-                      key={user}
-                      className="w-6 h-6 rounded-full bg-gray-100 border border-white flex items-center justify-center text-xs text-gray-500 overflow-hidden"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-4 w-4"
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                    </div>
-                  ))}
-                </div>
-                <span className="text-xs text-gray-500 ml-1">
-                  +2K utilisateurs aujourd'hui
+              <div className="flex items-center gap-2 my-2">
+                <span className="bg-green-100 text-green-800 text-xs px-2 py-0.5 rounded-full">
+                  Réponse instantanée
                 </span>
               </div>
 
@@ -950,42 +895,6 @@ export default function Home() {
               <motion.div className="absolute bottom-0 left-0 right-0 h-1 bg-green-500 transform origin-right scale-x-0 group-hover:scale-x-100 transition-transform duration-300" />
             </motion.div>
           </div>
-
-          {/* Badge de satisfaction avec action */}
-          <motion.div
-            className="mt-10 sm:mt-12 inline-flex items-center gap-2 bg-white bg-opacity-10 backdrop-blur-sm px-4 py-2 rounded-full"
-            initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.6 }}
-            viewport={{ once: true }}
-          >
-            <span className="text-white text-xs sm:text-sm">
-              Satisfaction client:{" "}
-            </span>
-            <div className="flex items-center">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <svg
-                  key={star}
-                  className="w-4 h-4 text-yellow-400 fill-current"
-                  viewBox="0 0 24 24"
-                >
-                  <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
-                </svg>
-              ))}
-            </div>
-            <span className="text-white text-xs font-medium">
-              93% cette semaine
-            </span>
-            <button
-              onClick={() => {
-                // Action pour voir les avis
-                window.open("/avis-clients", "_blank");
-              }}
-              className="ml-1 text-xs bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-2 py-0.5 rounded-full transition-colors duration-200"
-            >
-              Voir les avis
-            </button>
-          </motion.div>
         </div>
       </motion.section>
 

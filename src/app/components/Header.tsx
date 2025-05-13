@@ -195,8 +195,8 @@ const Header = () => {
           }`}
       >
         <motion.header
-          className={`bg-[#F5F5F5] w-full overflow-hidden rounded-[10px] sm:rounded-[20px] md:rounded-[40px] transition-all duration-200 ease-in-out ${hasScrolled || isMobile
-              ? "shadow rounded-tl-[0px] rounded-tr-[0px] rounded-bl-[0px] rounded-br-[0px]"
+          className={`bg-[#F5F5F5] w-full overflow-hidden transition-all duration-200 ease-in-out ${hasScrolled || isMobile
+              ? "shadow rounded-tl-[0px] rounded-tr-[0px] rounded-bl-[40px] rounded-br-[40px]"
               : "rounded-[10px] sm:rounded-[20px] md:rounded-[40px]"
             }`}
           initial={{ opacity: 0, y: -20 }}
