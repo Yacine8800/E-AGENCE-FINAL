@@ -86,8 +86,8 @@ const Stepper: React.FC<StepperProps> = ({ type, closeModal }) => {
                   currentStep > index
                     ? "bg-primary text-white border-primary"
                     : currentStep === index
-                    ? "bg-primary text-white border-primary"
-                    : "border-primary text-primary bg-white"
+                      ? "bg-primary text-white border-primary"
+                      : "border-primary text-primary bg-white"
                 )}
               >
                 {currentStep > index ? "✔" : index + 1}
@@ -137,9 +137,14 @@ const Stepper: React.FC<StepperProps> = ({ type, closeModal }) => {
           </button>
         )}
         <button
-          className={`rounded-full bg-primary text-white font-semibold py-4 hover:bg-red-600 ${
-            currentStep === 0 ? 'w-full' : 'w-full'
-          }`}
+          className="w-full rounded-full text-primary border-2 border-primary font-semibold py-4 hover:bg-gray-100"
+          disabled={currentStep === 0}
+          onClick={() => setCurrentStep((prev) => Math.max(0, prev - 1))}
+        >
+          Précédent
+        </button>
+        <button
+          className="w-full rounded-full bg-primary text-white font-semibold py-4 hover:bg-red-600"
           onClick={() =>
             currentStep === steps.length - 1
               ? closeModal()

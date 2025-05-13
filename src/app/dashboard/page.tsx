@@ -1006,14 +1006,14 @@ export default function Dashboard() {
       // Exécuter les deux requêtes en parallèle
       const [postpaidResponse, prepaidResponse] = await Promise.all([
         fetch(
-          `${API_URL}/v3/rattachement/postpaye/me?${queryParams.toString()}`,
+          `/api/proxy/rattachement/postpaye/me?${queryParams.toString()}`,
           {
             method: "GET",
             headers,
           }
         ),
         fetch(
-          `${API_URL}/v3/rattachement/prepaye/me?${queryParams.toString()}`,
+          `/api/proxy/rattachement/prepaye/me?${queryParams.toString()}`,
           {
             method: "GET",
             headers,
@@ -1285,8 +1285,8 @@ export default function Dashboard() {
       // URL de l'endpoint en fonction du type
       const endpoint =
         type === "postpaid"
-          ? `${API_URL}/v3/rattachement/postpaye/niveau/1`
-          : `${API_URL}/v3/rattachement/prepaye/niveau/1`;
+          ? `/api/proxy/rattachement/postpaye/niveau/1`
+          : `/api/proxy/rattachement/prepaye/niveau/1`;
 
       // Effectuer la requête
       const response = await fetch(endpoint, {
@@ -1388,7 +1388,7 @@ export default function Dashboard() {
 
         // Appel API pour récupérer les détails
         const response = await fetch(
-          `${API_URL}/v3/rattachement/details/${id}`,
+          `/api/proxy/rattachement/details/${id}`,
           {
             method: "GET",
             headers,
@@ -1466,12 +1466,14 @@ export default function Dashboard() {
 
         // Appel API pour récupérer la dernière facture
         const response = await fetch(
-          `${API_URL}/v3/rattachement/postpaye/factures/${identifiant}/last`,
+          `/api/proxy/rattachement/postpaye/factures/${identifiant}/last`,
           {
             method: "GET",
             headers,
           }
         );
+
+        const responseData = await response.json();
 
         if (!response.ok) {
           // Gérer les erreurs d'authentification
@@ -1487,16 +1489,34 @@ export default function Dashboard() {
           );
         }
 
-        const responseData = await response.json();
+        // Vérifier les différents cas de message avec data null
+        if (responseData) {
+          // Cas 1: "Cet identifiant ne possède pas de facture"
+          if (responseData.message === "Cet identifiant ne possède pas de facture") {
+            showToastMessage("Cet identifiant ne possède pas de facture", "info");
+            setLastInvoice(null);
+            return;
+          }
 
-        // Mettre à jour l'état avec les détails reçus selon le nouveau format de réponse
-        if (responseData && responseData.data) {
-          setLastInvoice(responseData.data);
+          // Cas 2: "L'identifiant n'appartient pas à ce client"
+          if (responseData.message === "L'identifiant n'appartient pas à ce client") {
+            showToastMessage("L'identifiant n'appartient pas à ce client", "warning");
+            setLastInvoice(null);
+            return;
+          }
+
+          // Cas standard: On a des données
+          if (responseData.data) {
+            setLastInvoice(responseData.data);
+          } else {
+            console.warn(
+              "Réponse API sans données valides pour la facture:",
+              responseData
+            );
+            setLastInvoice(null);
+          }
         } else {
-          console.warn(
-            "Réponse API sans données valides pour la facture:",
-            responseData
-          );
+          console.warn("Réponse API indéfinie", responseData);
           setLastInvoice(null);
         }
       } catch (error: any) {
@@ -1699,7 +1719,7 @@ export default function Dashboard() {
       }
 
       // API endpoint for level 2 attachment
-      const endpoint = `${API_URL}/v3/rattachement/${selectedItem.type === "postpaid" ? "postpaye" : "prepaye"}/niveau/2`;
+      const endpoint = `/api/proxy/rattachement/${selectedItem.type === "postpaid" ? "postpaye" : "prepaye"}/niveau/2`;
 
       // Make the request
       const response = await fetch(endpoint, {
@@ -1736,8 +1756,13 @@ export default function Dashboard() {
 
         // Refresh item details to update the UI
         if (selectedItem.item._id) {
-          fetchItemDetails(selectedItem.item._id);
+          await fetchItemDetails(selectedItem.item._id);
         }
+
+        // Forcer le rechargement de tous les rattachements pour mettre à jour la liste complète
+        // Marquer les données comme obsolètes pour forcer le rafraîchissement
+        dataLoadedRef.current = false;
+        fetchAllRattachements();
 
         return true;
       } else {
@@ -2065,7 +2090,7 @@ export default function Dashboard() {
           </header>
 
           <main className="sm:px-5 pt-4 sm:pt-6 pr-2 sm:pr-3 lg:pr-6 overflow-hidden max-w-[2280px] mx-auto">
-            <div className="h-[calc(100vh-80px)] overflow-y-auto pb-6 px-4 sm:px-6 pr-1 scrollbar-hide">
+            <div className="h-[calc(100vh-80px)] overflow-y-auto pb-6 pr-1 custom-scrollbar">
               {/* Bloc de bienvenue */}
               <div className="mb-6 sm:mb-8 to-transparent py-4 rounded-xl">
                 <h1 className="text-2xl sm:text-2xl md:text-3xl font-bold">
@@ -2084,8 +2109,8 @@ export default function Dashboard() {
               </div>
 
               {/* Section compteurs prépayés / postpayés + cartes */}
-              <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-4 gap-4 pb-10 items-start max-w-[1625px] mx-auto">
-                <div className="h-[201px] min-w-0 w-full">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 pb-10 items-start">
+                <div className="h-[201px]">
                   <MeterSection
                     title="Mes postpayés"
                     iconFill="#EE761A"
@@ -2100,7 +2125,7 @@ export default function Dashboard() {
                   />
                 </div>
 
-                <div className="h-[201px] min-w-0 w-full">
+                <div className="h-[201px]">
                   <MeterSection
                     title="Mes prépayés"
                     iconFill="#1F7A70"
@@ -2115,7 +2140,7 @@ export default function Dashboard() {
                   />
                 </div>
 
-                <div className="h-[201px] min-w-0 w-full">
+                <div className="h-[201px]">
                   {/* Carte 1 : "Un service d'électricité à demander ?" */}
                   <div className="flex flex-col h-full">
                     <div className="flex items-center mb-3 h-[42px]">
@@ -2163,7 +2188,7 @@ export default function Dashboard() {
                   </div>
                 </div>
 
-                <div className="h-[201px] min-w-0 w-full">
+                <div className="h-[201px]">
                   {/* Carte 2 : "Un problème rencontrée ?" */}
                   <div className="flex flex-col h-full">
                     <div className="flex items-center mb-3 h-[42px]">
@@ -2240,12 +2265,12 @@ export default function Dashboard() {
                         : ""}
                     </span>
                   </h1>
-                  <div className="w-full grid grid-cols-1 2xl:grid-cols-12 gap-4 rounded-xl transition-all duration-300 overflow-hidden max-w-[1500px] mx-auto">
+                  <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-4 rounded-xl transition-all duration-300 overflow-hidden max-w-full">
                     {/* Solde à régler - Ne s'affiche que lorsque les deux requêtes sont terminées */}
                     {itemDetails &&
                       !isLoadingDetails &&
                       (!isLoadingInvoice) ? (
-                      <div className="2xl:col-span-5 dashboard-card max-w-full min-w-0 w-full">
+                      <div className="lg:col-span-5 dashboard-card max-w-full">
                         <div className="dashboard-header">
                           <p className="text-base font-semibold text-gray-800 ml-4 mt-2">
                             Solde à régler
@@ -2509,7 +2534,7 @@ export default function Dashboard() {
                         </div>
                       </div>
                     ) : isLoadingDetails || isLoadingInvoice ? (
-                      <div className="2xl:col-span-5 dashboard-card p-8 flex justify-center items-center">
+                      <div className="lg:col-span-5 dashboard-card p-8 flex justify-center items-center">
                         <div className="flex flex-col items-center">
                           <div className="w-10 h-10 border-t-4 border-orange-500 rounded-full animate-spin mb-4"></div>
                           <p className="text-gray-600">
@@ -2520,7 +2545,7 @@ export default function Dashboard() {
                     ) : null}
 
                     {/* Conteneur pour les composants de droite */}
-                    <div className="2xl:col-span-7 relative overflow-hidden max-w-full min-w-0 w-full">
+                    <div className="lg:col-span-7 relative overflow-hidden max-w-full">
                       <div className="relative">
                         {/* Blur overlay */}
                         {itemDetails &&
@@ -2900,7 +2925,7 @@ export default function Dashboard() {
 
       {/* Modal "En cours de développement" pour les réclamations */}
       {isReclModalOpen && (
-        <div className="fixed inset-0 z-[9999] flex justify-end">
+        <div className="fixed inset-0 z-50 flex justify-end">
           {/* BACKDROP */}
           <div
             className="absolute inset-0 bg-black/60 backdrop-blur-md transition-opacity duration-300 animate-fadeIn"
