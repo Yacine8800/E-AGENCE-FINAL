@@ -936,131 +936,260 @@ export default function Home() {
             transition: { duration: 0.4, ease: [0.4, 0, 0.2, 1] },
           }}
           className={`
-          w-[90%] lg:w-[90%]
+          w-[90%] lg:w-[90%] 
           mx-auto 
           border-2 
           border-gray-400/30 
-          bg-[#1C1C1C]
+          ${isDarkMode ? "bg-[#1C1C1C]" : "bg-white"}
           rounded-[30px] sm:rounded-[40px] 
           p-4 sm:p-6 md:p-8 
+
           backdrop-blur-sm 
           transition-all 
           duration-500 
+          flex flex-col md:flex-row 
+          items-center 
+          justify-between 
           relative 
           cursor-pointer 
           transform-gpu 
-          h-auto md:h-[600px] lg:h-[700px] 
+          h-auto md:h-[700px] lg:h-[800px] 
           mb-12 sm:mb-16 md:mb-20 
           hover:border-opacity-50
         `}
         >
-          <div className="flex flex-col md:flex-row items-center justify-center gap-x-20 md:gap-x-20 mx-auto max-w-5xl w-full h-full">
-            {/* Colonne gauche : ClemBot + Textes + Bouton */}
-            <div className="flex-1 flex flex-col items-start text-left space-y-3 sm:space-y-4 md:space-y-5 px-2 sm:px-4">
-              <div className="flex flex-col space-y-2 sm:space-y-3 group">
-                <img
-                  src="assistance/bot.png"
-                  alt="ClemBot"
-                  className="w-[60px] h-[60px] sm:w-[80px] sm:h-[80px] md:w-[100px] md:h-[100px] object-contain mb-1 sm:mb-2 transition-transform duration-500 hover:scale-105"
-                />
-                <div className="mt-0 sm:mt-2">
-                  <h3
-                    className="
-                    text-lg sm:text-xl md:text-2xl font-bold flex items-center flex-wrap 
-                    transition-colors duration-300 
-                    text-[#F47D02]
-                  "
-                  >
-                    Le tout
-                    <span
-                      className="
-                      ml-1 sm:ml-2 px-2 sm:px-3 py-0.5 sm:py-1 
-                      rounded-lg 
-                      text-white
-                      transition-all duration-300 
-                      hover:shadow-lg 
-                      bg-[#EC4F48]
-                    "
-                    >
-                      nouveau
-                    </span>
-                  </h3>
-                  <h2
-                    className="
-                    mt-2 
-                    text-2xl sm:text-3xl font-bold 
-                    transition-colors duration-300 
-                    text-[#F47D02]
-                  "
-                  >
-                    Chat-Bot
-                  </h2>
-                </div>
-              </div>
-
-              <p className="text-sm sm:text-base text-white">
-                Découvrez <strong>Clem&apos;Bot</strong>, votre assistant
-                intelligent
-                <strong> disponible 24/7</strong> !
-              </p>
-              <p className="text-sm sm:text-base text-white">
-                <strong>Besoin d&apos;aide ?</strong> Clem&apos;Bot répond à vos
-                questions et vous guide dans toutes vos démarches.
-              </p>
-
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="
-                px-6 py-3 
-                rounded-xl font-medium 
-                flex items-center gap-2 
-                hover:shadow-lg 
-                transform hover:-translate-y-0.5 
-                transition-all duration-300
-                bg-white text-black
-              "
-              >
-                Essayer Clem&apos;bot
-                <svg
-                  width="22"
-                  height="20"
-                  viewBox="0 0 22 20"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
+          {/* Colonne gauche : ClemBot + Textes + Bouton */}
+          <div className="flex flex-col items-start text-left w-full md:w-1/2 space-y-3 sm:space-y-5 md:space-y-6 px-2 sm:px-4">
+            <div className="flex flex-col space-y-2 sm:space-y-4 group">
+              <img
+                src="assistance/bot.png"
+                alt="ClemBot"
+                className="w-[60px] h-[60px] sm:w-[80px] sm:h-[80px] md:w-[100px] md:h-[100px] object-contain mb-1 sm:mb-2 transition-transform duration-500 hover:scale-105"
+              />
+              <div className="mt-0 sm:mt-2 md:mt-3">
+                <h3
+                  className={`
+                  text-lg sm:text-xl md:text-2xl font-bold flex items-center flex-wrap 
+                  transition-colors duration-300 
+                  ${isDarkMode ? "text-[#F47D02]" : "text-[#474443]"}
+                `}
                 >
-                  <path
-                    d="M8.39583 6.37484H8.40625M13.6042 6.37484H13.6146M17.25 1.1665C18.0788 1.1665 18.8737 1.49574 19.4597 2.0818C20.0458 2.66785 20.375 3.4627 20.375 4.2915V12.6248C20.375 13.4536 20.0458 14.2485 19.4597 14.8345C18.8737 15.4206 18.0788 15.7498 17.25 15.7498H12.0417L6.83333 18.8748V15.7498H4.75C3.9212 15.7498 3.12634 15.4206 2.54029 14.8345C1.95424 14.2485 1.625 13.4536 1.625 12.6248V4.2915C1.625 3.4627 1.95424 2.66785 2.54029 2.0818C3.12634 1.49574 3.9212 1.1665 4.75 1.1665H17.25Z"
-                    stroke="black"
-                    strokeWidth="2.08333"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <path
-                    d="M8.39844 10.5415C8.73789 10.888 9.14307 11.1632 9.59024 11.3511C10.0374 11.539 10.5176 11.6358 11.0026 11.6358C11.4876 11.6358 11.9678 11.539 12.415 11.3511C12.8621 11.1632 13.2673 10.888 13.6068 10.5415"
-                    stroke="black"
-                    strokeWidth="2.08333"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </motion.button>
+                  Le tout
+                  <span
+                    className={`
+                    ml-1 sm:ml-2 px-2 sm:px-3 py-0.5 sm:py-1 
+                    rounded-lg 
+                    text-white
+                    transition-all duration-300 
+                    hover:shadow-lg 
+                    ${isDarkMode ? "bg-[#EC4F48]" : "bg-[#F47D02]"}
+                  `}
+                  >
+                    nouveau
+                  </span>
+                </h3>
+                <h2
+                  className={`
+                  mt-2 
+                  text-2xl sm:text-3xl font-bold 
+                  transition-colors duration-300 
+                  ${isDarkMode ? "text-[#F47D02]" : "text-[#474443]"}
+                `}
+                >
+                  Chat-Bot
+                </h2>
+              </div>
             </div>
 
-            {/* Colonne droite : Téléphone + Switch + Barres décoratives */}
-            <div className="flex-1 w-full flex justify-center mt-4 md:mt-0">
-              <div className="relative flex flex-col items-center">
-                {/* Conteneur du téléphone */}
-                <div className="relative w-[300px] sm:w-[380px] md:w-[430px] h-[400px] sm:h-[500px] mt-4 sm:mt-8">
-                  {/* Image du téléphone */}
-                  <Image
-                    src="/telephone/phoneNoir.png"
-                    alt="Phone Interface"
-                    fill
-                    className="object-contain mt-[26px] sm:mt-[108px]"
-                    priority
-                  />
+            <p
+              className={`
+              text-sm sm:text-base 
+              transition-colors duration-300 
+              ${isDarkMode ? "text-white" : "text-black"}
+            `}
+            >
+              Découvrez <strong>Clem&apos;Bot</strong>, votre assistant
+              intelligent
+              <strong> disponible 24/7</strong> !
+            </p>
+            <p
+              className={`
+              text-sm sm:text-base 
+              transition-colors duration-300
+              ${isDarkMode ? "text-white" : "text-black"}
+            `}
+            >
+              <strong>Besoin d&apos;aide ?</strong> Clem&apos;Bot répond à vos
+              questions et vous guide dans toutes vos démarches.
+            </p>
+
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className={`
+              px-6 py-3 
+              rounded-xl font-medium 
+              flex items-center gap-2 
+              hover:shadow-lg 
+              transform hover:-translate-y-0.5 
+              transition-all duration-300
+              ${isDarkMode ? "bg-white text-black" : "bg-[#191818] text-white"}
+            `}
+            >
+              Essayer Clem&apos;bot
+              <svg
+                width="22"
+                height="20"
+                viewBox="0 0 22 20"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M8.39583 6.37484H8.40625M13.6042 6.37484H13.6146M17.25 1.1665C18.0788 1.1665 18.8737 1.49574 19.4597 2.0818C20.0458 2.66785 20.375 3.4627 20.375 4.2915V12.6248C20.375 13.4536 20.0458 14.2485 19.4597 14.8345C18.8737 15.4206 18.0788 15.7498 17.25 15.7498H12.0417L6.83333 18.8748V15.7498H4.75C3.9212 15.7498 3.12634 15.4206 2.54029 14.8345C1.95424 14.2485 1.625 13.4536 1.625 12.6248V4.2915C1.625 3.4627 1.95424 2.66785 2.54029 2.0818C3.12634 1.49574 3.9212 1.1665 4.75 1.1665H17.25Z"
+                  stroke={isDarkMode ? "black" : "white"}
+                  strokeWidth="2.08333"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M8.39844 10.5415C8.73789 10.888 9.14307 11.1632 9.59024 11.3511C10.0374 11.539 10.5176 11.6358 11.0026 11.6358C11.4876 11.6358 11.9678 11.539 12.415 11.3511C12.8621 11.1632 13.2673 10.888 13.6068 10.5415"
+                  stroke={isDarkMode ? "black" : "white"}
+                  strokeWidth="2.08333"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </motion.button>
+          </div>
+
+          {/* Colonne droite : Téléphone + Switch + Barres décoratives */}
+          <div className="md:w-1/2 w-full flex justify-center mt-8 md:mt-0">
+            <div className="relative flex flex-col items-center">
+              {/* Conteneur du téléphone */}
+              <div className="relative w-[300px] sm:w-[380px] md:w-[430px] h-[400px] sm:h-[500px] mt-10 sm:mt-20">
+                <div
+                  className="
+                  absolute 
+                  left-1/2 
+                  -translate-x-1/2 
+                  top-[-486px] 
+                  sm:top-[-400px]
+                  md:top-[-186px]
+                  md:-left-[650px]
+                  sm:-left-[600px]
+                  z-50 
+                  flex flex-col 
+                  items-center 
+                  transition-all 
+                  duration-300
+                "
+                >
+                  {/* Barre décorative du haut */}
+                  <div className="w-[150px] h-[25px] bg-[#CFCACA] rounded-b-3xl shadow-sm mb-9" />
+                  <div className="flex flex-col items-center mt-3">
+                    {/* Petite barre décorative */}
+                    <div className="mb-8 bg-[#CFCACA] h-[10px] w-[50px] rounded-full shadow-sm" />
+
+                    {/* Switch Dark Mode */}
+                    <div
+                      onClick={toggleDarkMode}
+                      className={`
+                      ${isDarkMode ? "bg-[#2C2C2C]" : "bg-[#D1CFCF]"}
+                      rounded-[30px] 
+                      h-[36px] w-[100px] 
+                      sm:h-[41px] sm:w-[110px] 
+                      flex 
+                      items-center 
+                      justify-between 
+                      px-3 
+                      relative 
+                      cursor-pointer 
+                      transition-colors 
+                      duration-300 
+                      hover:shadow-md
+                    `}
+                    >
+                      <motion.div
+                        className={`
+                        absolute 
+                        h-[28px] w-[28px] 
+                        sm:h-[32px] sm:w-[32px]
+                        rounded-full 
+                        z-10 
+                        shadow-md 
+                        transition-colors 
+                        duration-300
+                        ${isDarkMode ? "bg-[#F47D02]" : "bg-[#191818]"}
+                      `}
+                        animate={{ x: isDarkMode ? 0 : 60 }}
+                        transition={{
+                          type: "spring",
+                          stiffness: 400,
+                          damping: 20,
+                        }}
+                      />
+                      {/* Icônes Lune & Soleil */}
+                      <div className="absolute inset-0 flex items-center justify-between px-[10px] z-20">
+                        {/* Icône lune */}
+                        <div className="flex items-center justify-center w-[28px] h-[28px] sm:w-[32px] sm:h-[32px]">
+                          <svg
+                            width="19"
+                            height="20"
+                            viewBox="0 0 19 20"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="M1.63935 10.3242C1.93313 14.5703 5.49933 18.0249 9.76734 18.2146C12.7786 18.3465 15.4716 16.9284 17.0874 14.694C17.7566 13.7788 17.3975 13.1687 16.2795 13.3748C15.7328 13.4737 15.1697 13.515 14.5821 13.4902C10.5916 13.3253 7.32731 9.95317 7.31099 5.97088C7.30283 4.89904 7.52317 3.88492 7.92304 2.96149C8.36371 1.93912 7.83327 1.45267 6.81319 1.88965C3.58158 3.26655 1.37005 6.55627 1.63935 10.3242Z"
+                              stroke={isDarkMode ? "white" : "#B1A8A8"}
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
+                        </div>
+                        {/* Icône soleil */}
+                        <div className="flex items-center justify-center w-[28px] h-[28px] sm:w-[32px] sm:h-[32px]">
+                          <svg
+                            width="21"
+                            height="20"
+                            viewBox="0 0 21 20"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="M10.3059 15.3368C13.2664 15.3368 15.6664 12.9368 15.6664 9.97629C15.6664 7.01573 13.2664 4.61572 10.3059 4.61572C7.34532 4.61572 4.94531 7.01573 4.94531 9.97629C4.94531 12.9368 7.34532 15.3368 10.3059 15.3368Z"
+                              stroke={isDarkMode ? "#B1A8A8" : "white"}
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                            <path
+                              d="M16.1979 15.8644L16.0907 15.7572M16.0907 4.19486L16.1979 4.08765L16.0907 4.19486ZM4.42115 15.8644L4.52836 15.7572L4.42115 15.8644ZM10.3095 1.79498V1.729V1.79498ZM10.3095 18.223V18.1571V18.223ZM2.12848 9.97602H2.0625H2.12848ZM18.5565 9.97602H18.4906H18.5565ZM4.52836 4.19486L4.42115 4.08765L4.52836 4.19486Z"
+                              stroke={isDarkMode ? "#B1A8A8" : "white"}
+                              strokeWidth="3"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
+
+                {/* Image du téléphone */}
+                <Image
+                  src={
+                    isDarkMode
+                      ? "/telephone/phoneNoir.png"
+                      : "/telephone/phoneBlanc.png"
+                  }
+                  alt="Phone Interface"
+                  fill
+                  className="object-contain mt-[26px] sm:mt-[108px] "
+                  priority
+                />
               </div>
             </div>
           </div>

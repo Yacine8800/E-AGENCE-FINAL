@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation";
 import { useResponsive } from "@/src/hooks/useResponsive";
 import Image from "next/image";
 import { bebas_beue } from "@/utils/globalFunction";
-import { X, AlertCircle, CheckCircle } from "lucide-react";
+import { X, AlertCircle, CheckCircle, ChevronDown } from "lucide-react";
 import { API_KEY, API_URL } from "../config/constants";
 import CountdownTimer from "../components/countdownTimer";
 import Title from "../components/title";
@@ -25,6 +25,15 @@ const PHASE = {
   PASSCODE_CONFIRMATION: 'passcode_confirmation'
 };
 
+// Définition des préfixes téléphoniques
+const COUNTRY_PREFIXES = [
+  { code: "+225", country: "Côte d'Ivoire" },
+  { code: "+233", country: "Ghana" },
+  { code: "+228", country: "Togo" },
+  { code: "+229", country: "Bénin" },
+  { code: "+226", country: "Burkina Faso" },
+];
+
 const Register = () => {
   const router = useRouter();
   const { isMobile } = useResponsive();
@@ -37,6 +46,7 @@ const Register = () => {
     firstname: "",
     lastname: "",
     email: "",
+    confirmEmail: "",
     contactPrefix: "+225",
     contact: "",
   });
@@ -57,6 +67,10 @@ const Register = () => {
 
   // Handle mode param for redirect after registration
   const [modeParam, setModeParam] = useState<string | null>(null);
+
+  // State pour le dropdown des préfixes
+  const [prefixDropdownOpen, setPrefixDropdownOpen] = useState(false);
+  const [selectedPrefix, setSelectedPrefix] = useState(COUNTRY_PREFIXES[0]);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -122,12 +136,24 @@ const Register = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  // Gérer le changement de préfixe
+  const handlePrefixChange = (prefix: typeof COUNTRY_PREFIXES[0]) => {
+    setSelectedPrefix(prefix);
+    setFormData(prev => ({ ...prev, contactPrefix: prefix.code }));
+    setPrefixDropdownOpen(false);
+  };
+
   // Submit user information and send OTP
   const handleUserInfoSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!formData.email && !formData.contact) {
       showToastMessage("Veuillez saisir un email ou un numéro de téléphone", "error");
+      return;
+    }
+
+    if (formData.email && formData.email !== formData.confirmEmail) {
+      showToastMessage("Les adresses email ne correspondent pas", "error");
       return;
     }
 
@@ -383,36 +409,39 @@ const Register = () => {
       <div className="pt-5 w-full">
         <form onSubmit={handleUserInfoSubmit}>
           <div className="space-y-4">
-            <div>
-              <label htmlFor="lastname" className="font-bold text-base">
-                Nom(s) <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                id="lastname"
-                name="lastname"
-                placeholder="Votre nom"
-                required
-                value={formData.lastname}
-                onChange={handleInputChange}
-                className="w-full rounded-xl px-5 py-4 border-2 border-[#EDEDED] mt-2"
-              />
-            </div>
+            {/* Nom et prénom sur la même ligne */}
+            <div className="flex gap-3">
+              <div className="w-1/2">
+                <label htmlFor="lastname" className="font-bold text-base">
+                  Nom(s) <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  id="lastname"
+                  name="lastname"
+                  placeholder="Votre nom"
+                  required
+                  value={formData.lastname}
+                  onChange={handleInputChange}
+                  className="w-full rounded-xl px-5 py-4 border-2 border-[#EDEDED] mt-2"
+                />
+              </div>
 
-            <div>
-              <label htmlFor="firstname" className="font-bold text-base">
-                Prénom(s) <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                id="firstname"
-                name="firstname"
-                placeholder="Votre prénom"
-                required
-                value={formData.firstname}
-                onChange={handleInputChange}
-                className="w-full rounded-xl px-5 py-4 border-2 border-[#EDEDED] mt-2"
-              />
+              <div className="w-1/2">
+                <label htmlFor="firstname" className="font-bold text-base">
+                  Prénom(s) <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  id="firstname"
+                  name="firstname"
+                  placeholder="Votre prénom"
+                  required
+                  value={formData.firstname}
+                  onChange={handleInputChange}
+                  className="w-full rounded-xl px-5 py-4 border-2 border-[#EDEDED] mt-2"
+                />
+              </div>
             </div>
 
             <div>
@@ -430,27 +459,65 @@ const Register = () => {
               />
             </div>
 
+            <div>
+              <label htmlFor="confirmEmail" className="font-bold text-base">
+                Confirmer Email
+              </label>
+              <input
+                type="email"
+                id="confirmEmail"
+                name="confirmEmail"
+                placeholder="Confirmez votre email"
+                value={formData.confirmEmail}
+                onChange={handleInputChange}
+                className={`w-full rounded-xl px-5 py-4 border-2 ${formData.email && formData.confirmEmail && formData.email !== formData.confirmEmail
+                  ? "border-red-500"
+                  : "border-[#EDEDED]"
+                  } mt-2`}
+              />
+              {formData.email && formData.confirmEmail && formData.email !== formData.confirmEmail && (
+                <p className="text-red-500 text-sm mt-1">Les adresses email ne correspondent pas</p>
+              )}
+            </div>
+
             <div className="flex gap-2">
-              <div className="w-1/3">
+              <div className="w-2/5 relative">
                 <label htmlFor="contactPrefix" className="font-bold text-base">
                   Préfixe <span className="text-red-500">*</span>
                 </label>
-                <select
-                  id="contactPrefix"
-                  name="contactPrefix"
-                  value={formData.contactPrefix}
-                  onChange={handleInputChange}
-                  className="w-full rounded-xl px-3 py-4 border-2 border-[#EDEDED] mt-2 bg-white"
-                >
-                  <option value="+225">+225</option>
-                  <option value="+233">+233</option>
-                  <option value="+228">+228</option>
-                  <option value="+229">+229</option>
-                  <option value="+226">+226</option>
-                </select>
+                <div className="relative mt-2">
+                  <button
+                    type="button"
+                    className="w-full flex items-center justify-between rounded-xl px-4 py-4 border-2 border-[#EDEDED] bg-white text-left focus:outline-none focus:border-primary transition-colors"
+                    onClick={() => setPrefixDropdownOpen(!prefixDropdownOpen)}
+                  >
+                    <span className="font-medium">{selectedPrefix.code}</span>
+                    <ChevronDown
+                      className={`h-5 w-5 text-gray-400 transition-transform ${prefixDropdownOpen ? 'rotate-180' : ''}`}
+                    />
+                  </button>
+
+                  {prefixDropdownOpen && (
+                    <div className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg py-1 max-h-56 overflow-auto">
+                      {COUNTRY_PREFIXES.map((prefix) => (
+                        <button
+                          key={prefix.code}
+                          type="button"
+                          className="w-full flex items-center justify-between px-4 py-3 hover:bg-gray-50 transition-colors"
+                          onClick={() => handlePrefixChange(prefix)}
+                        >
+                          <span className="font-medium">{prefix.code}</span>
+                          <span className="text-sm text-gray-500">
+                            {prefix.country}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
 
-              <div className="w-2/3">
+              <div className="w-3/5">
                 <label htmlFor="contact" className="font-bold text-base">
                   Téléphone
                 </label>
@@ -470,7 +537,7 @@ const Register = () => {
           <div className="pt-7">
             <button
               type="submit"
-              className="w-full rounded-full bg-primary text-white font-semibold py-4"
+              className="w-full rounded-full bg-primary text-white font-semibold py-4 hover:bg-primary/90 transition-colors"
               disabled={!formData.lastname || !formData.firstname || (!formData.email && !formData.contact)}
             >
               Continuer

@@ -47,9 +47,7 @@ export default function Column({
                   }`}>
                   {label}
                 </span>
-                {isActive && (
-                  <span className="ml-2 w-1.5 h-1.5 rounded-full bg-orange"></span>
-                )}
+
               </Link>
             </li>
           );

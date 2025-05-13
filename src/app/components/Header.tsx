@@ -40,6 +40,10 @@ const Header = () => {
   const [activeSubmenuPath, setActiveSubmenuPath] = useState<string | null>(
     null
   );
+  // État pour stocker l'onglet actif basé sur le chemin d'URL
+  const [currentSectionTab, setCurrentSectionTab] = useState<TabType | null>(
+    null
+  );
 
   // Récupérer l'état d'authentification
   const { isAuthenticated, user } = useAuth();
@@ -120,6 +124,10 @@ const Header = () => {
     const activeSubmenu = findActiveSubmenu(pathname);
     setActiveSubmenuPath(activeSubmenu);
 
+    // Déterminer l'onglet actif basé sur le chemin d'URL
+    const tabFromPath = getTabFromPath(pathname);
+    setCurrentSectionTab(tabFromPath);
+
     // Sur mobile, nous ne gardons pas le menu ouvert automatiquement
     if (isMobile) {
       setIsMenuOpen(false);
@@ -199,6 +207,8 @@ const Header = () => {
           className={`bg-[#F5F5F5] w-full overflow-hidden transition-all duration-200 ease-in-out ${
             hasScrolled || isMobile
               ? "shadow rounded-tl-[0px] rounded-tr-[0px] rounded-bl-[40px] rounded-br-[40px]"
+              : isMenuOpen
+              ? "rounded-[10px] sm:rounded-[20px] md:rounded-[40px] shadow-lg"
               : "rounded-[10px] sm:rounded-[20px] md:rounded-[40px]"
           }`}
           initial={{ opacity: 0, y: -20 }}
@@ -230,7 +240,9 @@ const Header = () => {
                       <button
                         key={tab}
                         className={`relative text-sm xs:text-base sm:text-lg md:text-xl text-noir hover:text-orange transition-all duration-300 ${
-                          activeTab === tab ? "font-semibold" : ""
+                          activeTab === tab || currentSectionTab === tab
+                            ? "font-semibold"
+                            : ""
                         }`}
                         onClick={() => handleTabClick(tab)}
                         onMouseEnter={() => handleTabHover(tab)}
@@ -240,7 +252,8 @@ const Header = () => {
                           : tab === "business"
                           ? "Business"
                           : "Institution"}
-                        {activeTab === tab && (
+                        {(activeTab === tab ||
+                          (!isMenuOpen && currentSectionTab === tab)) && (
                           <motion.div
                             layoutId="underline"
                             className="absolute left-0 right-0 -bottom-1 sm:-bottom-2 md:-bottom-3 mx-auto h-[4px] sm:h-[6px] md:h-[10px] w-full bg-orange shadow-sm rounded-full"
@@ -322,6 +335,15 @@ const Header = () => {
               </div>
             </div>
           </div>
+
+          {/* Indicateur de section actuelle (toujours visible) */}
+          {/* {currentSectionTab && !isMenuOpen && (
+            <div className="w-full px-3 sm:px-6 md:px-8 lg:px-12 xl:px-20 pb-2 sm:pb-3 md:pb-4">
+              <div className="inline-block bg-orange/10 px-2 sm:px-3 md:px-4 py-1 sm:py-1.5 md:py-2 rounded-full text-orange text-xs sm:text-sm md:text-base font-medium">
+                <span>Section: {currentSectionTab === "particulier" ? "Particulier" : currentSectionTab === "business" ? "Business" : "Institution"}</span>
+              </div>
+            </div>
+          )} */}
 
           {/* ─────────────  Contenu déroulant  ───────────── */}
           <AnimatePresence mode="sync">
