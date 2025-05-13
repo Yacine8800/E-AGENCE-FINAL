@@ -893,6 +893,42 @@ export default function Home() {
               <motion.div className="absolute bottom-0 left-0 right-0 h-1 bg-green-500 transform origin-right scale-x-0 group-hover:scale-x-100 transition-transform duration-300" />
             </motion.div>
           </div>
+
+          {/* Badge de satisfaction avec action */}
+          <motion.div
+            className="mt-10 sm:mt-12 inline-flex items-center gap-2 bg-white bg-opacity-10 backdrop-blur-sm px-4 py-2 rounded-full"
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.6 }}
+            viewport={{ once: true }}
+          >
+            <span className="text-white text-xs sm:text-sm">
+              Satisfaction client:{" "}
+            </span>
+            <div className="flex items-center">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <svg
+                  key={star}
+                  className="w-4 h-4 text-yellow-400 fill-current"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                </svg>
+              ))}
+            </div>
+            <span className="text-white text-xs font-medium">
+              93% cette semaine
+            </span>
+            <button
+              onClick={() => {
+                // Action pour voir les avis
+                window.open("/avis-clients", "_blank");
+              }}
+              className="ml-1 text-xs bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-2 py-0.5 rounded-full transition-colors duration-200"
+            >
+              Voir les avis
+            </button>
+          </motion.div>
         </div>
       </motion.section>
 
