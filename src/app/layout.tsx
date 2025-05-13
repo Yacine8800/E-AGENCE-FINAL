@@ -280,7 +280,7 @@ export default function RootLayout({
 
   return (
     <html lang="fr">
-      <head>
+       <head>
         <Script id="auth-check" strategy="beforeInteractive">
           {`
             // Intercepter les requêtes fetch pour ajouter l'en-tête d'authentification
