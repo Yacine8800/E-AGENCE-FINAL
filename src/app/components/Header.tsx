@@ -268,12 +268,15 @@ const Header = () => {
 
               {/* CTA */}
               <div className="flex items-center gap-2 sm:gap-3 md:gap-4 mt-2 sm:mt-0 w-full sm:w-auto justify-center sm:justify-end shrink-0">
+                {/* Modification ici: Ecostore avec un style de lien moderne et effet d'animation */}
                 <Link
                   href="/solutions-eco"
-                  className="bg-[#F5F5F5] border border-vert hover:bg-white font-semibold text-vert min-w-[80px] xs:min-w-[120px] sm:min-w-[120px] md:min-w-[120px] lg:min-w-[160px] max-w-[140px] xs:max-w-[140px] sm:max-w-[160px] md:max-w-[180px] lg:max-w-[233px] h-[35px] sm:h-[45px] md:h-[55px] px-2 xs:px-3 sm:px-4 md:px-6 lg:px-10 py-[8px] sm:py-[10px] md:py-[15px] rounded-[20px] sm:rounded-[30px] md:rounded-[40px] transition-all duration-300 text-[10px] xs:text-xs sm:text-sm flex items-center justify-center gap-[6px] sm:gap-[10px] hover:scale-105 hover:shadow-lg truncate"
+                  className="text-vert group flex items-center gap-[6px] sm:gap-[10px] font-medium text-[10px] xs:text-xs sm:text-sm transition-all duration-300"
                 >
-                  <Ecostore />
-                  <span>Ecostore</span>
+                  <Ecostore className="group-hover:scale-110 transition-transform duration-300" />
+                  <span className="relative after:absolute after:w-0 after:h-[3px] after:bg-vert after:bottom-[-2px] after:left-0 group-hover:after:w-full after:transition-all after:duration-300 group-hover:text-vert">
+                    Ecostore
+                  </span>
                 </Link>
 
                 <Link
@@ -335,15 +338,6 @@ const Header = () => {
               </div>
             </div>
           </div>
-
-          {/* Indicateur de section actuelle (toujours visible) */}
-          {/* {currentSectionTab && !isMenuOpen && (
-            <div className="w-full px-3 sm:px-6 md:px-8 lg:px-12 xl:px-20 pb-2 sm:pb-3 md:pb-4">
-              <div className="inline-block bg-orange/10 px-2 sm:px-3 md:px-4 py-1 sm:py-1.5 md:py-2 rounded-full text-orange text-xs sm:text-sm md:text-base font-medium">
-                <span>Section: {currentSectionTab === "particulier" ? "Particulier" : currentSectionTab === "business" ? "Business" : "Institution"}</span>
-              </div>
-            </div>
-          )} */}
 
           {/* ─────────────  Contenu déroulant  ───────────── */}
           <AnimatePresence mode="sync">
