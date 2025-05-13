@@ -769,6 +769,7 @@ export default function Dashboard() {
   // États pour gérer le chargement des données
   const [compteursPrepaid, setCompteursPrepaid] = useState<Compteur[]>([]);
   const [compteursPostpaid, setCompteursPostpaid] = useState<Compteur[]>([]);
+  
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingPrepaid, setIsLoadingPrepaid] = useState(false);
   const [isLoadingPostpaid, setIsLoadingPostpaid] = useState(false);
@@ -2687,12 +2688,12 @@ export default function Dashboard() {
               ) : (
                 <div className="flex flex-col items-center justify-center px-8 py-10 gap-5 mb-8 bg-gradient-to-r from-[#F7942E]/20 to-amber-50 rounded-xl shadow-sm border border-orange-100  overflow-hidden">
                   {/* Decorative bubbles */}
-                  <div className="absolute top-6 left-8 w-16 h-16 rounded-full bg-[#F7942E]/10 animate-float"></div>
+                  {/* <div className="absolute top-6 left-8 w-16 h-16 rounded-full bg-[#F7942E]/10 animate-float"></div>
                   <div className="absolute bottom-8 right-10 w-12 h-12 rounded-full bg-[#F7942E]/15 animate-float-delayed"></div>
                   <div className="absolute top-1/3 right-8 w-8 h-8 rounded-full bg-[#F7942E]/15 animate-float-slow"></div>
                   <div className="absolute bottom-10 left-12 w-10 h-10 rounded-full bg-[#F7942E]/10 animate-float-slow"></div>
                   <div className="absolute top-1/2 left-1/3 w-5 h-5 rounded-full bg-[#F7942E]/20 animate-float"></div>
-                  <div className="absolute top-1/4 right-1/4 w-7 h-7 rounded-full bg-[#F7942E]/10 animate-float-delayed"></div>
+                  <div className="absolute top-1/4 right-1/4 w-7 h-7 rounded-full bg-[#F7942E]/10 animate-float-delayed"></div> */}
 
                   <div className="">
                     <Image

@@ -17,6 +17,7 @@ import DesktopEffects from "./components/DesktopEffects";
 import { API_EAGENCE, API_EAGENCE_JOEL, API_BOT_CIE } from "@/config/constants";
 import { usePathname, useRouter } from "next/navigation";
 import Script from "next/script";
+import { LoaderProvider } from "@/src/contexts/LoaderContext";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -320,9 +321,11 @@ export default function RootLayout({
       </head>
       <body className={montserrat.className}>
         <ReduxProvider>
-          <RouteGuard>
-            {children}
-          </RouteGuard>
+          <LoaderProvider>
+            <RouteGuard>
+              {children}
+            </RouteGuard>
+          </LoaderProvider>
         </ReduxProvider>
       </body>
     </html>
