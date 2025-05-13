@@ -1,10 +1,12 @@
 "use client";
 import { motion } from "framer-motion";
-import { useRef, useState, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const VideoCarousel = () => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [isHalfway, setIsHalfway] = useState(false);
+  const [isHoveredClient, setIsHoveredClient] = useState(false);
+  const [isHoveredCompte, setIsHoveredCompte] = useState(false);
 
   useEffect(() => {
     const checkVideoProgress = () => {
@@ -29,6 +31,40 @@ const VideoCarousel = () => {
       }
     };
   }, [isHalfway]);
+
+  // Variantes pour l'animation du fond du bouton
+  const backgroundVariants = {
+    default: {
+      height: "100%",
+      width: "0%",
+    },
+    hover: {
+      height: "100%",
+      width: "100%",
+    },
+  };
+
+  // Variantes pour l'animation du texte
+  const textVariants = {
+    default: {
+      y: 0,
+    },
+    hover: {
+      y: -30,
+    },
+  };
+
+  // Variantes pour l'animation du texte secondaire
+  const secondTextVariants = {
+    default: {
+      y: 30,
+      opacity: 0,
+    },
+    hover: {
+      y: 0,
+      opacity: 1,
+    },
+  };
 
   return (
     <div className="relative px-4 sm:px-6 md:px-12 lg:px-[80px] w-full h-[450px] sm:h-[550px] md:h-[650px] lg:h-[850px] overflow-hidden">
@@ -100,28 +136,90 @@ const VideoCarousel = () => {
           <strong className="font-semibold">plus efficace</strong>.
         </motion.p>
 
-        {/* Boutons animés - espacement réduit */}
-        <motion.div className="mt-2 sm:mt-3 flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto max-w-[85%] sm:max-w-none mx-auto">
-          <motion.button
-            className="px-3 sm:px-4 md:px-5 py-1.5 sm:py-2 border border-black rounded-full text-black font-medium text-xs sm:text-sm bg-white hover:bg-black hover:text-white transition-all w-full sm:w-auto"
-            initial={{ x: 100, opacity: 0, filter: "blur(10px)" }}
-            animate={isHalfway ? { x: 0, opacity: 1, filter: "blur(0px)" } : {}}
-            transition={{ duration: 1, ease: "easeOut", delay: 0.8 }}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.98 }}
+        {/* Nouveaux boutons design innovant */}
+        <motion.div
+          className="mt-4 sm:mt-6 flex flex-col sm:flex-row gap-4 sm:gap-6 w-full max-w-[300px] sm:max-w-none mx-auto justify-center"
+          initial={{ opacity: 0, y: 50 }}
+          animate={isHalfway ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 1, delay: 0.8 }}
+        >
+          {/* Bouton Devenir client */}
+          <motion.div
+            className="relative overflow-hidden h-12 sm:h-14 w-full sm:w-44 md:w-48 rounded-lg border-2 border-black cursor-pointer bg-white backdrop-blur-sm bg-opacity-70"
+            onHoverStart={() => setIsHoveredClient(true)}
+            onHoverEnd={() => setIsHoveredClient(false)}
+            whileTap={{ scale: 0.97 }}
           >
-            Devenir client
-          </motion.button>
-          <motion.button
-            className="px-3 sm:px-4 md:px-5 py-1.5 sm:py-2 bg-black text-white rounded-full font-medium text-xs sm:text-sm hover:bg-white hover:text-black hover:border hover:border-black transition-all w-full sm:w-auto"
-            initial={{ x: 100, opacity: 0, filter: "blur(10px)" }}
-            animate={isHalfway ? { x: 0, opacity: 1, filter: "blur(0px)" } : {}}
-            transition={{ duration: 1, ease: "easeOut", delay: 1 }}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.98 }}
+            {/* Fond animé */}
+            <motion.div
+              className="absolute bottom-0 left-0 bg-black"
+              initial="default"
+              animate={isHoveredClient ? "hover" : "default"}
+              variants={backgroundVariants}
+              transition={{ duration: 0.4, ease: "easeInOut" }}
+            />
+
+            {/* Texte principal */}
+            <motion.div
+              className="absolute inset-0 flex items-center justify-center font-medium text-sm sm:text-base text-black"
+              initial="default"
+              animate={isHoveredClient ? "hover" : "default"}
+              variants={textVariants}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+            >
+              Devenir client
+            </motion.div>
+
+            {/* Texte secondaire */}
+            <motion.div
+              className="absolute inset-0 flex items-center justify-center font-medium text-sm sm:text-base text-white"
+              initial="default"
+              animate={isHoveredClient ? "hover" : "default"}
+              variants={secondTextVariants}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+            >
+              C'est parti →
+            </motion.div>
+          </motion.div>
+
+          {/* Bouton Créer un compte */}
+          <motion.div
+            className="relative overflow-hidden h-12 sm:h-14 w-full sm:w-44 md:w-48 rounded-lg border-2 border-black cursor-pointer bg-black backdrop-blur-sm bg-opacity-90"
+            onHoverStart={() => setIsHoveredCompte(true)}
+            onHoverEnd={() => setIsHoveredCompte(false)}
+            whileTap={{ scale: 0.97 }}
           >
-            Créer un compte
-          </motion.button>
+            {/* Fond animé */}
+            <motion.div
+              className="absolute bottom-0 left-0 bg-white"
+              initial="default"
+              animate={isHoveredCompte ? "hover" : "default"}
+              variants={backgroundVariants}
+              transition={{ duration: 0.4, ease: "easeInOut" }}
+            />
+
+            {/* Texte principal */}
+            <motion.div
+              className="absolute inset-0 flex items-center justify-center font-medium text-sm sm:text-base text-white"
+              initial="default"
+              animate={isHoveredCompte ? "hover" : "default"}
+              variants={textVariants}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+            >
+              Créer un compte
+            </motion.div>
+
+            {/* Texte secondaire */}
+            <motion.div
+              className="absolute inset-0 flex items-center justify-center font-medium text-sm sm:text-base text-black"
+              initial="default"
+              animate={isHoveredCompte ? "hover" : "default"}
+              variants={secondTextVariants}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+            >
+              S'inscrire →
+            </motion.div>
+          </motion.div>
         </motion.div>
       </div>
     </div>
