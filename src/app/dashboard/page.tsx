@@ -769,6 +769,7 @@ export default function Dashboard() {
   // États pour gérer le chargement des données
   const [compteursPrepaid, setCompteursPrepaid] = useState<Compteur[]>([]);
   const [compteursPostpaid, setCompteursPostpaid] = useState<Compteur[]>([]);
+  
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingPrepaid, setIsLoadingPrepaid] = useState(false);
   const [isLoadingPostpaid, setIsLoadingPostpaid] = useState(false);
@@ -1005,14 +1006,14 @@ export default function Dashboard() {
       // Exécuter les deux requêtes en parallèle
       const [postpaidResponse, prepaidResponse] = await Promise.all([
         fetch(
-          `${API_URL}/v3/rattachement/postpaye/me?${queryParams.toString()}`,
+          `/api/proxy/rattachement/postpaye/me?${queryParams.toString()}`,
           {
             method: "GET",
             headers,
           }
         ),
         fetch(
-          `${API_URL}/v3/rattachement/prepaye/me?${queryParams.toString()}`,
+          `/api/proxy/rattachement/prepaye/me?${queryParams.toString()}`,
           {
             method: "GET",
             headers,
@@ -1284,8 +1285,8 @@ export default function Dashboard() {
       // URL de l'endpoint en fonction du type
       const endpoint =
         type === "postpaid"
-          ? `${API_URL}/v3/rattachement/postpaye/niveau/1`
-          : `${API_URL}/v3/rattachement/prepaye/niveau/1`;
+          ? `/api/proxy/rattachement/postpaye/niveau/1`
+          : `/api/proxy/rattachement/prepaye/niveau/1`;
 
       // Effectuer la requête
       const response = await fetch(endpoint, {
@@ -1387,7 +1388,7 @@ export default function Dashboard() {
 
         // Appel API pour récupérer les détails
         const response = await fetch(
-          `${API_URL}/v3/rattachement/details/${id}`,
+          `/api/proxy/rattachement/details/${id}`,
           {
             method: "GET",
             headers,
@@ -1465,12 +1466,14 @@ export default function Dashboard() {
 
         // Appel API pour récupérer la dernière facture
         const response = await fetch(
-          `${API_URL}/v3/rattachement/postpaye/factures/${identifiant}/last`,
+          `/api/proxy/rattachement/postpaye/factures/${identifiant}/last`,
           {
             method: "GET",
             headers,
           }
         );
+
+        const responseData = await response.json();
 
         if (!response.ok) {
           // Gérer les erreurs d'authentification
@@ -1486,16 +1489,34 @@ export default function Dashboard() {
           );
         }
 
-        const responseData = await response.json();
+        // Vérifier les différents cas de message avec data null
+        if (responseData) {
+          // Cas 1: "Cet identifiant ne possède pas de facture"
+          if (responseData.message === "Cet identifiant ne possède pas de facture") {
+            showToastMessage("Cet identifiant ne possède pas de facture", "info");
+            setLastInvoice(null);
+            return;
+          }
 
-        // Mettre à jour l'état avec les détails reçus selon le nouveau format de réponse
-        if (responseData && responseData.data) {
-          setLastInvoice(responseData.data);
+          // Cas 2: "L'identifiant n'appartient pas à ce client"
+          if (responseData.message === "L'identifiant n'appartient pas à ce client") {
+            showToastMessage("L'identifiant n'appartient pas à ce client", "warning");
+            setLastInvoice(null);
+            return;
+          }
+
+          // Cas standard: On a des données
+          if (responseData.data) {
+            setLastInvoice(responseData.data);
+          } else {
+            console.warn(
+              "Réponse API sans données valides pour la facture:",
+              responseData
+            );
+            setLastInvoice(null);
+          }
         } else {
-          console.warn(
-            "Réponse API sans données valides pour la facture:",
-            responseData
-          );
+          console.warn("Réponse API indéfinie", responseData);
           setLastInvoice(null);
         }
       } catch (error: any) {
@@ -1698,7 +1719,7 @@ export default function Dashboard() {
       }
 
       // API endpoint for level 2 attachment
-      const endpoint = `${API_URL}/v3/rattachement/${selectedItem.type === "postpaid" ? "postpaye" : "prepaye"}/niveau/2`;
+      const endpoint = `/api/proxy/rattachement/${selectedItem.type === "postpaid" ? "postpaye" : "prepaye"}/niveau/2`;
 
       // Make the request
       const response = await fetch(endpoint, {
@@ -1735,8 +1756,13 @@ export default function Dashboard() {
 
         // Refresh item details to update the UI
         if (selectedItem.item._id) {
-          fetchItemDetails(selectedItem.item._id);
+          await fetchItemDetails(selectedItem.item._id);
         }
+
+        // Forcer le rechargement de tous les rattachements pour mettre à jour la liste complète
+        // Marquer les données comme obsolètes pour forcer le rafraîchissement
+        dataLoadedRef.current = false;
+        fetchAllRattachements();
 
         return true;
       } else {
@@ -2687,12 +2713,12 @@ export default function Dashboard() {
               ) : (
                 <div className="flex flex-col items-center justify-center px-8 py-10 gap-5 mb-8 bg-gradient-to-r from-[#F7942E]/20 to-amber-50 rounded-xl shadow-sm border border-orange-100  overflow-hidden">
                   {/* Decorative bubbles */}
-                  <div className="absolute top-6 left-8 w-16 h-16 rounded-full bg-[#F7942E]/10 animate-float"></div>
+                  {/* <div className="absolute top-6 left-8 w-16 h-16 rounded-full bg-[#F7942E]/10 animate-float"></div>
                   <div className="absolute bottom-8 right-10 w-12 h-12 rounded-full bg-[#F7942E]/15 animate-float-delayed"></div>
                   <div className="absolute top-1/3 right-8 w-8 h-8 rounded-full bg-[#F7942E]/15 animate-float-slow"></div>
                   <div className="absolute bottom-10 left-12 w-10 h-10 rounded-full bg-[#F7942E]/10 animate-float-slow"></div>
                   <div className="absolute top-1/2 left-1/3 w-5 h-5 rounded-full bg-[#F7942E]/20 animate-float"></div>
-                  <div className="absolute top-1/4 right-1/4 w-7 h-7 rounded-full bg-[#F7942E]/10 animate-float-delayed"></div>
+                  <div className="absolute top-1/4 right-1/4 w-7 h-7 rounded-full bg-[#F7942E]/10 animate-float-delayed"></div> */}
 
                   <div className="">
                     <Image

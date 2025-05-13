@@ -33,68 +33,65 @@ interface SelectedEquipement {
 
 const CATEGORIES: Category[] = [
   {
-    slug: "cuisine",
-    label: "Cuisine",
-    illustration: "/simulateur/cuisine.png",
-    puissance: "1500-5000W",
-    color: "#FBD38D",
+    slug: "froid",
+    label: "Appareils de froid",
+    illustration: "/simulateur/clim.png",
+    puissance: "150-500W",
+    color: "#90CDF4",
     equipements: [
       { id: "refrigerateur", label: "Réfrigérateur", puissance: 150 },
       { id: "congelateur", label: "Congélateur", puissance: 200 },
-      { id: "lave-vaisselle", label: "Lave-vaisselle", puissance: 1500 },
-      { id: "four", label: "Four", puissance: 2500 },
-      { id: "micro-onde", label: "Micro-onde", puissance: 800 },
-      { id: "cuisiniere", label: "Cuisinière", puissance: 2000 },
-      { id: "grille-pain", label: "Grille-pain", puissance: 900 },
-      { id: "mixeur", label: "Mixeur", puissance: 500 }
+      { id: "refrigerateur-congelateur", label: "Réfrigérateur-congélateur", puissance: 350 },
+      { id: "cave-a-vin", label: "Cave à vin", puissance: 100 },
+      { id: "mini-refrigerateur", label: "Mini-réfrigérateur", puissance: 70 }
     ]
   },
   {
-    slug: "bureau",
-    label: "Bureau et divertissements",
-    illustration: "/simulateur/bureau.png",
-    puissance: "400-1000W",
-    color: "#90CDF4",
-    equipements: [
-      { id: "ordinateur", label: "Ordinateur", puissance: 250 },
-      { id: "television", label: "Télévision", puissance: 150 },
-      { id: "console", label: "Console de jeux", puissance: 180 },
-      { id: "imprimante", label: "Imprimante", puissance: 100 }
-    ]
-  },
-  {
-    slug: "chauffage",
-    label: "Chauffage de l'eau",
+    slug: "eclairage",
+    label: "Éclairage",
     illustration: "/simulateur/eau.png",
-    puissance: "1500-3000W",
+    puissance: "20-100W",
+    color: "#FBD38D",
+    equipements: [
+      { id: "ampoule-led", label: "Ampoule LED", puissance: 10 },
+      { id: "ampoule-basse-consommation", label: "Ampoule basse consommation", puissance: 20 },
+      { id: "ampoule-halogene", label: "Ampoule halogène", puissance: 50 },
+      { id: "lampadaire", label: "Lampadaire", puissance: 60 },
+      { id: "spot-encastre", label: "Spot encastré", puissance: 35 }
+    ]
+  },
+  {
+    slug: "multimedia",
+    label: "Multimédia",
+    illustration: "/simulateur/bureau.png",
+    puissance: "50-400W",
     color: "#9AE6B4",
     equipements: [
-      { id: "chauffe-eau", label: "Chauffe-eau électrique", puissance: 2000 },
-      { id: "radiateur", label: "Radiateur électrique", puissance: 1500 },
-      { id: "seche-serviette", label: "Sèche-serviette", puissance: 800 }
+      { id: "television", label: "Télévision", puissance: 150 },
+      { id: "ordinateur", label: "Ordinateur", puissance: 250 },
+      { id: "console", label: "Console de jeux", puissance: 180 },
+      { id: "chaine-hifi", label: "Chaîne Hi-Fi", puissance: 80 },
+      { id: "home-cinema", label: "Home Cinéma", puissance: 300 },
+      { id: "box-internet", label: "Box Internet", puissance: 15 }
     ]
   },
   {
-    slug: "clim",
-    label: "Climatisation",
-    illustration: "/simulateur/clim.png",
-    puissance: "900-2500W",
-    color: "#81E6D9",
-    equipements: [
-      { id: "climatiseur", label: "Climatiseur", puissance: 1500 },
-      { id: "ventilateur", label: "Ventilateur", puissance: 100 }
-    ]
-  },
-  {
-    slug: "laver",
-    label: "Lave et repassage",
-    illustration: "/simulateur/laver.png",
-    puissance: "2000-4000W",
+    slug: "equipements",
+    label: "Équipements",
+    illustration: "/simulateur/cuisine.png",
+    puissance: "500-3000W",
     color: "#D53F8C",
     equipements: [
       { id: "lave-linge", label: "Lave-linge", puissance: 2000 },
       { id: "seche-linge", label: "Sèche-linge", puissance: 3000 },
-      { id: "fer-repasser", label: "Fer à repasser", puissance: 1500 }
+      { id: "lave-vaisselle", label: "Lave-vaisselle", puissance: 1500 },
+      { id: "four", label: "Four", puissance: 2500 },
+      { id: "micro-onde", label: "Micro-onde", puissance: 800 },
+      { id: "aspirateur", label: "Aspirateur", puissance: 700 },
+      { id: "fer-repasser", label: "Fer à repasser", puissance: 1500 },
+      { id: "climatiseur", label: "Climatiseur", puissance: 1500 },
+      { id: "chauffe-eau", label: "Chauffe-eau électrique", puissance: 2000 },
+      { id: "radiateur", label: "Radiateur électrique", puissance: 1500 }
     ]
   },
 ];
@@ -118,7 +115,7 @@ export default function SimulatorPage({
 }: SimulatorPageProps) {
   const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
-  const [selectedCategoryTab, setSelectedCategoryTab] = useState<string>("cuisine");
+  const [selectedCategoryTab, setSelectedCategoryTab] = useState<string>("froid");
   const [selectedEquipements, setSelectedEquipements] = useState<SelectedEquipement[]>([]);
   const [step, setStep] = useState<number>(1);
   const [showResultModal, setShowResultModal] = useState(false);
@@ -126,6 +123,7 @@ export default function SimulatorPage({
   const [newEquipementName, setNewEquipementName] = useState("");
   const [newEquipementPower, setNewEquipementPower] = useState("");
   const [showAddEquipementForm, setShowAddEquipementForm] = useState(false);
+  const [showStickyButton, setShowStickyButton] = useState(false);
 
   useEffect(() => {
     // Initialiser les équipements par défaut avec quantité 1 pour la première catégorie
@@ -138,6 +136,22 @@ export default function SimulatorPage({
       }));
       setSelectedEquipements(initialEquipements);
     }
+  }, []);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 300) {
+        setShowStickyButton(true);
+      } else {
+        setShowStickyButton(false);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
   }, []);
 
   const handleQuantityChange = (equipementId: string, categorySlug: string, puissance: number, change: number) => {
@@ -254,138 +268,197 @@ export default function SimulatorPage({
 
   return (
     <>
-      <div className="min-h-screen flex items-start justify-center pt-16 pb-28 -mb-[100px]">
+      <div className="min-h-screen flex items-start justify-center pt-10 pb-20 -mb-[100px]">
         <div className="w-[91%]">
-          <div className="bg-gradient-to-br from-[#F5F5F5]  rounded-[40px] overflow-hidden relative ">
-            {/* Titre & sous‑texte */}
-            <header className="px-12 py-16 relative text-center">
+          <div className="bg-gradient-to-br from-[#F5F5F5] to-white rounded-[30px] overflow-hidden relative  border border-orange/10">
+            {/* Titre & sous‑texte améliorés */}
+            <header className="px-8 py-10 relative text-center">
               <div className="absolute inset-0 bg-[url('/pattern.svg')] opacity-5"></div>
-              <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-noir relative inline-block">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-noir relative inline-block">
                 {title}
-                <div className={`absolute -bottom-3 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-${highlightColor} to-transparent`}></div>
+                <div className={`absolute -bottom-2 left-0 right-0 h-2 bg-gradient-to-r from-transparent via-${highlightColor} to-transparent`}></div>
               </h1>
-              <p className="mt-8 text-xl text-gray-600 max-w-3xl mx-auto relative">
+              <p className="mt-4 text-lg text-gray-600 max-w-2xl mx-auto relative">
                 {description}
               </p>
+
+              {/* Sous-titre explicatif amélioré pour contraste */}
+
             </header>
 
             {/* Contenu principal */}
-            <div className="max-w-7xl w-[91%] mx-auto px-4 py-12">
-              <div className="flex flex-col lg:flex-row gap-10">
+            <div className="w-[70%] mx-auto px-2 py-6">
+              {/* Bouton principal de simulation déplacé en haut avant le contenu */}
+
+
+              <div className="flex flex-col lg:flex-row gap-6">
+
+
                 {/* Colonne de gauche: information générale */}
-                <div className="w-full lg:w-2/3 bg-white rounded-lg shadow-sm overflow-hidden">
-                  <div className="p-6">
-                    <h2 className="text-lg font-medium text-gray-800 mb-6">
-                      Simulation de puissance électrique
-                    </h2>
+                <div className="w-full lg:w-3/3 bg-white rounded-xl overflow-hidden border border-gray-100 order-2 lg:order-1">
+                  <div className="p-6 flex flex-col md:flex-row items-center justify-center">
+                    <div className="md:w-1/3 flex flex-col justify-center items-center mb-6 md:mb-0 md:mr-6 mx-auto">
+                      <div className="flex justify-center w-full">
+                        <Image
+                          src="/simulateur/puissance.png"
+                          alt="Illustration de puissance électrique"
+                          width={300}
+                          height={300}
+                          className="object-contain"
+                        />
+                      </div>
 
-                    {/* Contenu général pour tous les appareils */}
-                    <div className="space-y-8">
-                      {/* Comment calculer ma puissance */}
-                      <div>
-                        <div className="flex items-center gap-2 mb-3">
-                          <span className="text-orange font-medium">*</span>
-                          <h4 className="font-medium">Comment calculer ma puissance ?</h4>
+                      <div className="mt-6 w-full max-w-xs mx-auto">
+                        <button
+                          className="w-full py-5 bg-orange text-white font-bold text-xl rounded-xl shadow-xl transition-all duration-300 group relative overflow-hidden transform hover:scale-[1.02] hover:bg-orange-600 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-orange-300 active:bg-orange-700"
+                          onClick={() => setShowModal(true)}
+                          aria-label="Lancer la simulation de puissance électrique"
+                        >
+                          <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-white/0 via-white/20 to-white/0 transform -translate-x-full animate-shimmer"></span>
+                          <div className="relative flex items-center justify-center gap-3 px-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7 animate-pulse" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
+                            </svg>
+                            <span className="group-hover:tracking-wider transition-all text-sm duration-300">LANCER LA SIMULATION</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 transform group-hover:translate-x-1 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                            </svg>
+                          </div>
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="md:w-2/3">
+                      <h2 className="text-3xl font-semibold text-gray-800 mb-8 ">
+                        Comment ça marche ?
+                      </h2>
+
+                      {/* Étapes de simulation ajoutées */}
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-100 shadow-sm relative">
+                          <div className="absolute -top-2 -left-2 w-6 h-6 bg-orange text-white rounded-full flex items-center justify-center font-bold text-xs" aria-hidden="true">1</div>
+                          <h3 className="font-bold text-base mb-2 mt-1 pl-2">Sélectionnez vos appareils</h3>
+                          <p className="text-gray-600 text-sm">Parcourez notre catalogue d'appareils électriques par catégorie</p>
                         </div>
-
-                        <div className="ml-6 bg-gray-50 p-4 rounded-md">
-                          <ol className="list-decimal ml-4 space-y-2 text-gray-700">
-                            <li>Parcourir la liste des équipements disponibles par catégorie</li>
-                            <li>Sélectionner les équipements utilisés en cochant les cases correspondantes</li>
-                            <li>La puissance totale sera calculée automatiquement en fonction des appareils sélectionnés</li>
-                          </ol>
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-100 shadow-sm relative">
+                          <div className="absolute -top-2 -left-2 w-6 h-6 bg-orange text-white rounded-full flex items-center justify-center font-bold text-xs" aria-hidden="true">2</div>
+                          <h3 className="font-bold text-base mb-2 mt-1 pl-2">Ajustez les quantités</h3>
+                          <p className="text-gray-600 text-sm">Indiquez combien d'appareils de chaque type vous utilisez</p>
+                        </div>
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-100 shadow-sm relative">
+                          <div className="absolute -top-2 -left-2 w-6 h-6 bg-orange text-white rounded-full flex items-center justify-center font-bold text-xs" aria-hidden="true">3</div>
+                          <h3 className="font-bold text-base mb-2 mt-1 pl-2">Obtenez votre résultat</h3>
+                          <p className="text-gray-600 text-sm">Découvrez instantanément la puissance électrique nécessaire</p>
                         </div>
                       </div>
 
-                      {/* Conseils d'économie */}
-                      <div>
-                        <div className="flex items-center gap-2 mb-3">
-                          <span className="text-orange font-medium">*</span>
-                          <h4 className="font-medium">Comment réduire ma consommation électrique ?</h4>
-                        </div>
+                      {/* Sections détaillées avec accordéon */}
+                      <div className="space-y-4 mb-8">
+                        <details className="group bg-gray-50 rounded-lg border border-gray-100 overflow-hidden transition-all duration-300">
+                          <summary className="flex items-center gap-2 p-4 cursor-pointer list-none">
+                            <span className="text-orange font-medium text-lg">*</span>
+                            <h4 className="font-medium text-base">Pourquoi faire une simulation ?</h4>
+                            <svg className="h-5 w-5 ml-auto transform group-open:rotate-180 transition-transform duration-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                            </svg>
+                          </summary>
+                          <div className="p-4 pt-0">
+                            <ul className="space-y-3">
+                              <li className="flex items-start gap-2">
+                                <div className="bg-orange/20 p-1.5 rounded-full mt-0.5" aria-hidden="true">
+                                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 text-orange-700" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
+                                  </svg>
+                                </div>
+                                <p className="text-gray-700 text-sm"><span className="font-semibold">Évitez les surcharges</span> - Déterminez si votre installation électrique est adaptée</p>
+                              </li>
+                              <li className="flex items-start gap-2">
+                                <div className="bg-orange/20 p-1.5 rounded-full mt-0.5" aria-hidden="true">
+                                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 text-orange-700" viewBox="0 0 20 20" fill="currentColor">
+                                    <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z" />
+                                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clipRule="evenodd" />
+                                  </svg>
+                                </div>
+                                <p className="text-gray-700 text-sm"><span className="font-semibold">Optimisez votre contrat</span> - Choisissez l'abonnement adapté</p>
+                              </li>
+                              <li className="flex items-start gap-2">
+                                <div className="bg-orange/20 p-1.5 rounded-full mt-0.5" aria-hidden="true">
+                                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 text-orange-700" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fillRule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                                  </svg>
+                                </div>
+                                <p className="text-gray-700 text-sm"><span className="font-semibold">Planifiez en sécurité</span> - Anticipez vos besoins actuels et futurs</p>
+                              </li>
+                            </ul>
+                          </div>
+                        </details>
 
-                        <div className="ml-6 bg-gray-50 p-4 rounded-md">
-                          <ul className="space-y-2 text-gray-700">
-                            <li className="flex items-start gap-2">
-                              <span className="text-orange font-bold">•</span>
-                              <p>Privilégiez les appareils de classe énergétique A+++ ou supérieure</p>
-                            </li>
-                            <li className="flex items-start gap-2">
-                              <span className="text-orange font-bold">•</span>
-                              <p>Éteignez complètement vos appareils plutôt que de les laisser en veille</p>
-                            </li>
-                            <li className="flex items-start gap-2">
-                              <span className="text-orange font-bold">•</span>
-                              <p>Réglez votre chauffage et climatisation à des températures raisonnables</p>
-                            </li>
-                            <li className="flex items-start gap-2">
-                              <span className="text-orange font-bold">•</span>
-                              <p>Utilisez des multiprises avec interrupteur pour couper l'alimentation</p>
-                            </li>
-                          </ul>
-                        </div>
+                        <details className="group bg-gray-50 rounded-lg border border-gray-100 overflow-hidden transition-all duration-300">
+                          <summary className="flex items-center gap-2 p-4 cursor-pointer list-none">
+                            <span className="text-orange font-medium text-lg">*</span>
+                            <h4 className="font-medium text-base">Comment réduire ma consommation ?</h4>
+                            <svg className="h-5 w-5 ml-auto transform group-open:rotate-180 transition-transform duration-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                            </svg>
+                          </summary>
+                          <div className="p-4 pt-0">
+                            <ul className="space-y-1.5 text-sm">
+                              <li className="flex items-start gap-2">
+                                <span className="text-orange-700 font-bold" aria-hidden="true">•</span>
+                                <p className="text-gray-700">Privilégiez les appareils de classe A+++ ou supérieure</p>
+                              </li>
+                              <li className="flex items-start gap-2">
+                                <span className="text-orange-700 font-bold" aria-hidden="true">•</span>
+                                <p className="text-gray-700">Éteignez complètement vos appareils en veille</p>
+                              </li>
+                              <li className="flex items-start gap-2">
+                                <span className="text-orange-700 font-bold" aria-hidden="true">•</span>
+                                <p className="text-gray-700">Réglez votre chauffage à des températures raisonnables</p>
+                              </li>
+                              <li className="flex items-start gap-2">
+                                <span className="text-orange-700 font-bold" aria-hidden="true">•</span>
+                                <p className="text-gray-700">Utilisez des multiprises avec interrupteur</p>
+                              </li>
+                            </ul>
+                          </div>
+                        </details>
                       </div>
                     </div>
                   </div>
                 </div>
 
                 {/* Colonne de droite: catégories d'appareils */}
-                <div className="w-full lg:w-1/3">
-                  <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-                    <p className="text-center mb-5 font-medium text-lg">Catégories d'appareils</p>
 
-                    {/* Grille de catégories */}
-                    <div className="grid grid-cols-3 gap-4 mb-8">
-                      {CATEGORIES.map((category) => (
-                        <div
-                          key={category.slug}
-                          className="relative flex flex-col items-center cursor-pointer p-2 rounded-lg transition hover:bg-gray-50"
-                          onMouseEnter={() => setHoveredCategory(category.slug)}
-                          onMouseLeave={() => setHoveredCategory(null)}
-                        >
-                          <div className="w-full aspect-square rounded-full overflow-hidden mb-2 flex items-center justify-center bg-gray-50">
-                            <Image
-                              src={category.illustration}
-                              alt={category.label}
-                              width={48}
-                              height={48}
-                              className="object-contain"
-                            />
-                          </div>
-
-                          <span className="text-xs font-medium text-center">
-                            {category.label.split(' ')[0]}
-                          </span>
-
-                        </div>
-                      ))}
-                    </div>
-
-                    {/* Information générale modifiée pour des conseils d'économie */}
-                    <div className="bg-gray-50 p-4 rounded-lg">
-                      <p className="text-sm text-gray-700">
-                        <span className="font-medium text-orange">Conseils :</span> Limitez l'utilisation des appareils à forte puissance. Privilégiez un usage raisonné et des appareils économes en énergie pour réduire votre facture d'électricité.
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Bouton de lancement */}
-                  <button
-                    className="w-full py-4 bg-orange hover:bg-orange/90 text-white font-bold rounded-lg shadow-md transition-all duration-300 group relative overflow-hidden"
-                    onClick={() => setShowModal(true)}
-                  >
-                    <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-white/0 via-white/20 to-white/0 transform -translate-x-full animate-shimmer group-hover:animate-shimmer"></span>
-                    <div className="flex items-center justify-center gap-2">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
-                      </svg>
-                      <span>Lancer la simulation</span>
-                    </div>
-                  </button>
-                </div>
               </div>
             </div>
 
+            {/* Bouton sticky qui apparaît lors du défilement */}
+            <AnimatePresence>
+              {showStickyButton && (
+                <motion.div
+                  className="fixed bottom-6 right-6 z-50 shadow-xl"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 20 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <button
+                    className="flex items-center gap-2 py-3 px-6 bg-orange rounded-full text-white font-bold hover:bg-orange-600 transition-colors duration-300 shadow-lg"
+                    onClick={() => {
+                      setShowModal(true);
+                      // Remonter en haut de la page
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
+                    aria-label="Lancer la simulation maintenant"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 animate-pulse" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
+                    </svg>
+                    Simuler ma puissance
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
       </div>
@@ -834,7 +907,7 @@ export default function SimulatorPage({
         )}
       </AnimatePresence>
 
-      {/* Ajouter une classe keyframe pour l'animation shimmer */}
+      {/* Ajouter les animations personnalisées en bas de fichier */}
       <style jsx global>{`
         @keyframes shimmer {
           100% {
@@ -843,6 +916,56 @@ export default function SimulatorPage({
         }
         .animate-shimmer {
           animation: shimmer 1.5s infinite;
+        }
+        @keyframes floating {
+          0% {
+            transform: translateY(0px);
+          }
+          50% {
+            transform: translateY(-10px);
+          }
+          100% {
+            transform: translateY(0px);
+          }
+        }
+        .animate-floating {
+          animation: floating 3s ease-in-out infinite;
+        }
+        .animate-floating-slow {
+          animation: floating 5s ease-in-out infinite;
+        }
+        @keyframes pulse-slow {
+          0%, 100% {
+            opacity: 1;
+          }
+          50% {
+            opacity: 0.85;
+          }
+        }
+        .animate-pulse-slow {
+          animation: pulse-slow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes rotate {
+          from {
+            transform: rotate(0deg);
+          }
+          to {
+            transform: rotate(360deg);
+          }
+        }
+        .animate-rotate-slow {
+          animation: rotate 60s linear infinite;
+        }
+        @keyframes counter-rotate {
+          from {
+            transform: rotate(0deg);
+          }
+          to {
+            transform: rotate(-360deg);
+          }
+        }
+        .animate-counter-rotate {
+          animation: counter-rotate 60s linear infinite;
         }
       `}</style>
     </>

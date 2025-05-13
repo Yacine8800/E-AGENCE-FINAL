@@ -191,7 +191,7 @@ const ModalDEmande = ({ onClose }: { onClose: () => void }) => {
         }}
       ></div>
 
-      <div className="relative w-[600px] bg-[#F8F9F9] h-full shadow-2xl overflow-auto flex flex-col rounded-l-2xl transition-all duration-500">
+      <div className="relative w-full md:w-[600px] bg-[#F8F9F9] h-full shadow-2xl overflow-auto flex flex-col rounded-l-2xl transition-all duration-500">
         {/* HEADER */}
         <div className="flex items-center justify-between p-6 border-b">
 
@@ -222,7 +222,7 @@ const ModalDEmande = ({ onClose }: { onClose: () => void }) => {
             </svg>
           </button>}
 
-          <h2 className="text-xl font-semibold text-gray-800 text-center flex-1">
+          <h2 className="text-lg md:text-xl font-semibold text-gray-800 text-center flex-1">
             {selectedDemande
               ? typesDeDemandeParType[
                 selectedTypeId! as keyof typeof typesDeDemandeParType
@@ -240,7 +240,7 @@ const ModalDEmande = ({ onClose }: { onClose: () => void }) => {
                 setSelectedTypeId(typesDeSelection[0].id);
               }
             }}
-            className="w-10 h-10 flex items-center justify-center rounded-full shadow-md cursor-pointer pointer-events-auto"
+            className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-full shadow-md cursor-pointer pointer-events-auto"
             style={{
               backgroundColor: "#F3F4F6",
               color: "#4B5563",
@@ -269,11 +269,11 @@ const ModalDEmande = ({ onClose }: { onClose: () => void }) => {
         {/* SECTION : Sélection du type de demande */}
         {!selectedDemande && (
           <>
-            <div className="bg-[#F7F7F7] w-full flex flex-col gap-4 px-6 py-6 rounded-t-lg mb-4">
-              <p className="font-semibold text-gray-700">
+            <div className="bg-[#F7F7F7] w-full flex flex-col gap-4 px-4 md:px-6 py-4 md:py-6 rounded-t-lg mb-4">
+              <p className="font-semibold text-gray-700 text-sm md:text-base">
                 Je souhaite faire une demande pour :
               </p>
-              <div className="flex justify-center items-center gap-3 w-full">
+              <div className="flex flex-col md:flex-row justify-center items-center gap-3 w-full">
                 {typesDeSelection.map((type) => (
                   <button
                     key={type.id}
@@ -292,8 +292,8 @@ const ModalDEmande = ({ onClose }: { onClose: () => void }) => {
 
             {/* SECTION : Choix du type de demande */}
             {selectedTypeId && (
-              <div className="flex flex-col gap-4 px-6 py-8">
-                <p className="font-semibold text-gray-800">
+              <div className="flex flex-col gap-4 px-4 md:px-6 py-6 md:py-8">
+                <p className="font-semibold text-gray-800 text-sm md:text-base">
                   Choisissez le type de demande souhaité :
                 </p>
                 <div className="grid grid-cols-2 gap-6 w-full items-center">

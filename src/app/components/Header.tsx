@@ -2,7 +2,10 @@
 
 import { useAuth } from "@/src/hooks/useAuth";
 import { AnimatePresence, motion } from "framer-motion";
+import { useAuth } from "@/src/hooks/useAuth";
+import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
+import Link from "next/link";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -10,6 +13,7 @@ import Ecostore from "./icons/EcoStore";
 import UserSolo from "./icons/UserSolo";
 
 import { TAB_CONTENT } from "../utils/headerData";
+import Column from "./Column";
 import Column from "./Column";
 
 // Styles pour assurer que la position sticky fonctionne correctement
@@ -40,6 +44,9 @@ const Header = () => {
   const [activeSubmenuPath, setActiveSubmenuPath] = useState<string | null>(
     null
   );
+  const [activeSubmenuPath, setActiveSubmenuPath] = useState<string | null>(
+    null
+  );
 
   // Récupérer l'état d'authentification
   const { isAuthenticated, user } = useAuth();
@@ -60,6 +67,7 @@ const Header = () => {
         // Pour chaque lien dans la colonne
         for (const link of column.links) {
           if (path === link.href || path.startsWith(link.href + "/")) {
+          if (path === link.href || path.startsWith(link.href + "/")) {
             return tab;
           }
         }
@@ -72,13 +80,28 @@ const Header = () => {
       path.includes("/simulateur-puissance") ||
       path.includes("/mes-demandes")
     ) {
+    if (
+      path.includes("/simulateur-facture") ||
+      path.includes("/simulateur-puissance") ||
+      path.includes("/mes-demandes")
+    ) {
       return "particulier";
     } else if (
       path.includes("/business") ||
       path.includes("/pro") ||
       path.includes("/entreprise")
     ) {
+    } else if (
+      path.includes("/business") ||
+      path.includes("/pro") ||
+      path.includes("/entreprise")
+    ) {
       return "business";
+    } else if (
+      path.includes("/institution") ||
+      path.includes("/administration") ||
+      path.includes("/collectivite")
+    ) {
     } else if (
       path.includes("/institution") ||
       path.includes("/administration") ||
@@ -184,6 +207,9 @@ const Header = () => {
   return (
     <>
       {/* Styles globaux pour le header */}
+      <style jsx global>
+        {headerStyles}
+      </style>
       <style jsx global>
         {headerStyles}
       </style>
@@ -310,6 +336,12 @@ const Header = () => {
                         <span className="font-medium text-[8px] xs:text-[9px] sm:text-[11px] opacity-90">
                           {user.lastname}
                         </span>
+                        <span className="font-bold text-[9px] xs:text-[10px] sm:text-xs">
+                          {user.firstname}
+                        </span>
+                        <span className="font-medium text-[8px] xs:text-[9px] sm:text-[11px] opacity-90">
+                          {user.lastname}
+                        </span>
                       </div>
                     </>
                   ) : (
@@ -373,6 +405,15 @@ const Header = () => {
 
                 {/* Grille de colonnes */}
                 <div className="bg-[#f1f1f1] flex flex-col md:flex-row items-start gap-4 sm:gap-6 md:gap-8 p-3 sm:p-4 md:p-6 rounded-lg sm:rounded-xl shadow-sm">
+                  {activeTab &&
+                    TAB_CONTENT[activeTab].map((col, idx) => (
+                      <Column
+                        key={col.title}
+                        {...col}
+                        activeSubmenuPath={activeSubmenuPath}
+                        showSeparator={idx < TAB_CONTENT[activeTab].length - 1}
+                      />
+                    ))}
                   {activeTab &&
                     TAB_CONTENT[activeTab].map((col, idx) => (
                       <Column

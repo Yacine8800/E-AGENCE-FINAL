@@ -57,7 +57,7 @@ const Documents: React.FC<DocumentsProps> = ({ endpoint }) => {
         <label htmlFor="typePiece" className="text-sm font-semibold">
           Pièce d'identité du demandeur <span className="text-primary">*</span>
         </label>
-        <InputTypePiece endpoint={endpoint} />
+        <InputTypePiece/>
       </div>
 
       {/* Pièce d'identité du propriétaire - affiché uniquement pour mutation */}
@@ -66,7 +66,7 @@ const Documents: React.FC<DocumentsProps> = ({ endpoint }) => {
           <label htmlFor="typePiece" className="text-sm font-semibold">
             Pièce d'identité du propriétaire <span className="text-primary">*</span>
           </label>
-          <InputTypePiece endpoint={endpoint} />
+          <InputTypePiece/>
         </div>
       )}
 
@@ -76,7 +76,7 @@ const Documents: React.FC<DocumentsProps> = ({ endpoint }) => {
           <label htmlFor="typePiece" className="text-sm font-semibold">
             Titre de propriété <span className="text-primary">*</span>
           </label>
-          <InputTypePiece endpoint={endpoint} />
+          <InputTypePiece/>
         </div>
       )}
 
@@ -86,7 +86,7 @@ const Documents: React.FC<DocumentsProps> = ({ endpoint }) => {
           <label htmlFor="typePiece" className="text-sm font-semibold">
             Dernière facture <span className="text-primary">*</span>
           </label>
-          <InputTypePiece endpoint={endpoint} />
+          <InputTypePiece/>
         </div>
       )}
 

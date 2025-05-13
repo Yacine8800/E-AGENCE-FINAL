@@ -1,22 +1,30 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 
 interface InputTypePieceProps {
-  onChange?: (typePiece: string, numeroPiece: string) => void;
-  endpoint?: "mutation" | "reabonnement" | "branchement";
+  onChange?: (typePiece: string, imageBase64: string | null) => void;
+  initialImage?: string | null;
+  initialType?: string;
 }
 
-const InputTypePiece: React.FC<InputTypePieceProps> = ({ onChange, endpoint }) => {
-  const [typePiece, setTypePiece] = useState<string>('');
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+const InputTypePiece: React.FC<InputTypePieceProps> = ({ onChange, initialImage, initialType }) => {
+  const [typePiece, setTypePiece] = useState<string>(initialType || '');
+  const [imagePreview, setImagePreview] = useState<string | null>(initialImage || null);
+
+  useEffect(() => {
+    if ((initialType || initialImage) && onChange) {
+      onChange(initialType || '', initialImage || null);
+    }
+    // eslint-disable-next-line
+  }, []);
 
   const handleTypePieceChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
     setTypePiece(value);
     if (onChange) {
-      onChange(value, '');
+      onChange(value, imagePreview);
     }
   };
 
@@ -27,6 +35,9 @@ const InputTypePiece: React.FC<InputTypePieceProps> = ({ onChange, endpoint }) =
       reader.onload = (event) => {
         if (event.target) {
           setImagePreview(event.target.result as string);
+          if (onChange) {
+            onChange(typePiece, event.target.result as string);
+          }
         }
       };
       reader.readAsDataURL(file);
@@ -35,32 +46,9 @@ const InputTypePiece: React.FC<InputTypePieceProps> = ({ onChange, endpoint }) =
 
   const handleRemoveImage = () => {
     setImagePreview(null);
-  };
-
-  // Options de type de pièce en fonction du endpoint
-  const getPieceOptions = () => {
-    const commonOptions = [
-      <option key="cni" value="cni">CNI</option>,
-      <option key="passeport" value="passeport">Passeport</option>,
-      <option key="permis" value="permis">Permis de conduire</option>
-    ];
-
-    if (endpoint === "reabonnement") {
-      return [
-        ...commonOptions,
-        <option key="attestation" value="attestation">Attestation d'identité</option>
-      ];
-    } else if (endpoint === "branchement") {
-      return [
-        ...commonOptions,
-        <option key="carte_consulaire" value="carte_consulaire">Carte consulaire</option>
-      ];
+    if (onChange) {
+      onChange(typePiece, null);
     }
-
-    return [
-      ...commonOptions,
-      <option key="autre" value="autre">Autre</option>
-    ];
   };
 
   return (
@@ -74,42 +62,44 @@ const InputTypePiece: React.FC<InputTypePieceProps> = ({ onChange, endpoint }) =
         required
       >
         <option value="">Sélectionnez un type de pièce</option>
-        {getPieceOptions()}
+        <option value="cni">CNI</option>
+        <option value="passeport">Passeport</option>
+        <option value="permis">Permis de conduire</option>
+        <option value="attestation">Attestation d'identité</option>
+        <option value="carte_consulaire">Carte consulaire</option>
+        <option value="autre">Autre</option>
       </select>
 
-      {/* Bouton Upload - masqué pour certains types de demande si nécessaire */}
-      {(!endpoint || endpoint !== "branchement" || typePiece !== "carte_consulaire") && (
-        <div className="relative w-[100px] h-[50px] flex items-center justify-center bg-[#F1F4FB] border-l border-[#EDEDED]">
-          {imagePreview ? (
-            <div className="relative w-full h-full">
-              <Image
-                src={imagePreview}
-                alt="Aperçu"
-                layout="fill"
-                objectFit="cover"
-                className="rounded-md"
-              />
-              <button
-                onClick={handleRemoveImage}
-                className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs"
-              >
-                ×
-              </button>
-            </div>
-          ) : (
-            <label className="flex flex-col items-center cursor-pointer">
-              <Image src="/demande/basil_camera-solid.png" alt="" width={20} height={20} />
-              <span className="text-xs font-semibold text-[#858FA0]">Photo</span>
-              <input
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleImageUpload}
-              />
-            </label>
-          )}
-        </div>
-      )}
+      <div className="relative w-[100px] h-[50px] flex items-center justify-center bg-[#F1F4FB] border-l border-[#EDEDED]">
+        {imagePreview ? (
+          <div className="relative w-full h-full">
+            <Image
+              src={imagePreview}
+              alt="Aperçu"
+              layout="fill"
+              objectFit="cover"
+              className="rounded-md"
+            />
+            <button
+              onClick={handleRemoveImage}
+              className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs"
+            >
+              ×
+            </button>
+          </div>
+        ) : (
+          <label className="flex flex-col items-center cursor-pointer">
+            <Image src="/demande/basil_camera-solid.png" alt="" width={20} height={20} />
+            <span className="text-xs font-semibold text-[#858FA0]">Photo</span>
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleImageUpload}
+            />
+          </label>
+        )}
+      </div>
     </div>
   );
 };

@@ -214,3 +214,19 @@ body {
 .animate-shimmer {
   animation: shimmer 2s infinite;
 }
+
+@keyframes float {
+  0% {
+    transform: translateY(100vh);
+  }
+  100% {
+    transform: translateY(-100px);
+  }
+}
+
+.animate-float {
+  animation-name: float;
+  animation-duration: 10s;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}

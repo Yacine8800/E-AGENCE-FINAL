@@ -2,6 +2,7 @@
 
 import { API_EAGENCE } from "@/config/constants";
 import { ReduxProvider } from "@/src/store/provider";
+import { LoaderProvider } from "@/src/contexts/LoaderContext";
 import { Montserrat } from "next/font/google";
 import { usePathname, useRouter } from "next/navigation";
 import Script from "next/script";
@@ -134,10 +135,17 @@ const RouteGuard = ({ children }: { children: React.ReactNode }) => {
     "/dashboard",
   ].includes(pathname);
 
+  const showMT = [
+    "/login",
+    "/register-stepper",
+    "/verify",
+    "/dashboard",
+  ].includes(pathname);
+
   return (
     <>
       {showHeader && <Header />}
-      <main className="mt-32">
+      <main className={!showMT ? "mt-32" : ""}>
         <div className="flex-1 overflow-x-hidden">
           <DesktopEffects />
           <ToastContainer />
@@ -332,10 +340,31 @@ export default function RootLayout({
             }
           `}
         </Script>
+        <Script id="gtm-script" strategy="afterInteractive">
+          {`(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-WSGT5KVL');`}
+        </Script>
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-M9KJ90D8Y2"
+          strategy="afterInteractive"
+        />
+        <Script id="ga4-init" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-M9KJ90D8Y2');
+          `}
+        </Script>
       </head>
       <body className={montserrat.className}>
         <ReduxProvider>
-          <RouteGuard>{children}</RouteGuard>
+          <LoaderProvider>
+            <RouteGuard>{children}</RouteGuard>
+          </LoaderProvider>
         </ReduxProvider>
       </body>
     </html>
