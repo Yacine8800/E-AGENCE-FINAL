@@ -301,173 +301,111 @@ const Login = () => {
           </div>
         )}
 
-        <div className="-mt-16">
-          <div
-            className={`flex items-center justify-center ${isMobile ? "flex-col px-5" : ""}`}
-          >
-            <div className="w-full max-w-md">
-              {/* Titre */}
-              <div>
-                <Title title="Connexion" />
-                <p className="text-[14px] text-smallText font-medium text-center">
-                  Saisir l'adresse e-mail ou le n° de téléphone associé à votre
-                  compte maCIE
-                </p>
-              </div>
+        <div
+          className={`flex items-center justify-center ${isMobile ? "flex-col pt-10 px-5" : ""
+            }`}
+        >
+          <div className="w-full max-w-md">
+            {/* Titre */}
+            <div>
+              <Title title="Connexion" />
+              <p className="text-[14px] text-smallText font-medium text-center">
+                Saisir l'adresse e-mail ou le n° de téléphone associé à votre
+                compte maCIE
+              </p>
+            </div>
 
-              {/* Formulaire */}
-              <div className="pt-5 w-full">
-                <form onSubmit={handleSubmit}>
-                  <div>
-                    <label htmlFor="email" className="font-bold text-base">
-                      Email ou N° de téléphone
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="E-mail / téléphone"
-                      required
-                      value={loginIdentifier}
-                      onChange={(e) => setLoginIdentifier(e.target.value)}
-                      className="w-full rounded-xl px-5 py-5 border-2 border-[#EDEDED] mt-2"
-                    />
-                  </div>
-                  <div className="pt-7">
-                    <button
-                      type="submit"
-                      disabled={isLoading} // Désactivé pendant le chargement
-                      className="w-full rounded-full bg-primary text-white font-semibold py-4 flex items-center justify-center"
-                    >
-                      {isLoading ? "Chargement..." : "Continuer"}
-                    </button>
-                  </div>
-                </form>
-              </div>
-
-              {/* Séparateur */}
-              <div className="flex items-center my-5 px-10 pt-3">
-                <div className="flex-grow border-t border-smallText"></div>
-                <span className="px-3 text-sm text-smallText">
-                  ou continuer avec
-                </span>
-                <div className="flex-grow border-t border-smallText"></div>
-              </div>
-
-              {/* Réseaux sociaux */}
-              <div className="flex gap-5 items-center justify-center">
-                <button
-                  onClick={initGoogleLogin}
-                  className="flex items-center justify-center rounded-lg py-3 px-7 bg-[#F5F5F5] hover:bg-gray-200"
-                >
-                  <IconGoogle />
-                </button>
-                <button
-                  onClick={initFacebookLogin}
-                  className="flex items-center justify-center rounded-lg py-3 px-7 bg-[#F5F5F5] hover:bg-gray-200"
-                >
-                  <IconFacebook />
-                </button>
-              </div>
-
-              {/* S'inscrire */}
-              <div className="w-full pt-10">
-                <p className="text-sm text-smallText text-center">
-                  Je n&apos;ai pas de compte ?
-                </p>
+            {/* Formulaire */}
+            <div className="pt-5 w-full">
+              <form onSubmit={handleSubmit}>
+                <div>
+                  <label htmlFor="email" className="font-bold text-base">
+                    Email ou N° de téléphone
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="E-mail / téléphone"
+                    required
+                    value={loginIdentifier}
+                    onChange={(e) => setLoginIdentifier(e.target.value)}
+                    className="w-full rounded-xl px-5 py-5 border-2 border-[#EDEDED] mt-2"
+                  />
+                </div>
                 <div className="pt-7">
                   <button
-                    onClick={initFacebookLogin}
-                    className="flex items-center justify-center rounded-lg py-3 px-7 bg-[#F5F5F5] hover:bg-gray-200"
+                    type="submit"
+                    disabled={isLoading} // Désactivé pendant le chargement
+                    className="w-full rounded-full bg-primary text-white font-semibold py-4 flex items-center justify-center"
                   >
-                    <IconFacebook />
+                    {isLoading ? "Chargement..." : "Continuer"}
                   </button>
                 </div>
+              </form>
+            </div>
 
-                {/* S'inscrire */}
-                <div className="w-full pt-10">
-                  <p className="text-sm text-smallText text-center">
-                    Je n&apos;ai pas de compte ?
-                  </p>
-                  <div className="pt-7">
-                    <button
-                      onClick={initFacebookLogin}
-                      className="flex items-center justify-center rounded-lg py-3 px-7 bg-[#F5F5F5] hover:bg-gray-200"
-                    >
-                      <IconFacebook />
-                    </button>
-                  </div>
+            {/* Séparateur */}
+            <div className="flex items-center my-5 px-10 pt-3">
+              <div className="flex-grow border-t border-smallText"></div>
+              <span className="px-3 text-sm text-smallText">
+                ou continuer avec
+              </span>
+              <div className="flex-grow border-t border-smallText"></div>
+            </div>
 
-                  {/* S'inscrire */}
-                  <div className="w-full pt-10">
-                    <p className="text-sm text-smallText text-center">
-                      Je n&apos;ai pas de compte ?
-                    </p>
-                    <div className="pt-7">
-                      <button
-                        onClick={initFacebookLogin}
-                        className="flex items-center justify-center rounded-lg py-3 px-7 bg-[#F5F5F5] hover:bg-gray-200"
-                      >
-                        <IconFacebook />
-                      </button>
-                    </div>
+            {/* Réseaux sociaux */}
+            <div className="flex gap-5 items-center justify-center">
+              <button
+                onClick={initGoogleLogin}
+                className="flex items-center justify-center rounded-lg py-3 px-7 bg-[#F5F5F5] hover:bg-gray-200"
+              >
+                <IconGoogle />
+              </button>
+              <button
+                onClick={initFacebookLogin}
+                className="flex items-center justify-center rounded-lg py-3 px-7 bg-[#F5F5F5] hover:bg-gray-200"
+              >
+                <IconFacebook />
+              </button>
+            </div>
 
-                    {/* S'inscrire */}
-                    <div className="w-full pt-10">
-                      <p className="text-sm text-smallText text-center">
-                        Je n&apos;ai pas de compte ?
-                      </p>
-                      <div className="pt-7">
-                        <button
-                          onClick={initFacebookLogin}
-                          className="flex items-center justify-center rounded-lg py-3 px-7 bg-[#F5F5F5] hover:bg-gray-200"
-                        >
-                          <IconFacebook />
-                        </button>
-                      </div>
-
-                      {/* S'inscrire */}
-                      <div className="w-full pt-10">
-                        <p className="text-sm text-smallText text-center">
-                          Je n&apos;ai pas de compte ?
-                        </p>
-                        <div className="pt-7">
-                          <button
-                            onClick={() => router.push("/register-stepper")}
-                            className="w-full rounded-full text-primary border-2 border-primary font-semibold py-4 hover:bg-gray-100"
-                          >
-                            S&apos;inscrire
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Séparateur vertical sur desktop */}
-                    {!isMobile && (
-                      <div className="h-96 w-px mx-8 border border-gray-100"></div>
-                    )}
-
-                    {/* QR Code */}
-                    <div className="w-full mt-12 text-center">
-                      <div className="inline-block">
-                        <Image
-                          src="/qrcode/qrcode.png"
-                          alt="QR Code"
-                          width={150}
-                          height={150}
-                          className="rounded-lg"
-                        />
-                      </div>
-                      <h3 className="text-base font-bold text-gray-700 mt-4">
-                        Se connecter avec QR code
-                      </h3>
-                      <p className="text-sm text-smallText mt-1">
-                        Scan ce code avec ton téléphone pour te connecter instantanément
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
+            {/* S'inscrire */}
+            <div className="w-full pt-10">
+              <p className="text-sm text-smallText text-center">
+                Je n&apos;ai pas de compte ?
+              </p>
+              <div className="pt-7">
+                <button
+                  onClick={() => router.push("/register-stepper")}
+                  className="w-full rounded-full text-primary border-2 border-primary font-semibold py-4 hover:bg-gray-100"
+                >
+                  S&apos;inscrire
+                </button>
               </div>
             </div>
+          </div>
+
+          {/* Séparateur vertical sur desktop */}
+          {!isMobile && (
+            <div className="h-96 w-px mx-8 border border-gray-100"></div>
+          )}
+
+          {/* QR Code */}
+          <div className="w-full mt-12 text-center">
+            <div className="inline-block">
+              <Image
+                src="/qrcode/qrcode.png"
+                alt="QR Code"
+                width={150}
+                height={150}
+                className="rounded-lg"
+              />
+            </div>
+            <h3 className="text-base font-bold text-gray-700 mt-4">
+              Se connecter avec QR code
+            </h3>
+            <p className="text-sm text-smallText mt-1">
+              Scan ce code avec ton téléphone pour te connecter instantanément
+            </p>
           </div>
         </div>
       </>
