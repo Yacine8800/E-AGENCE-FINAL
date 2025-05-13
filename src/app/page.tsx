@@ -189,13 +189,13 @@ export default function Home() {
           </p>
         </motion.section>
 
-        {/* Section 2 - Carrousel/Grid amélioré */}
+        {/* Section 2 - Carrousel/Grid avec plus d'espace */}
         <motion.section
           initial={{ opacity: 0, y: 50 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.4, ease: "easeOut" }}
           viewport={{ once: true }}
-          className="mb-6 sm:mb-8 relative"
+          className="mb-10 sm:mb-12 relative"
         >
           {/* Indicateur de défilement sur mobile */}
           {isMobile && (
@@ -216,15 +216,15 @@ export default function Home() {
             </div>
           )}
 
-          {/* Conteneur avec défilement horizontal sur mobile, grid sur desktop */}
+          {/* Conteneur avec défilement horizontal sur mobile, grid espacé sur desktop */}
           <div
             ref={carouselRef}
             className={`
               ${isMobile
-                ? "flex overflow-x-auto snap-x snap-mandatory hide-scrollbar pb-6"
-                : "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3"
+                ? "flex overflow-x-auto snap-x snap-mandatory hide-scrollbar pb-6 gap-6"
+                : "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
               }
-              gap-y-12 gap-x-8 sm:gap-x-10 md:gap-x-12 mx-auto px-4 sm:px-6
+              gap-y-16 gap-x-8 sm:gap-x-12 lg:gap-x-16 mx-auto px-4 sm:px-6
             `}
             onMouseDown={handleMouseDown}
             onMouseUp={handleMouseUp}
@@ -238,11 +238,11 @@ export default function Home() {
               <motion.div
                 key={index}
                 className={`
-                  group rounded-xl overflow-hidden text-center 
-                  cursor-pointer relative bg-white shadow-sm hover:shadow-xl
+                  group rounded-2xl overflow-hidden text-center 
+                  cursor-pointer relative bg-transparent
                   transition-all duration-300
                   ${isMobile
-                    ? "flex-shrink-0 w-[85vw] max-w-[300px] snap-center"
+                    ? "flex-shrink-0 w-[85vw] max-w-[340px] snap-center"
                     : ""
                   }
                   ${service.className || ""}
@@ -255,28 +255,30 @@ export default function Home() {
                   ease: "easeOut",
                 }}
                 viewport={{ once: true, margin: "-50px" }}
-                whileHover={{ y: -8 }}
+                whileHover={{ y: -5 }}
               >
-                {/* Conteneur qui limite la taille de l'image et la rend responsive */}
-                <div className="relative w-full h-[180px] sm:h-[200px] md:h-[220px] mx-auto rounded-t-lg overflow-hidden bg-gray-50">
-                  <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-5 transition-opacity duration-500 z-10" />
-
+                {/* Image plus grande et respirante */}
+                <div className="relative w-full aspect-[4/3] mx-auto rounded-2xl overflow-hidden shadow-lg">
                   <Image
                     src={service.image}
                     alt={service.title}
                     fill
                     sizes="(max-width: 640px) 85vw, (max-width: 768px) 50vw, 33vw"
-                    className="object-cover grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-500"
+                    className="object-cover transition-all duration-700 group-hover:scale-105"
                     priority
                   />
 
+                  {/* Overlay subtil au survol */}
+                  <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
                   <motion.button
                     className="
-                      absolute bottom-3 left-1/2 transform -translate-x-1/2 
-                      bg-black hover:bg-blue-600 text-white py-2 px-4 rounded-full 
-                      opacity-0 group-hover:opacity-100 shadow-lg 
+                      absolute bottom-4 left-1/2 transform -translate-x-1/2 
+                      bg-white hover:bg-black text-black hover:text-white 
+                      py-2.5 px-6 rounded-full 
+                      opacity-0 group-hover:opacity-100 shadow-xl
                       text-xs sm:text-sm font-medium transition-all duration-300 ease-in-out 
-                      w-32 flex items-center justify-center gap-1
+                      w-auto min-w-[120px] flex items-center justify-center gap-1.5
                     "
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.98 }}
@@ -301,13 +303,14 @@ export default function Home() {
                   </motion.button>
                 </div>
 
-                <div className="px-4 py-4 bg-white">
-                  <h3 className="text-base sm:text-lg font-semibold text-black">
+                {/* Texte plus aéré et épuré */}
+                <div className="px-2 py-5 text-center">
+                  <h3 className="text-lg sm:text-xl font-semibold text-black mb-2">
                     {service.title}
                   </h3>
                   {service.description && (
                     <motion.p
-                      className="mt-2 text-black text-xs max-w-[90%] mx-auto line-clamp-2 group-hover:line-clamp-none"
+                      className="mt-2 text-gray-700 text-sm sm:text-base max-w-[95%] mx-auto line-clamp-2 group-hover:line-clamp-none"
                       initial={{ opacity: 0.7 }}
                       whileHover={{ opacity: 1 }}
                       transition={{ duration: 0.3 }}
@@ -316,14 +319,6 @@ export default function Home() {
                     </motion.p>
                   )}
                 </div>
-
-                {/* Effet de ligne au survol */}
-                <motion.div
-                  className="absolute bottom-0 left-0 right-0 h-1 bg-blue-500"
-                  initial={{ scaleX: 0 }}
-                  whileHover={{ scaleX: 1 }}
-                  transition={{ duration: 0.3 }}
-                />
               </motion.div>
             ))}
           </div>
