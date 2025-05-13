@@ -11,7 +11,7 @@ const typesDeDemandeParType = {
       label: "Branchement d'abonnement",
       width: 30,
       height: 30,
-      disabled: true, // Désactivé car la vue n'est pas disponible
+      disabled: true // Désactivé car la vue n'est pas disponible
     },
     // {
     //   id: "abonnement",
@@ -34,7 +34,7 @@ const typesDeDemandeParType = {
       label: "Augmentation de puissance",
       width: 50,
       height: 50,
-      disabled: true, // Désactivé car la vue n'est pas disponible
+      disabled: true // Désactivé car la vue n'est pas disponible
     },
     {
       id: "reabonnement",
@@ -139,29 +139,19 @@ const ModalDEmande = ({ onClose }: { onClose: () => void }) => {
 
   // Effet pour vérifier s'il y a une demande à ouvrir automatiquement
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const openDemandeType = localStorage.getItem("openDemandeType");
+    if (typeof window !== 'undefined') {
+      const openDemandeType = localStorage.getItem('openDemandeType');
       if (openDemandeType) {
         console.log("Demande à ouvrir automatiquement:", openDemandeType);
 
         // Vérifier si le type de demande existe dans les options disponibles
-        const isValidType = Object.values(typesDeDemandeParType).some(
-          (demandes) =>
-            demandes.some(
-              (demande) => demande.id === openDemandeType && !demande.disabled
-            )
-        );
+        const isValidType = Object.values(typesDeDemandeParType)
+          .some(demandes => demandes.some(demande => demande.id === openDemandeType && !demande.disabled));
 
         if (isValidType) {
           // Trouver le bon type de profil qui contient cette demande
-          for (const [typeId, demandes] of Object.entries(
-            typesDeDemandeParType
-          )) {
-            if (
-              demandes.some(
-                (demande) => demande.id === openDemandeType && !demande.disabled
-              )
-            ) {
+          for (const [typeId, demandes] of Object.entries(typesDeDemandeParType)) {
+            if (demandes.some(demande => demande.id === openDemandeType && !demande.disabled)) {
               setSelectedTypeId(typeId);
               break;
             }
@@ -176,23 +166,21 @@ const ModalDEmande = ({ onClose }: { onClose: () => void }) => {
           // Supprimer la demande du localStorage pour éviter de l'ouvrir à nouveau
           // mais avec un délai pour être sûr que tout est bien configuré
           setTimeout(() => {
-            localStorage.removeItem("openDemandeType");
+            localStorage.removeItem('openDemandeType');
             console.log("openDemandeType supprimé du localStorage");
           }, 2000);
         } else {
-          console.warn(
-            `Le type de demande "${openDemandeType}" n'est pas valide ou est désactivé`
-          );
-          localStorage.removeItem("openDemandeType");
+          console.warn(`Le type de demande "${openDemandeType}" n'est pas valide ou est désactivé`);
+          localStorage.removeItem('openDemandeType');
         }
       }
     }
   }, []);
 
-  console.log(selectedDemande, "selectedDemande");
+  console.log(selectedDemande, "selectedDemande")
 
   return (
-    <div className="fixed inset-0 z-[9999] flex justify-end">
+    <div className="fixed inset-0 z-50 flex justify-end">
       {/* BACKDROP */}
       <div
         className="absolute inset-0 bg-black/50 backdrop-blur-md"
@@ -206,36 +194,33 @@ const ModalDEmande = ({ onClose }: { onClose: () => void }) => {
       <div className="relative w-full md:w-[600px] bg-[#F8F9F9] h-full shadow-2xl overflow-auto flex flex-col rounded-l-2xl transition-all duration-500">
         {/* HEADER */}
         <div className="flex items-center justify-between p-6 border-b">
-          {selectedDemande === null ? (
-            ""
-          ) : (
-            <button
-              onClick={() => {
-                if (selectedDemande) {
-                  setSelectedDemande(null);
-                } else {
-                  setSelectedTypeId(typesDeSelection[0].id);
-                }
-              }}
-              className="text-gray-600 hover:text-gray-800"
+
+          {selectedDemande === null ? "" : <button
+            onClick={() => {
+              if (selectedDemande) {
+                setSelectedDemande(null);
+              } else {
+                setSelectedTypeId(typesDeSelection[0].id);
+              }
+            }}
+            className="text-gray-600 hover:text-gray-800"
+          >
+            <svg
+              width="22"
+              height="20"
+              viewBox="0 0 22 20"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
             >
-              <svg
-                width="22"
-                height="20"
-                viewBox="0 0 22 20"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M10.2864 18.5635L1.72388 10.001L10.2864 1.43848M2.91311 10.001H20.276"
-                  stroke="#EC4F48"
-                  strokeWidth="2.69"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </button>
-          )}
+              <path
+                d="M10.2864 18.5635L1.72388 10.001L10.2864 1.43848M2.91311 10.001H20.276"
+                stroke="#EC4F48"
+                strokeWidth="2.69"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>}
 
           <h2 className="text-lg md:text-xl font-semibold text-gray-800 text-center flex-1">
             {selectedDemande
@@ -312,51 +297,33 @@ const ModalDEmande = ({ onClose }: { onClose: () => void }) => {
                   Choisissez le type de demande souhaité :
                 </p>
                 <div className="grid grid-cols-2 gap-6 w-full items-center">
-                  {typesDeDemandeParType[
-                    selectedTypeId as keyof typeof typesDeDemandeParType
-                  ]?.map((demande, index, array) => (
-                    <button
-                      key={demande.id}
-                      onClick={() =>
-                        !demande.disabled && setSelectedDemande(demande.id)
-                      }
-                      className={`bg-white h-[115px] rounded-xl shadow-md flex flex-col items-center justify-center p-5 gap-3 
-          transition-all duration-300 hover:shadow-lg ${!demande.disabled
-                          ? "hover:scale-105"
-                          : "cursor-not-allowed opacity-50"
-                        }
-          ${selectedDemande === demande.id
-                          ? "border-2 border-red-500 scale-105"
-                          : "border border-transparent"
-                        }
-          ${index === array.length - 1 && array.length % 2 !== 0
-                          ? "col-span-2 mx-auto"
-                          : ""
-                        }
+                  {typesDeDemandeParType[selectedTypeId as keyof typeof typesDeDemandeParType]?.map(
+                    (demande, index, array) => (
+                      <button
+                        key={demande.id}
+                        onClick={() => !demande.disabled && setSelectedDemande(demande.id)}
+                        className={`bg-white h-[115px] rounded-xl shadow-md flex flex-col items-center justify-center p-5 gap-3 
+          transition-all duration-300 hover:shadow-lg ${!demande.disabled ? "hover:scale-105" : "cursor-not-allowed opacity-50"}
+          ${selectedDemande === demande.id ? "border-2 border-red-500 scale-105" : "border border-transparent"}
+          ${index === array.length - 1 && array.length % 2 !== 0 ? "col-span-2 mx-auto" : ""}
         `}
-                    >
-                      <Image
-                        src={demande.src}
-                        alt={demande.label}
-                        width={demande.width}
-                        height={demande.height}
-                        className={`object-contain ${demande.disabled ? "opacity-60" : ""
-                          }`}
-                      />
-                      <span
-                        className={`font-medium text-center text-[14px] ${demande.disabled ? "text-gray-400" : "text-gray-700"
-                          }`}
                       >
-                        {demande.label}
-                        {demande.disabled && (
-                          <div className="text-xs italic mt-1">
-                            Bientôt disponible
-                          </div>
-                        )}
-                      </span>
-                    </button>
-                  ))}
+                        <Image
+                          src={demande.src}
+                          alt={demande.label}
+                          width={demande.width}
+                          height={demande.height}
+                          className={`object-contain ${demande.disabled ? "opacity-60" : ""}`}
+                        />
+                        <span className={`font-medium text-center text-[14px] ${demande.disabled ? "text-gray-400" : "text-gray-700"}`}>
+                          {demande.label}
+                          {demande.disabled && <div className="text-xs italic mt-1">Bientôt disponible</div>}
+                        </span>
+                      </button>
+                    )
+                  )}
                 </div>
+
               </div>
             )}
           </>
