@@ -282,21 +282,37 @@ const Login = () => {
       <>
         {/* Modal "Client introuvable" */}
         {showNotFoundModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="bg-white p-4 rounded-md max-w-sm w-full mx-4">
-              <p className="text-center text-base font-medium mb-4">
-                Votre compte est introuvable.
-                <br />
-                Veuillez vous inscrire avant de vous connecter.
-              </p>
-              <button
-                onClick={() => {
-                  router.push("/register-stepper");
-                }}
-                className="w-full mt-2 rounded-full bg-primary text-white font-semibold py-3"
-              >
-                S&apos;inscrire
-              </button>
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm transition-all duration-300">
+            <div className="bg-white p-6 rounded-xl max-w-sm w-full mx-4 shadow-2xl transform transition-all duration-300 border border-gray-200">
+              <div className="flex flex-col items-center mb-4">
+                <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-bold text-gray-800 mb-2">Compte introuvable</h3>
+                <p className="text-center text-base font-medium text-gray-600">
+                  Votre compte est introuvable.
+                  <br />
+                  Veuillez vous inscrire avant de vous connecter.
+                </p>
+              </div>
+              <div className="space-y-3">
+                <button
+                  onClick={() => {
+                    router.push("/register-stepper");
+                  }}
+                  className="w-full rounded-full bg-primary text-white font-semibold py-3 hover:bg-primary/90 transition-colors"
+                >
+                  S&apos;inscrire
+                </button>
+                <button
+                  onClick={() => setShowNotFoundModal(false)}
+                  className="w-full rounded-full border border-gray-300 text-gray-700 font-semibold py-3 hover:bg-gray-50 transition-colors"
+                >
+                  Réessayer
+                </button>
+              </div>
             </div>
           </div>
         )}
