@@ -7,7 +7,6 @@ import IconFacebook from "../components/icons/iconFacebook";
 import OtpInput from "react-otp-input";
 import { useRouter } from "next/navigation";
 import { useResponsive } from "@/src/hooks/useResponsive";
-
 import Image from "next/image";
 import { bebas_beue } from "@/utils/globalFunction";
 import SucessModale from "../components/modales/sucessModale";
@@ -27,6 +26,30 @@ const RegisterStepper = () => {
   // État pour le paramètre mode de l'URL
   const [modeParam, setModeParam] = useState<string | null>(null);
 
+  // État pour suivre l'étape actuelle
+  const [currentStep, setCurrentStep] = useState("userInfo"); // userInfo, otpVerification, passcode
+
+  // États pour les informations utilisateur
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [contactPrefix, setContactPrefix] = useState("+225");
+  const [contact, setContact] = useState("");
+  const [otpCode, setOtpCode] = useState("");
+
+  // États pour le code PIN
+  const [step, setStep] = useState<1 | 2>(1); // Étape 1: Saisie initiale, Étape 2: Confirmation
+  const [originalPin, setOriginalPin] = useState<string | null>(null); // Premier PIN
+  const [pin, setPin] = useState<string[]>([]);
+
+  // États pour les notifications
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string>("");
+  const [shakeAnimation, setShakeAnimation] = useState(false);
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
+  const [toastType, setToastType] = useState<"success" | "error">("error");
+
   // Récupérer le paramètre mode depuis l'URL
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -42,49 +65,6 @@ const RegisterStepper = () => {
     }
   }, []);
 
-  // État pour suivre l'étape actuelle
-  const [currentStep, setCurrentStep] = useState(1);
-
-  // États pour les différentes étapes
-  const [email, setEmail] = useState("");
-  const [otpCode, setOtpCode] = useState("");
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [secretQuestion, setSecretQuestion] = useState("");
-  const [secretAnswer, setSecretAnswer] = useState("");
-  const [secretQuestions, setSecretQuestions] = useState<
-    Array<{
-      _id: string;
-      slug: string;
-      questionText: string;
-      languageCode: string;
-      category: string;
-      status: string;
-      securityLevel: string;
-      isCustomizable: boolean;
-      minAnswerLength: number;
-      maxAnswerLength: number;
-      createdBy: string;
-      version: number;
-      user: null | string;
-      createdAt: string;
-      updatedAt: string;
-      updatedBy: string;
-    }>
-  >([]);
-
-  // États pour le code PIN
-  const [step, setStep] = useState<1 | 2>(1); // Étape 1: Saisie initiale, Étape 2: Confirmation
-  const [originalPin, setOriginalPin] = useState<string | null>(null); // Premier PIN
-  const [pin, setPin] = useState<string[]>([]);
-
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string>("");
-  const [shakeAnimation, setShakeAnimation] = useState(false);
-  const [showToast, setShowToast] = useState(false);
-  const [toastMessage, setToastMessage] = useState("");
-  const [toastType, setToastType] = useState<"success" | "error">("error");
-
   // Fonction pour afficher un toast
   const showToastMessage = (
     message: string,
@@ -95,28 +75,6 @@ const RegisterStepper = () => {
     setToastType(type);
     setShowToast(true);
     setTimeout(() => setShowToast(false), duration);
-  };
-
-  // Fonction pour passer à l'étape suivante
-  const goToNextStep = () => {
-    const nextStep = currentStep + 1;
-
-    // Si on passe à l'étape de la question secrète, charger les questions
-    if (nextStep === 4) {
-      loadSecretQuestions();
-    }
-
-    setCurrentStep(nextStep);
-  };
-
-  // Fonction pour revenir à l'étape précédente
-  const goToPreviousStep = () => {
-    setCurrentStep(currentStep - 1);
-  };
-
-  // Fonction pour revenir à la création de compte (première étape)
-  const backToRegister = () => {
-    setCurrentStep(1);
   };
 
   // Fonction pour obtenir le token d'API
@@ -161,68 +119,12 @@ const RegisterStepper = () => {
     }
   };
 
-  // Fonction pour charger les questions secrètes depuis l'API
-  const loadSecretQuestions = async () => {
-    try {
-      // Obtenir le token d'API
-      const apiToken = await getApiToken();
-
-      const response = await fetch(`${API_URL}/v3/user/question`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${apiToken}`,
-        },
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        // Vérifier si data est un tableau ou s'il contient une propriété data/questions
-        if (Array.isArray(data)) {
-          setSecretQuestions(data);
-        } else if (data.data && Array.isArray(data.data)) {
-          setSecretQuestions(data.data);
-        } else if (data.questions && Array.isArray(data.questions)) {
-          setSecretQuestions(data.questions);
-        } else {
-          // Si nous recevons un seul objet, le mettre dans un tableau
-          const singleQuestion = data.hasOwnProperty("_id") ? [data] : [];
-          if (singleQuestion.length > 0) {
-            setSecretQuestions(singleQuestion);
-          } else {
-            console.error("Format de réponse inattendu:", data);
-            showToastMessage(
-              "Impossible de charger les questions secrètes. Format de réponse inattendu.",
-              "error"
-            );
-          }
-        }
-      } else {
-        console.error(
-          "Erreur lors du chargement des questions secrètes:",
-          data
-        );
-        showToastMessage(
-          "Impossible de charger les questions secrètes. Veuillez réessayer.",
-          "error"
-        );
-      }
-    } catch (error) {
-      console.error("Erreur lors du chargement des questions secrètes:", error);
-      showToastMessage("Une erreur est survenue. Veuillez réessayer.", "error");
-    }
-  };
-
-  // Gestionnaire pour l'étape 1 (Création de compte)
-  const handleEmailSubmit = async (e: React.FormEvent) => {
+  // Gestionnaire pour la soumission du formulaire d'informations utilisateur
+  const handleUserInfoSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!email.trim()) {
-      showToastMessage(
-        "Veuillez entrer un email ou un numéro de téléphone valide",
-        "error"
-      );
+    if (!email.trim() || !firstName.trim() || !lastName.trim() || !contact.trim()) {
+      showToastMessage("Veuillez remplir tous les champs obligatoires", "error");
       return;
     }
 
@@ -230,28 +132,28 @@ const RegisterStepper = () => {
       // Obtenir le token d'API
       const apiToken = await getApiToken();
 
-      // Appel API pour générer l'OTP
-      const response = await fetch(`${API_URL}/v3/user/otp/generate`, {
+      // Appel API pour générer l'OTP pour le numéro de téléphone
+      const phoneResponse = await fetch(`${API_URL}/v3/user/otp/generate`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${apiToken}`,
         },
         body: JSON.stringify({
-          login: email,
+          login: `${contact}`,
         }),
       });
 
-      const data = await response.json();
+      const phoneData = await phoneResponse.json();
 
-      if (response.ok) {
-        showToastMessage("Code OTP envoyé avec succès", "success");
-        goToNextStep();
+      // Vérifier si la requête a réussi
+      if (phoneResponse.ok) {
+        showToastMessage("Code OTP envoyé à votre numéro de téléphone", "success");
+        setCurrentStep("otpVerification");
       } else {
-        showToastMessage(
-          data.message || "Erreur lors de la génération du code OTP",
-          "error"
-        );
+        // La requête a échoué
+        const errorMessage = phoneData.message || "Erreur lors de l'envoi du code OTP";
+        showToastMessage(errorMessage, "error");
       }
     } catch (error) {
       console.error("Erreur lors de la génération de l'OTP:", error);
@@ -259,7 +161,7 @@ const RegisterStepper = () => {
     }
   };
 
-  // Gestionnaire pour l'étape 2 (OTP)
+  // Gestionnaire pour l'OTP
   const handleOtpChange = (newCode: string) => {
     // Vérifier que l'entrée ne contient que des chiffres et qu'on ne dépasse pas la limite
     if (/^\d*$/.test(newCode) && newCode.length <= 4) {
@@ -277,30 +179,33 @@ const RegisterStepper = () => {
       // Obtenir le token d'API
       const apiToken = await getApiToken();
 
-      const response = await fetch(`${API_URL}/v3/user/otp/verify`, {
+      // Vérifier l'OTP avec le numéro de téléphone
+      const phoneVerification = await fetch(`${API_URL}/v3/user/otp/verify`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${apiToken}`,
         },
         body: JSON.stringify({
-          login: email,
+          login: `${contact}`,
           code: code,
         }),
       });
 
-      const data = await response.json();
+      const phoneData = await phoneVerification.json();
 
-      if (response.ok) {
+      // Si la vérification par téléphone réussit
+      if (phoneVerification.ok) {
         showToastMessage("Code OTP vérifié avec succès", "success");
-        setTimeout(() => goToNextStep(), 500);
-      } else {
-        showToastMessage(
-          data.message || "Code OTP invalide. Veuillez réessayer.",
-          "error"
-        );
-        setOtpCode(""); // Réinitialiser le code OTP
+        setTimeout(() => setCurrentStep("passcode"), 500);
+        return;
       }
+
+      // Si la vérification échoue
+      const errorMessage = phoneData.message || "Code OTP invalide. Veuillez réessayer.";
+      showToastMessage(errorMessage, "error");
+      setOtpCode(""); // Réinitialiser le code OTP
+
     } catch (error) {
       console.error("Erreur lors de la vérification de l'OTP:", error);
       showToastMessage("Une erreur est survenue. Veuillez réessayer.", "error");
@@ -308,41 +213,15 @@ const RegisterStepper = () => {
     }
   };
 
-  // Gestionnaire pour l'étape 3 (Identité)
-  const handleIdentitySubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    goToNextStep();
-  };
-
-  // Gestionnaire pour l'étape 4 (Question secrète)
-  const handleSecretQuestionSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!secretQuestion || !secretAnswer.trim()) {
-      showToastMessage(
-        "Veuillez sélectionner une question et entrer une réponse",
-        "error"
-      );
-      return;
-    }
-
-    showToastMessage("Question secrète enregistrée", "success");
-    goToNextStep();
-  };
-
-  // Fonctions pour l'étape 5 (Code PIN)
+  // Fonctions pour la gestion du code PIN
   const handleDigitClick = (digit: string) => {
     if (pin.length < PIN_LENGTH) {
       setPin([...pin, digit]);
-      // Mélanger le clavier après chaque saisie
-      // setShuffledDigits(shuffleArray([...shuffledDigits]));
     }
   };
 
   const handleDelete = () => {
     setPin(pin.slice(0, -1));
-    // Mélanger le clavier après suppression
-    // setShuffledDigits(shuffleArray([...shuffledDigits]));
   };
 
   // Vérifier la validation du PIN
@@ -359,7 +238,7 @@ const RegisterStepper = () => {
           // Appeler l'API d'inscription
           registerUser(pin.join(""));
         } else {
-          setToastMessage("Code incorrect, veuillez réessayer.");
+          setToastMessage("Les codes ne correspondent pas, veuillez réessayer.");
           setShowToast(true);
           setTimeout(() => setShowToast(false), 3000);
           setPin([]); // Réinitialiser l'entrée utilisateur
@@ -381,12 +260,12 @@ const RegisterStepper = () => {
           Authorization: `Bearer ${apiToken}`,
         },
         body: JSON.stringify({
-          login: email,
-          passcode: passcode,
+          email: email,
+          contact: contact,
+          contactPrefix: contactPrefix,
           lastname: lastName,
           firstname: firstName,
-          secretQuestion: secretQuestion,
-          secretResponse: secretAnswer,
+          passcode: passcode,
         }),
       });
 
@@ -501,116 +380,87 @@ const RegisterStepper = () => {
     }
   };
 
-  // Indicateur de progression du stepper
-  const renderStepIndicator = () => {
-    return (
-      <div className="flex justify-center mb-6">
-        <div className="flex items-center">
-          {[1, 2, 3, 4, 5].map((stepNumber) => (
-            <React.Fragment key={stepNumber}>
-              <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center ${stepNumber === currentStep
-                  ? "bg-primary text-white"
-                  : stepNumber < currentStep
-                    ? "bg-green-500 text-white"
-                    : "bg-gray-200 text-gray-500"
-                  }`}
-              >
-                {stepNumber < currentStep ? (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                ) : (
-                  stepNumber
-                )}
-              </div>
-              {stepNumber < 5 && (
-                <div
-                  className={`w-10 h-1 ${stepNumber < currentStep ? "bg-green-500" : "bg-gray-200"
-                    }`}
-                ></div>
-              )}
-            </React.Fragment>
-          ))}
-        </div>
-      </div>
-    );
-  };
-
-  // Bouton de retour
-  const renderBackButton = () => {
-    if (currentStep === 1) return null;
-
-    return (
-      <div className="flex justify-center pt-10">
-        <button
-          className="flex items-center gap-2"
-          onClick={currentStep === 2 ? backToRegister : goToPreviousStep}
-        >
-          <div className="flex justify-center bg-primary w-8 h-8 rounded-full items-center">
-            <svg
-              width="11"
-              height="18"
-              viewBox="0 0 11 18"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M8.71875 2.0625L1.78125 9L8.71875 15.9375"
-                stroke="white"
-                strokeWidth="3"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </div>
-          <p className="text-primary font-medium">
-            {currentStep === 2
-              ? "Retour à la création de compte"
-              : "Retour à l'étape précédente"}
-          </p>
-        </button>
-      </div>
-    );
-  };
-
   // Rendu conditionnel du contenu en fonction de l'étape actuelle
-  const renderStepContent = () => {
+  const renderContent = () => {
     switch (currentStep) {
-      case 1:
+      case "userInfo":
         return (
           <>
             <div>
               <Title title="Création de compte" />
               <p className="text-[14px] text-smallText font-medium text-center">
-                Saisir l'adresse e-mail ou le n° de téléphone que vous voulez
-                associer à votre compte maCIE.
+                Saisissez vos informations pour créer votre compte maCIE.
               </p>
             </div>
             {/* Formulaire */}
             <div className="pt-5 w-full">
-              <form onSubmit={handleEmailSubmit}>
-                <div>
-                  <label htmlFor="email" className="font-bold text-base">
-                    Email ou N° de téléphone
+              <form onSubmit={handleUserInfoSubmit}>
+                <div className="mb-4">
+                  <label htmlFor="lastName" className="font-bold text-base">
+                    Nom
                   </label>
                   <input
                     type="text"
-                    placeholder="E-mail / téléphone"
+                    id="lastName"
+                    placeholder="Votre nom"
+                    required
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    className="w-full rounded-xl px-5 py-5 border-2 border-[#EDEDED] mt-2"
+                  />
+                </div>
+                <div className="mb-4">
+                  <label htmlFor="firstName" className="font-bold text-base">
+                    Prénom
+                  </label>
+                  <input
+                    type="text"
+                    id="firstName"
+                    placeholder="Votre prénom"
+                    required
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    className="w-full rounded-xl px-5 py-5 border-2 border-[#EDEDED] mt-2"
+                  />
+                </div>
+                <div className="mb-4">
+                  <label htmlFor="email" className="font-bold text-base">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    id="email"
+                    placeholder="Votre email"
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="w-full rounded-xl px-5 py-5 border-2 border-[#EDEDED] mt-2"
                   />
+                </div>
+                <div className="mb-4">
+                  <label htmlFor="contact" className="font-bold text-base">
+                    Téléphone
+                  </label>
+                  <div className="flex mt-2">
+                    <select
+                      value={contactPrefix}
+                      onChange={(e) => setContactPrefix(e.target.value)}
+                      className="rounded-l-xl px-3 py-5 border-2 border-r-0 border-[#EDEDED] bg-white"
+                    >
+                      <option value="+225">+225</option>
+                      <option value="+33">+33</option>
+                      <option value="+1">+1</option>
+                    </select>
+                    <input
+                      type="tel"
+                      id="contact"
+                      placeholder="Votre numéro de téléphone"
+                      required
+                      value={contact}
+                      onChange={(e) => setContact(e.target.value)}
+                      className="flex-1 rounded-r-xl px-5 py-5 border-2 border-[#EDEDED]"
+                    />
+                  </div>
                 </div>
                 <div className="pt-7">
                   <button className="w-full rounded-full bg-primary text-white font-semibold py-4">
@@ -664,23 +514,20 @@ const RegisterStepper = () => {
           </>
         );
 
-      case 2:
+      case "otpVerification":
         return (
           <>
             <div>
               <Title title="Vérification OTP" />
               <p className="text-[14px] font-medium text-center">
                 Entrez le code OTP qui vous a été envoyé à{" "}
-                <span className="font-bold">
-                  {email || "landryyamb@gmail.com"}
-                </span>
+                <span className="font-bold">{contactPrefix}{contact}</span>
               </p>
             </div>
 
             {/* Input OTP */}
             <div
-              className={`pt-10 w-full flex justify-center ${isMobile ? "px-5" : ""
-                }`}
+              className={`pt-10 w-full flex justify-center ${isMobile ? "px-5" : ""}`}
             >
               <OtpInput
                 value={otpCode}
@@ -722,125 +569,20 @@ const RegisterStepper = () => {
             <div className="pt-10 flex justify-center w-full">
               <CountdownTimer />
             </div>
-          </>
-        );
 
-      case 3:
-        return (
-          <>
-            <div>
-              <Title title="Vérification identité" />
-              <p className="text-[14px] text-smallText font-medium text-center">
-                Nous avons récupérer les informations suivantes vous concernant
-              </p>
-            </div>
-            {/* Formulaire */}
-            <div className="pt-5 w-full">
-              <form onSubmit={handleIdentitySubmit}>
-                <div>
-                  <label
-                    htmlFor="firstName"
-                    className="font-semibold text-base"
-                  >
-                    Nom(s)
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Yamb"
-                    required
-                    value={firstName}
-                    onChange={(e) => setFirstName(e.target.value)}
-                    className="w-full font-semibold rounded-xl px-5 py-5 border-2 border-[#EDEDED] mt-2"
-                  />
-                </div>
-                <div className="pt-7">
-                  <label htmlFor="lastName" className="font-semibold text-base">
-                    Prénom(s)
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Landry"
-                    required
-                    value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
-                    className="w-full font-semibold rounded-xl px-5 py-5 border-2 border-[#EDEDED] mt-2"
-                  />
-                </div>
-                <div className="pt-7">
-                  <button className="w-full rounded-full bg-primary text-white font-semibold py-4">
-                    Définir ma question secrète
-                  </button>
-                </div>
-              </form>
+            {/* Bouton Retour */}
+            <div className="mt-8">
+              <button
+                onClick={() => setCurrentStep("userInfo")}
+                className="w-full rounded-full text-primary border-2 border-primary font-semibold py-4 hover:bg-gray-100"
+              >
+                Retour
+              </button>
             </div>
           </>
         );
 
-      case 4:
-        return (
-          <>
-            <div>
-              <Title title="Question secrète" />
-              <p className="text-[14px] text-smallText font-medium text-center">
-                Choisissez une question et une réponse pour protéger votre
-                compte.
-              </p>
-            </div>
-            {/* Formulaire */}
-            <div className="pt-5 w-full">
-              <form onSubmit={handleSecretQuestionSubmit}>
-                <div>
-                  <label htmlFor="question" className="font-semibold text-base">
-                    Sélectionnez une question secrète
-                  </label>
-                  <select
-                    id="question"
-                    name="question"
-                    required
-                    value={secretQuestion}
-                    onChange={(e) => setSecretQuestion(e.target.value)}
-                    className="w-full font-semibold rounded-xl px-3 py-5 border-2 border-[#EDEDED] mt-2 bg-white"
-                  >
-                    <option value="" disabled>
-                      Choisissez une question
-                    </option>
-                    {secretQuestions.length > 0 ? (
-                      secretQuestions.map((q) => (
-                        <option key={q._id} value={q._id}>
-                          {q.questionText}
-                        </option>
-                      ))
-                    ) : (
-                      <>
-                        <option value="">Aucune question</option>
-                      </>
-                    )}
-                  </select>
-                </div>
-                <div className="pt-7">
-                  <label htmlFor="response" className="font-semibold text-base">
-                    Entrez votre réponse secrète
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Votre réponse"
-                    required
-                    value={secretAnswer}
-                    onChange={(e) => setSecretAnswer(e.target.value)}
-                    className="w-full font-semibold rounded-xl px-5 py-5 border-2 border-[#EDEDED] mt-2"
-                  />
-                </div>
-                <div className="pt-7">
-                  <button className="w-full rounded-full bg-primary text-white font-semibold py-4">
-                    Définir mon code confidentiel
-                  </button>
-                </div>
-              </form>
-            </div>
-          </>
-        );
-
-      case 5:
+      case "passcode":
         return (
           <>
             <div className="flex flex-col justify-center w-full items-center">
@@ -858,14 +600,12 @@ const RegisterStepper = () => {
 
               {/* Points indicateurs */}
               <div
-                className={`flex gap-2 mb-3 ${shakeAnimation ? "animate-shake" : ""
-                  }`}
+                className={`flex gap-2 mb-3 ${shakeAnimation ? "animate-shake" : ""}`}
               >
                 {Array.from({ length: PIN_LENGTH }).map((_, index) => (
                   <span
                     key={index}
-                    className={`h-6 w-6 rounded-full ${index < pin.length ? "bg-primary" : "bg-[#F1F1F1]"
-                      }`}
+                    className={`h-6 w-6 rounded-full ${index < pin.length ? "bg-primary" : "bg-[#F1F1F1]"}`}
                   ></span>
                 ))}
               </div>
@@ -893,14 +633,13 @@ const RegisterStepper = () => {
                 </div>
               )}
 
-              {/* Clavier numérique (mélangé après la première saisie) */}
+              {/* Clavier numérique */}
               <div className={`grid grid-cols-3 ${isMobile ? "gap-2" : "gap-8"}`}>
                 {[1, 2, 3, 4, 5, 6, 7, 8, 9, 0].map((digit, index) => (
                   <button
                     key={digit}
                     onClick={() => handleDigitClick(digit.toString())}
-                    className={`h-20 w-28 text-4xl font-bold flex items-center justify-center border-2 border-gray-100 rounded-xl hover:bg-gray-100 ${bebas_beue.className} ${digit === 0 ? "col-start-2" : ""
-                      }`}
+                    className={`h-20 w-28 text-4xl font-bold flex items-center justify-center border-2 border-gray-100 rounded-xl hover:bg-gray-100 ${bebas_beue.className} ${digit === 0 ? "col-start-2" : ""}`}
                     style={{
                       gridColumn: digit === 0 ? "2" : "auto",
                     }}
@@ -928,6 +667,16 @@ const RegisterStepper = () => {
                       strokeLinejoin="round"
                     />
                   </svg>
+                </button>
+              </div>
+
+              {/* Bouton Retour */}
+              <div className="mt-8">
+                <button
+                  onClick={() => setCurrentStep("otpVerification")}
+                  className="w-full rounded-full text-primary border-2 border-primary font-semibold py-4 hover:bg-gray-100"
+                >
+                  Retour
                 </button>
               </div>
 
@@ -986,19 +735,10 @@ const RegisterStepper = () => {
           }
         `}</style>
 
-        <div
-          className={`flex items-center justify-center ${isMobile ? "pt-10 px-3" : ""
-            }`}
-        >
-          <div className="w-full max-w-md">
-            {/* Indicateur d'étape */}
-            {renderStepIndicator()}
-
+        <div className="h-full overflow-auto">
+          <div className="w-full max-w-md mx-auto px-4 pt-4 pb-4">
             {/* Contenu de l'étape actuelle */}
-            {renderStepContent()}
-
-            {/* Bouton de retour */}
-            {renderBackButton()}
+            {renderContent()}
           </div>
         </div>
 
@@ -1010,8 +750,7 @@ const RegisterStepper = () => {
             }`}
         >
           <div
-            className={`${toastType === "error" ? "bg-red-500" : "bg-green-500"
-              } p-2 rounded-full`}
+            className={`${toastType === "error" ? "bg-red-500" : "bg-green-500"} p-2 rounded-full`}
           >
             {toastType === "error" ? (
               <AlertCircle className="text-white h-5 w-5" />
