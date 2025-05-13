@@ -134,10 +134,17 @@ const RouteGuard = ({ children }: { children: React.ReactNode }) => {
     "/dashboard",
   ].includes(pathname);
 
+  const showMT = [
+    "/login",
+    "/register-stepper",
+    "/verify",
+    "/dashboard",
+  ].includes(pathname);
+
   return (
     <>
       {showHeader && <Header />}
-      <main className="mt-32">
+      <main className={!showMT ? "mt-32" : ""}>
         <div className="flex-1 overflow-x-hidden">
           <DesktopEffects />
           <ToastContainer />
