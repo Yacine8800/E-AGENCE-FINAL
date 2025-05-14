@@ -19,21 +19,17 @@ import Footer from "./components/Footer";
 import Header from "./components/Header";
 import "./globals.css";
 
-const montserrat = Montserrat({
-  subsets: ["latin"],
-  display: "swap",
-});
-
-// export const metadata = {
-//   title: "E-AGENCE",
-//   description: "Votre agence digitale de confiance",
-// };
-
 import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import { useAuth } from "../hooks/useAuth";
 import { useResponsive } from "../hooks/useResponsive";
 import ElectricityEffect from "./components/ElectricityEffect";
 import EnergyScrollbar from "./components/EnergyScrollbar";
+
+const montserrat = Montserrat({
+  subsets: ["latin"],
+  display: "swap",
+});
 
 // Composant enfant qui s'occupe de la protection des routes
 // Il utilisera useAuth à l'intérieur du ReduxProvider

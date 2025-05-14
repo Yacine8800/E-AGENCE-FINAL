@@ -637,12 +637,22 @@ const Header = () => {
 
                 {/* Message spécifique selon l'onglet */}
                 <div className="w-full mb-3 sm:mb-4 md:mb-6">
-                  <p className="text-base sm:text-lg md:text-xl font-semibold text-noir">
-                    {activeTab === "particulier"
-                      ? "Vous êtes particulier professionnel ou particulier domicile"
-                      : activeTab === "business"
-                      ? "Vous êtes domestique HT ou professionnel HT?"
-                      : "Vous êtes une administration?"}
+                  <p className="text-base sm:text-lg md:text-xl font-regular text-noir">
+                    {activeTab === "particulier" ? (
+                      <span>
+                        Vous êtes particulier <strong> professionnel</strong> ou{" "}
+                        <strong> domicile</strong>
+                      </span>
+                    ) : activeTab === "business" ? (
+                      <span>
+                        Vous êtes <strong>domicile HT</strong> ou{" "}
+                        <strong>professionnel HT</strong>
+                      </span>
+                    ) : (
+                      <span>
+                        Vous êtes une <strong>administration</strong>
+                      </span>
+                    )}
                   </p>
                 </div>
 

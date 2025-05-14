@@ -73,3 +73,12 @@ export const Toastify = (
       break;
   }
 };
+
+export const ToastifyDetailedError = (errorMessage: string) => {
+  toast.error(errorMessage, {
+    autoClose: 8000, // Plus de temps pour lire les détails
+    style: { whiteSpace: "pre-line" }, // Pour respecter les sauts de ligne
+    className: "toast-error-details",
+    position: "top-center",
+  });
+};
