@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import GenericPage from "../components/GenericPage";
-import EntretienTransfoModal from "../components/EntretienTransfoModal";
+import EfficaciteTransfoModal from "../components/efficacitemodal";
 import PageWrapper from "../components/PageWrapper";
 
 export default function SolutionPage() {
@@ -25,7 +25,7 @@ export default function SolutionPage() {
                     onButtonClick={handleButtonClick}
                 />
             </PageWrapper>
-            <EntretienTransfoModal
+            <EfficaciteTransfoModal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
                 prestationType="Solutions d’efficacité énergétique"

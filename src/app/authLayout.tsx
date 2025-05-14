@@ -23,7 +23,7 @@ interface LayoutProps {
 }
 
 const Header = ({ isMobile }: LayoutProps) => {
-  const svgSizeWidth = isMobile ?  300 : 476;
+  const svgSizeWidth = isMobile ? 300 : 476;
   const svgSizeHeight = isMobile ? 300 : 398;
 
   return (
@@ -34,9 +34,8 @@ const Header = ({ isMobile }: LayoutProps) => {
         </Link>
       </div>
       <div
-        className={`${
-          isMobile ? "absolute" : "fixed"
-        } top-0 right-0 pointer-events-none`}
+        className={`${isMobile ? "absolute" : "fixed"
+          } top-0 right-0 pointer-events-none`}
       >
         {" "}
         <svg
@@ -109,28 +108,25 @@ const Footer = ({ isMobile }: LayoutProps) => {
     <footer className="bottom-0 left-0 w-full py-4 px-10 pt-20 text-sm">
       <div className="flex items-center">
         <div className="flex items-center">
-          <Image src="/logoCie 1.png" alt="Logo" width={30} height={30} />
+          <Image src="/logoBot.png" alt="Logo" width={30} height={30} />
           <span
-            className={`ml-2 font-semibold text-sm ${
-              isMobile ? "text-xs" : ""
-            }`}
+            className={`ml-2 font-semibold text-sm ${isMobile ? "text-xs" : ""
+              }`}
           >
             © Tous droits réservés
           </span>
         </div>
         <Link
           href="#"
-          className={`hover:underline font-semibold text-sm pl-5 ${
-            isMobile ? "text-xs" : ""
-          }`}
+          className={`hover:underline font-semibold text-sm pl-5 ${isMobile ? "text-xs" : ""
+            }`}
         >
           Politique de confidentialité
         </Link>
         <Link
           href="#"
-          className={`hover:underline font-semibold text-sm pl-5 ${
-            isMobile ? "text-xs hover:underline" : ""
-          }`}
+          className={`hover:underline font-semibold text-sm pl-5 ${isMobile ? "text-xs hover:underline" : ""
+            }`}
         >
           Conditions générales d&apos;utilisation
         </Link>

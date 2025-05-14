@@ -5,7 +5,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Ecostore from "./icons/EcoStore";
 import UserSolo from "./icons/UserSolo";
 
@@ -40,6 +40,8 @@ const Header = () => {
   const [activeSubmenuPath, setActiveSubmenuPath] = useState<string | null>(
     null
   );
+  // État pour stocker l'onglet actif basé sur le chemin d'URL
+  const [currentSectionTab, setCurrentSectionTab] = useState<TabType | null>(null);
 
   // Récupérer l'état d'authentification
   const { isAuthenticated, user } = useAuth();
@@ -112,59 +114,23 @@ const Header = () => {
     return null;
   };
 
-  // Nouvelle fonction pour sauvegarder l'onglet actif
-  const saveActiveTab = useCallback((tab: TabType) => {
-    if (typeof window !== "undefined") {
-      sessionStorage.setItem("lastActiveTab", tab);
-    }
-  }, []);
-
-  // Nouvelle fonction pour récupérer l'onglet précédemment actif
-  const getSavedActiveTab = useCallback((): TabType | null => {
-    if (typeof window !== "undefined") {
-      const savedTab = sessionStorage.getItem(
-        "lastActiveTab"
-      ) as TabType | null;
-      return savedTab;
-    }
-    return null;
-  }, []);
-
   /* ──────────────────────────  Effects  ────────────────────────── */
 
   // Initialisation et changement de page
   useEffect(() => {
-    // Déterminer l'onglet actif en fonction du chemin ou récupérer celui sauvegardé
-    const tabFromPath = getTabFromPath(pathname);
-    const savedTab = getSavedActiveTab();
-
-    // Priorité à l'onglet enregistré s'il existe, sinon utiliser celui détecté par l'URL
-    const finalTab = savedTab || tabFromPath;
-
-    // Ne mettre à jour l'onglet actif que s'il est défini
-    if (finalTab) {
-      setActiveTab(finalTab);
-    }
-
     // Déterminer le sous-menu actif
     const activeSubmenu = findActiveSubmenu(pathname);
     setActiveSubmenuPath(activeSubmenu);
 
-    // Log pour le débogage
-    console.log(
-      `Page changed: ${pathname} → Saved Tab: ${savedTab} → Path Tab: ${tabFromPath} → Final Tab: ${finalTab} → Active submenu: ${activeSubmenu}`
-    );
-
-    // Si un sous-menu est actif, ouvrir le menu correspondant automatiquement sur desktop
-    if (activeSubmenu && finalTab && !isMobile) {
-      setIsMenuOpen(true);
-    }
+    // Déterminer l'onglet actif basé sur le chemin d'URL
+    const tabFromPath = getTabFromPath(pathname);
+    setCurrentSectionTab(tabFromPath);
 
     // Sur mobile, nous ne gardons pas le menu ouvert automatiquement
     if (isMobile) {
       setIsMenuOpen(false);
     }
-  }, [pathname, isMobile, getSavedActiveTab]);
+  }, [pathname, isMobile]);
 
   // Détecter scroll + mobile
   useEffect(() => {
@@ -185,23 +151,16 @@ const Header = () => {
 
   /* ──────────────────────────  Handlers  ────────────────────────── */
 
-  // Gestion du clic sur un onglet
+  // Gestion du clic sur un onglet (sur mobile uniquement)
   const handleTabClick = (tab: TabType) => {
-    console.log(
-      `Tab clicked: ${tab}, current active: ${activeTab}, menu open: ${isMenuOpen}`
-    );
-
-    if (hoverTimeout) clearTimeout(hoverTimeout);
-
-    // Si on clique sur l'onglet actif, on bascule juste l'état du menu
-    if (tab === activeTab) {
-      setIsMenuOpen(!isMenuOpen);
-    }
-    // Sinon, on active le nouvel onglet et on ouvre le menu
-    else {
-      setActiveTab(tab);
-      saveActiveTab(tab);
-      setIsMenuOpen(true);
+    if (isMobile) {
+      // Sur mobile, on bascule juste l'état du menu
+      if (tab === activeTab) {
+        setIsMenuOpen(!isMenuOpen);
+      } else {
+        setActiveTab(tab);
+        setIsMenuOpen(true);
+      }
     }
   };
 
@@ -215,11 +174,13 @@ const Header = () => {
       setHoverTimeout(
         setTimeout(() => {
           setIsMenuOpen(false);
+          setActiveTab(null); // Réinitialiser l'onglet actif lorsque le menu se ferme
         }, 300)
       );
     }
-    // Sinon, ouvrir le menu sans changer l'onglet actif
-    else if (activeTab) {
+    // Sinon, ouvrir le menu et définir l'onglet actif
+    else {
+      setActiveTab(tab);
       setIsMenuOpen(true);
     }
   };
@@ -234,15 +195,17 @@ const Header = () => {
       </style>
 
       <div
-        className={`fixed w-full z-50 transition-all duration-200 ease-in-out ${hasScrolled || isMobile
+        className={`fixed w-full z-[9999] transition-all duration-200 ease-in-out ${hasScrolled || isMobile
           ? "top-0 px-0"
           : "top-6 px-2 sm:px-4 md:px-6 lg:px-[40px] xl:px-[80px]"
           }`}
       >
         <motion.header
           className={`bg-[#F5F5F5] w-full overflow-hidden transition-all duration-200 ease-in-out ${hasScrolled || isMobile
-            ? "rounded-b-[10px] sm:rounded-b-[20px] md:rounded-b-[40px] shadow-sm"
-            : "rounded-[10px] sm:rounded-[20px] md:rounded-[40px]"
+            ? "shadow rounded-tl-[0px] rounded-tr-[0px] rounded-bl-[40px] rounded-br-[40px]"
+            : isMenuOpen
+              ? "rounded-[10px] sm:rounded-[20px] md:rounded-[40px] shadow-lg"
+              : "rounded-[10px] sm:rounded-[20px] md:rounded-[40px]"
             }`}
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -272,7 +235,7 @@ const Header = () => {
                     (tab) => (
                       <button
                         key={tab}
-                        className={`relative text-sm xs:text-base sm:text-lg md:text-xl text-noir hover:text-orange transition-all duration-300 ${activeTab === tab ? "font-semibold" : ""
+                        className={`relative text-sm xs:text-base sm:text-lg md:text-xl text-noir hover:text-orange transition-all duration-300 ${activeTab === tab || currentSectionTab === tab ? "font-semibold" : ""
                           }`}
                         onClick={() => handleTabClick(tab)}
                         onMouseEnter={() => handleTabHover(tab)}
@@ -282,7 +245,7 @@ const Header = () => {
                           : tab === "business"
                             ? "Business"
                             : "Institution"}
-                        {activeTab === tab && (
+                        {(activeTab === tab || (!isMenuOpen && currentSectionTab === tab)) && (
                           <motion.div
                             layoutId="underline"
                             className="absolute left-0 right-0 -bottom-1 sm:-bottom-2 md:-bottom-3 mx-auto h-[4px] sm:h-[6px] md:h-[10px] w-full bg-orange shadow-sm rounded-full"
@@ -297,12 +260,15 @@ const Header = () => {
 
               {/* CTA */}
               <div className="flex items-center gap-2 sm:gap-3 md:gap-4 mt-2 sm:mt-0 w-full sm:w-auto justify-center sm:justify-end shrink-0">
+                {/* Modification ici: Ecostore avec un style de lien moderne et effet d'animation */}
                 <Link
                   href="/solutions-eco"
-                  className="bg-[#F5F5F5] border border-vert hover:bg-white font-semibold text-vert min-w-[80px] xs:min-w-[120px] sm:min-w-[120px] md:min-w-[120px] lg:min-w-[160px] max-w-[140px] xs:max-w-[140px] sm:max-w-[160px] md:max-w-[180px] lg:max-w-[233px] h-[35px] sm:h-[45px] md:h-[55px] px-2 xs:px-3 sm:px-4 md:px-6 lg:px-10 py-[8px] sm:py-[10px] md:py-[15px] rounded-[20px] sm:rounded-[30px] md:rounded-[40px] transition-all duration-300 text-[10px] xs:text-xs sm:text-sm flex items-center justify-center gap-[6px] sm:gap-[10px] hover:scale-105 hover:shadow-lg truncate"
+                  className="text-vert group flex items-center gap-[6px] sm:gap-[10px] font-medium text-[10px] xs:text-xs sm:text-sm transition-all duration-300"
                 >
-                  <Ecostore />
-                  <span>Ecostore</span>
+                  <Ecostore className="group-hover:scale-110 transition-transform duration-300" />
+                  <span className="relative after:absolute after:w-0 after:h-[3px] after:bg-vert after:bottom-[-2px] after:left-0 group-hover:after:w-full after:transition-all after:duration-300 group-hover:text-vert">
+                    Ecostore
+                  </span>
                 </Link>
 
                 <Link

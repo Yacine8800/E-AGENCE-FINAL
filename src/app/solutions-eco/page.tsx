@@ -263,7 +263,7 @@ export default function SolutionsEcoPage() {
           <div className="mt-8 text-center">
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-noir relative inline-block">
               Éco-Store
-              <div className="absolute -bottom-3 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-orange to-transparent"></div>
+              <div className="absolute -bottom-3 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-vert to-transparent"></div>
             </h1>
             <p className="mt-6 text-lg text-gray-600 max-w-3xl mx-auto">
               Découvrez notre sélection de produits écologiques pour réduire votre consommation d'énergie
@@ -274,7 +274,7 @@ export default function SolutionsEcoPage() {
       </header>
 
       {/* Bannière promotionnelle */}
-      <div className="bg-gradient-to-r from-orange to-orange-600 text-white py-12 px-4 sm:px-6 md:px-8 rounded-2xl mt-8 mb-16 relative z-10">
+      <div className="bg-gradient-to-r from-vert to-vert-600 text-white py-12 px-4 sm:px-6 md:px-8 rounded-2xl mt-8 mb-16 relative z-10">
         <div className="container mx-auto">
           <div className="flex flex-col md:flex-row items-center justify-between">
             <div className="mb-6 md:mb-0 md:mr-10">
@@ -283,7 +283,7 @@ export default function SolutionsEcoPage() {
                 Utilisez le code <span className="font-semibold bg-white/20 px-2 py-1 rounded">ECO15</span> lors de votre règlement pour bénéficier de cette offre exclusive.
               </p>
             </div>
-            <button className="bg-white text-orange hover:bg-gray-100 font-semibold px-8 py-3 rounded-full inline-flex items-center transition-colors">
+            <button className="bg-white text-vert hover:bg-gray-100 font-semibold px-8 py-3 rounded-full inline-flex items-center transition-colors">
               En profiter maintenant
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-2" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />

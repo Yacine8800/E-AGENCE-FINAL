@@ -213,6 +213,24 @@ export default function MesDemandesPage() {
         case 2: // Réabonnement
           demandeType = "reabonnement";
           break;
+        case 4: // Abonnement
+          demandeType = "abonnement";
+          break;
+        case 5: // Modification branchement
+          demandeType = "modification-branchement";
+          break;
+        case 6: // Maintenance d'ouvrage
+          demandeType = "maintenance-ouvrage";
+          break;
+        case 7: // Modification commerciale
+          demandeType = "modification-commerciale";
+          break;
+        case 8: // Achat disjoncteur
+          demandeType = "achat-disjoncteur";
+          break;
+        case 9: // Construction d'ouvrage
+          demandeType = "construction-ouvrage";
+          break;
         default:
           demandeType = "";
       }
