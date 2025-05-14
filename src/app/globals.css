@@ -45,27 +45,6 @@ body {
   .animate-scaleIn {
     animation: scaleIn 0.3s ease-out forwards;
   }
-
-  /* Styles pour masquer la scrollbar */
-  .no-scrollbar {
-    -ms-overflow-style: none; /* IE and Edge */
-    scrollbar-width: none; /* Firefox */
-  }
-
-  .no-scrollbar::-webkit-scrollbar {
-    display: none; /* Chrome, Safari and Opera */
-  }
-
-  /* Style spécifique pour la section du dashboard */
-  .dashboard-scroll {
-    overflow-y: auto;
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
-
-  .dashboard-scroll::-webkit-scrollbar {
-    display: none;
-  }
 }
 
 /* Animations pour le modal */
@@ -272,57 +251,4 @@ body {
 
 .toast-error-details .Toastify__progress-bar {
   height: 4px;
-}
-
-.auth-container {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: white;
-  position: relative;
-}
-
-.auth-container::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 50%;
-  height: 50%;
-  background: radial-gradient(
-    circle at top right,
-    rgba(255, 102, 51, 0.2),
-    transparent
-  );
-}
-
-/* Animation pour le skeleton loader */
-@keyframes shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
-}
-
-.skeleton {
-  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
-  border-radius: 4px;
-}
-
-.skeleton-circle {
-  border-radius: 50%;
-}
-
-.skeleton-text {
-  height: 1em;
-  margin-bottom: 0.5em;
-}
-
-.skeleton-text:last-child {
-  margin-bottom: 0;
 }
