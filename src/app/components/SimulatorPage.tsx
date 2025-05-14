@@ -1,5 +1,3 @@
-"use client";
-
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
@@ -41,10 +39,14 @@ const CATEGORIES: Category[] = [
     equipements: [
       { id: "refrigerateur", label: "Réfrigérateur", puissance: 150 },
       { id: "congelateur", label: "Congélateur", puissance: 200 },
-      { id: "refrigerateur-congelateur", label: "Réfrigérateur-congélateur", puissance: 350 },
+      {
+        id: "refrigerateur-congelateur",
+        label: "Réfrigérateur-congélateur",
+        puissance: 350,
+      },
       { id: "cave-a-vin", label: "Cave à vin", puissance: 100 },
-      { id: "mini-refrigerateur", label: "Mini-réfrigérateur", puissance: 70 }
-    ]
+      { id: "mini-refrigerateur", label: "Mini-réfrigérateur", puissance: 70 },
+    ],
   },
   {
     slug: "eclairage",
@@ -54,11 +56,15 @@ const CATEGORIES: Category[] = [
     color: "#FBD38D",
     equipements: [
       { id: "ampoule-led", label: "Ampoule LED", puissance: 10 },
-      { id: "ampoule-basse-consommation", label: "Ampoule basse consommation", puissance: 20 },
+      {
+        id: "ampoule-basse-consommation",
+        label: "Ampoule basse consommation",
+        puissance: 20,
+      },
       { id: "ampoule-halogene", label: "Ampoule halogène", puissance: 50 },
       { id: "lampadaire", label: "Lampadaire", puissance: 60 },
-      { id: "spot-encastre", label: "Spot encastré", puissance: 35 }
-    ]
+      { id: "spot-encastre", label: "Spot encastré", puissance: 35 },
+    ],
   },
   {
     slug: "multimedia",
@@ -72,8 +78,8 @@ const CATEGORIES: Category[] = [
       { id: "console", label: "Console de jeux", puissance: 180 },
       { id: "chaine-hifi", label: "Chaîne Hi-Fi", puissance: 80 },
       { id: "home-cinema", label: "Home Cinéma", puissance: 300 },
-      { id: "box-internet", label: "Box Internet", puissance: 15 }
-    ]
+      { id: "box-internet", label: "Box Internet", puissance: 15 },
+    ],
   },
   {
     slug: "equipements",
@@ -91,8 +97,8 @@ const CATEGORIES: Category[] = [
       { id: "fer-repasser", label: "Fer à repasser", puissance: 1500 },
       { id: "climatiseur", label: "Climatiseur", puissance: 1500 },
       { id: "chauffe-eau", label: "Chauffe-eau électrique", puissance: 2000 },
-      { id: "radiateur", label: "Radiateur électrique", puissance: 1500 }
-    ]
+      { id: "radiateur", label: "Radiateur électrique", puissance: 1500 },
+    ],
   },
 ];
 
@@ -111,12 +117,15 @@ interface SimulatorPageProps {
 export default function SimulatorPage({
   title = "Simulateur de puissance",
   description = "Estimez la puissance de vos appareils électriques",
-  highlightColor = "orange"
+  highlightColor = "orange",
 }: SimulatorPageProps) {
   const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
-  const [selectedCategoryTab, setSelectedCategoryTab] = useState<string>("froid");
-  const [selectedEquipements, setSelectedEquipements] = useState<SelectedEquipement[]>([]);
+  const [selectedCategoryTab, setSelectedCategoryTab] =
+    useState<string>("froid");
+  const [selectedEquipements, setSelectedEquipements] = useState<
+    SelectedEquipement[]
+  >([]);
   const [step, setStep] = useState<number>(1);
   const [showResultModal, setShowResultModal] = useState(false);
   const [isCalculating, setIsCalculating] = useState(false);
@@ -128,12 +137,13 @@ export default function SimulatorPage({
   useEffect(() => {
     // Initialiser les équipements par défaut avec quantité 1 pour la première catégorie
     if (selectedEquipements.length === 0 && CATEGORIES.length > 0) {
-      const initialEquipements: SelectedEquipement[] = CATEGORIES[0].equipements.map(eq => ({
-        id: eq.id,
-        categorySlug: CATEGORIES[0].slug,
-        quantity: 1,
-        puissance: eq.puissance
-      }));
+      const initialEquipements: SelectedEquipement[] =
+        CATEGORIES[0].equipements.map((eq) => ({
+          id: eq.id,
+          categorySlug: CATEGORIES[0].slug,
+          quantity: 1,
+          puissance: eq.puissance,
+        }));
       setSelectedEquipements(initialEquipements);
     }
   }, []);
@@ -147,16 +157,23 @@ export default function SimulatorPage({
       }
     };
 
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll);
 
     return () => {
-      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener("scroll", handleScroll);
     };
   }, []);
 
-  const handleQuantityChange = (equipementId: string, categorySlug: string, puissance: number, change: number) => {
-    setSelectedEquipements(prev => {
-      const existingIndex = prev.findIndex(item => item.id === equipementId && item.categorySlug === categorySlug);
+  const handleQuantityChange = (
+    equipementId: string,
+    categorySlug: string,
+    puissance: number,
+    change: number
+  ) => {
+    setSelectedEquipements((prev) => {
+      const existingIndex = prev.findIndex(
+        (item) => item.id === equipementId && item.categorySlug === categorySlug
+      );
 
       if (existingIndex >= 0) {
         // Mise à jour d'un équipement existant
@@ -171,37 +188,45 @@ export default function SimulatorPage({
         const newEquipements = [...prev];
         newEquipements[existingIndex] = {
           ...newEquipements[existingIndex],
-          quantity: newQuantity
+          quantity: newQuantity,
         };
         return newEquipements;
       } else if (change > 0) {
         // Ajouter un nouvel équipement
-        return [...prev, {
-          id: equipementId,
-          categorySlug,
-          quantity: 1,
-          puissance
-        }];
+        return [
+          ...prev,
+          {
+            id: equipementId,
+            categorySlug,
+            quantity: 1,
+            puissance,
+          },
+        ];
       }
 
       return prev;
     });
   };
 
-  const getEquipementQuantity = (equipementId: string, categorySlug: string): number => {
+  const getEquipementQuantity = (
+    equipementId: string,
+    categorySlug: string
+  ): number => {
     const equipement = selectedEquipements.find(
-      eq => eq.id === equipementId && eq.categorySlug === categorySlug
+      (eq) => eq.id === equipementId && eq.categorySlug === categorySlug
     );
     return equipement ? equipement.quantity : 0;
   };
 
   const getTotalPuissance = (): number => {
     return selectedEquipements.reduce((total, eq) => {
-      return total + (eq.puissance * eq.quantity);
+      return total + eq.puissance * eq.quantity;
     }, 0);
   };
 
-  const selectedCategory = CATEGORIES.find(cat => cat.slug === selectedCategoryTab);
+  const selectedCategory = CATEGORIES.find(
+    (cat) => cat.slug === selectedCategoryTab
+  );
 
   const calculateAmperage = (watts: number): number => {
     // Formule: I (Ampères) = P (Watts) / V (Volts)
@@ -214,22 +239,22 @@ export default function SimulatorPage({
     if (!selectedCategory || !newEquipementName || !newEquipementPower) return;
 
     // Créer un ID lisible basé sur le nom de l'équipement
-    const cleanName = newEquipementName.toLowerCase().replace(/\s+/g, '-');
+    const cleanName = newEquipementName.toLowerCase().replace(/\s+/g, "-");
     const newId = `custom-${cleanName}`;
 
     // Ajouter le nouvel équipement à la catégorie actuelle
     const powerValue = parseInt(newEquipementPower, 10);
 
     // Ajouter directement aux équipements sélectionnés
-    setSelectedEquipements(prev => [
+    setSelectedEquipements((prev) => [
       ...prev,
       {
         id: newId,
         categorySlug: selectedCategoryTab,
         quantity: 1,
         puissance: powerValue,
-        label: newEquipementName // Stocker explicitement le nom saisi
-      }
+        label: newEquipementName, // Stocker explicitement le nom saisi
+      },
     ]);
 
     // Réinitialiser le formulaire
@@ -239,7 +264,9 @@ export default function SimulatorPage({
   };
 
   const handleNext = () => {
-    const currentIndex = CATEGORIES.findIndex(cat => cat.slug === selectedCategoryTab);
+    const currentIndex = CATEGORIES.findIndex(
+      (cat) => cat.slug === selectedCategoryTab
+    );
 
     if (currentIndex < CATEGORIES.length - 1) {
       // Passer à la catégorie suivante
@@ -263,7 +290,9 @@ export default function SimulatorPage({
 
   // Fonction pour compter le nombre d'équipements sélectionnés dans une catégorie
   const getCategoryEquipementCount = (categorySlug: string): number => {
-    return selectedEquipements.filter(eq => eq.categorySlug === categorySlug && eq.quantity > 0).length;
+    return selectedEquipements.filter(
+      (eq) => eq.categorySlug === categorySlug && eq.quantity > 0
+    ).length;
   };
 
   return (
@@ -276,24 +305,22 @@ export default function SimulatorPage({
               <div className="absolute inset-0 bg-[url('/pattern.svg')] opacity-5"></div>
               <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-noir relative inline-block">
                 {title}
-                <div className={`absolute -bottom-2 left-0 right-0 h-2 bg-gradient-to-r from-transparent via-${highlightColor} to-transparent`}></div>
+                <div
+                  className={`absolute -bottom-2 left-0 right-0 h-2 bg-gradient-to-r from-transparent via-${highlightColor} to-transparent`}
+                ></div>
               </h1>
               <p className="mt-4 text-lg text-gray-600 max-w-2xl mx-auto relative">
                 {description}
               </p>
 
               {/* Sous-titre explicatif amélioré pour contraste */}
-
             </header>
 
             {/* Contenu principal */}
             <div className="w-[70%] mx-auto px-2 py-6">
               {/* Bouton principal de simulation déplacé en haut avant le contenu */}
 
-
               <div className="flex flex-col lg:flex-row gap-6">
-
-
                 {/* Colonne de gauche: information générale */}
                 <div className="w-full lg:w-3/3 bg-white rounded-xl overflow-hidden border border-gray-100 order-2 lg:order-1">
                   <div className="p-6 flex flex-col md:flex-row items-center justify-center">
@@ -316,12 +343,36 @@ export default function SimulatorPage({
                         >
                           <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-white/0 via-white/20 to-white/0 transform -translate-x-full animate-shimmer"></span>
                           <div className="relative flex items-center justify-center gap-3 px-4">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7 animate-pulse" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="h-7 w-7 animate-pulse"
+                              viewBox="0 0 20 20"
+                              fill="currentColor"
+                              aria-hidden="true"
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"
+                                clipRule="evenodd"
+                              />
                             </svg>
-                            <span className="group-hover:tracking-wider transition-all text-sm duration-300">LANCER LA SIMULATION</span>
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 transform group-hover:translate-x-1 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                            <span className="group-hover:tracking-wider transition-all text-sm duration-300">
+                              LANCER LA SIMULATION
+                            </span>
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="h-6 w-6 transform group-hover:translate-x-1 transition-transform duration-300"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                              aria-hidden="true"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M13 7l5 5m0 0l-5 5m5-5H6"
+                              />
                             </svg>
                           </div>
                         </button>
@@ -336,19 +387,49 @@ export default function SimulatorPage({
                       {/* Étapes de simulation ajoutées */}
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-100 shadow-sm relative">
-                          <div className="absolute -top-2 -left-2 w-6 h-6 bg-orange text-white rounded-full flex items-center justify-center font-bold text-xs" aria-hidden="true">1</div>
-                          <h3 className="font-bold text-base mb-2 mt-1 pl-2">Sélectionnez vos appareils</h3>
-                          <p className="text-gray-600 text-sm">Parcourez notre catalogue d'appareils électriques par catégorie</p>
+                          <div
+                            className="absolute -top-2 -left-2 w-6 h-6 bg-orange text-white rounded-full flex items-center justify-center font-bold text-xs"
+                            aria-hidden="true"
+                          >
+                            1
+                          </div>
+                          <h3 className="font-bold text-base mb-2 mt-1 pl-2">
+                            Sélectionnez vos appareils
+                          </h3>
+                          <p className="text-gray-600 text-sm">
+                            Parcourez notre catalogue d'appareils électriques
+                            par catégorie
+                          </p>
                         </div>
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-100 shadow-sm relative">
-                          <div className="absolute -top-2 -left-2 w-6 h-6 bg-orange text-white rounded-full flex items-center justify-center font-bold text-xs" aria-hidden="true">2</div>
-                          <h3 className="font-bold text-base mb-2 mt-1 pl-2">Ajustez les quantités</h3>
-                          <p className="text-gray-600 text-sm">Indiquez combien d'appareils de chaque type vous utilisez</p>
+                          <div
+                            className="absolute -top-2 -left-2 w-6 h-6 bg-orange text-white rounded-full flex items-center justify-center font-bold text-xs"
+                            aria-hidden="true"
+                          >
+                            2
+                          </div>
+                          <h3 className="font-bold text-base mb-2 mt-1 pl-2">
+                            Ajustez les quantités
+                          </h3>
+                          <p className="text-gray-600 text-sm">
+                            Indiquez combien d'appareils de chaque type vous
+                            utilisez
+                          </p>
                         </div>
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-100 shadow-sm relative">
-                          <div className="absolute -top-2 -left-2 w-6 h-6 bg-orange text-white rounded-full flex items-center justify-center font-bold text-xs" aria-hidden="true">3</div>
-                          <h3 className="font-bold text-base mb-2 mt-1 pl-2">Obtenez votre résultat</h3>
-                          <p className="text-gray-600 text-sm">Découvrez instantanément la puissance électrique nécessaire</p>
+                          <div
+                            className="absolute -top-2 -left-2 w-6 h-6 bg-orange text-white rounded-full flex items-center justify-center font-bold text-xs"
+                            aria-hidden="true"
+                          >
+                            3
+                          </div>
+                          <h3 className="font-bold text-base mb-2 mt-1 pl-2">
+                            Obtenez votre résultat
+                          </h3>
+                          <p className="text-gray-600 text-sm">
+                            Découvrez instantanément la puissance électrique
+                            nécessaire
+                          </p>
                         </div>
                       </div>
 
@@ -356,38 +437,105 @@ export default function SimulatorPage({
                       <div className="space-y-4 mb-8">
                         <details className="group bg-gray-50 rounded-lg border border-gray-100 overflow-hidden transition-all duration-300">
                           <summary className="flex items-center gap-2 p-4 cursor-pointer list-none">
-                            <span className="text-orange font-medium text-lg">*</span>
-                            <h4 className="font-medium text-base">Pourquoi faire une simulation ?</h4>
-                            <svg className="h-5 w-5 ml-auto transform group-open:rotate-180 transition-transform duration-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                            <span className="text-orange font-medium text-lg">
+                              *
+                            </span>
+                            <h4 className="font-medium text-base">
+                              Pourquoi faire une simulation ?
+                            </h4>
+                            <svg
+                              className="h-5 w-5 ml-auto transform group-open:rotate-180 transition-transform duration-300"
+                              xmlns="http://www.w3.org/2000/svg"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M19 9l-7 7-7-7"
+                              />
                             </svg>
                           </summary>
                           <div className="p-4 pt-0">
                             <ul className="space-y-3">
                               <li className="flex items-start gap-2">
-                                <div className="bg-orange/20 p-1.5 rounded-full mt-0.5" aria-hidden="true">
-                                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 text-orange-700" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
+                                <div
+                                  className="bg-orange/20 p-1.5 rounded-full mt-0.5"
+                                  aria-hidden="true"
+                                >
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    className="h-3.5 w-3.5 text-orange-700"
+                                    viewBox="0 0 20 20"
+                                    fill="currentColor"
+                                  >
+                                    <path
+                                      fillRule="evenodd"
+                                      d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z"
+                                      clipRule="evenodd"
+                                    />
                                   </svg>
                                 </div>
-                                <p className="text-gray-700 text-sm"><span className="font-semibold">Évitez les surcharges</span> - Déterminez si votre installation électrique est adaptée</p>
+                                <p className="text-gray-700 text-sm">
+                                  <span className="font-semibold">
+                                    Évitez les surcharges
+                                  </span>{" "}
+                                  - Déterminez si votre installation électrique
+                                  est adaptée
+                                </p>
                               </li>
                               <li className="flex items-start gap-2">
-                                <div className="bg-orange/20 p-1.5 rounded-full mt-0.5" aria-hidden="true">
-                                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 text-orange-700" viewBox="0 0 20 20" fill="currentColor">
+                                <div
+                                  className="bg-orange/20 p-1.5 rounded-full mt-0.5"
+                                  aria-hidden="true"
+                                >
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    className="h-3.5 w-3.5 text-orange-700"
+                                    viewBox="0 0 20 20"
+                                    fill="currentColor"
+                                  >
                                     <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z" />
-                                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clipRule="evenodd" />
+                                    <path
+                                      fillRule="evenodd"
+                                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z"
+                                      clipRule="evenodd"
+                                    />
                                   </svg>
                                 </div>
-                                <p className="text-gray-700 text-sm"><span className="font-semibold">Optimisez votre contrat</span> - Choisissez l'abonnement adapté</p>
+                                <p className="text-gray-700 text-sm">
+                                  <span className="font-semibold">
+                                    Optimisez votre contrat
+                                  </span>{" "}
+                                  - Choisissez l'abonnement adapté
+                                </p>
                               </li>
                               <li className="flex items-start gap-2">
-                                <div className="bg-orange/20 p-1.5 rounded-full mt-0.5" aria-hidden="true">
-                                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 text-orange-700" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fillRule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                                <div
+                                  className="bg-orange/20 p-1.5 rounded-full mt-0.5"
+                                  aria-hidden="true"
+                                >
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    className="h-3.5 w-3.5 text-orange-700"
+                                    viewBox="0 0 20 20"
+                                    fill="currentColor"
+                                  >
+                                    <path
+                                      fillRule="evenodd"
+                                      d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                      clipRule="evenodd"
+                                    />
                                   </svg>
                                 </div>
-                                <p className="text-gray-700 text-sm"><span className="font-semibold">Planifiez en sécurité</span> - Anticipez vos besoins actuels et futurs</p>
+                                <p className="text-gray-700 text-sm">
+                                  <span className="font-semibold">
+                                    Planifiez en sécurité
+                                  </span>{" "}
+                                  - Anticipez vos besoins actuels et futurs
+                                </p>
                               </li>
                             </ul>
                           </div>
@@ -395,29 +543,74 @@ export default function SimulatorPage({
 
                         <details className="group bg-gray-50 rounded-lg border border-gray-100 overflow-hidden transition-all duration-300">
                           <summary className="flex items-center gap-2 p-4 cursor-pointer list-none">
-                            <span className="text-orange font-medium text-lg">*</span>
-                            <h4 className="font-medium text-base">Comment réduire ma consommation ?</h4>
-                            <svg className="h-5 w-5 ml-auto transform group-open:rotate-180 transition-transform duration-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                            <span className="text-orange font-medium text-lg">
+                              *
+                            </span>
+                            <h4 className="font-medium text-base">
+                              Comment réduire ma consommation ?
+                            </h4>
+                            <svg
+                              className="h-5 w-5 ml-auto transform group-open:rotate-180 transition-transform duration-300"
+                              xmlns="http://www.w3.org/2000/svg"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M19 9l-7 7-7-7"
+                              />
                             </svg>
                           </summary>
                           <div className="p-4 pt-0">
                             <ul className="space-y-1.5 text-sm">
                               <li className="flex items-start gap-2">
-                                <span className="text-orange-700 font-bold" aria-hidden="true">•</span>
-                                <p className="text-gray-700">Privilégiez les appareils de classe A+++ ou supérieure</p>
+                                <span
+                                  className="text-orange-700 font-bold"
+                                  aria-hidden="true"
+                                >
+                                  •
+                                </span>
+                                <p className="text-gray-700">
+                                  Privilégiez les appareils de classe A+++ ou
+                                  supérieure
+                                </p>
                               </li>
                               <li className="flex items-start gap-2">
-                                <span className="text-orange-700 font-bold" aria-hidden="true">•</span>
-                                <p className="text-gray-700">Éteignez complètement vos appareils en veille</p>
+                                <span
+                                  className="text-orange-700 font-bold"
+                                  aria-hidden="true"
+                                >
+                                  •
+                                </span>
+                                <p className="text-gray-700">
+                                  Éteignez complètement vos appareils en veille
+                                </p>
                               </li>
                               <li className="flex items-start gap-2">
-                                <span className="text-orange-700 font-bold" aria-hidden="true">•</span>
-                                <p className="text-gray-700">Réglez votre chauffage à des températures raisonnables</p>
+                                <span
+                                  className="text-orange-700 font-bold"
+                                  aria-hidden="true"
+                                >
+                                  •
+                                </span>
+                                <p className="text-gray-700">
+                                  Réglez votre chauffage à des températures
+                                  raisonnables
+                                </p>
                               </li>
                               <li className="flex items-start gap-2">
-                                <span className="text-orange-700 font-bold" aria-hidden="true">•</span>
-                                <p className="text-gray-700">Utilisez des multiprises avec interrupteur</p>
+                                <span
+                                  className="text-orange-700 font-bold"
+                                  aria-hidden="true"
+                                >
+                                  •
+                                </span>
+                                <p className="text-gray-700">
+                                  Utilisez des multiprises avec interrupteur
+                                </p>
                               </li>
                             </ul>
                           </div>
@@ -428,7 +621,6 @@ export default function SimulatorPage({
                 </div>
 
                 {/* Colonne de droite: catégories d'appareils */}
-
               </div>
             </div>
 
@@ -447,12 +639,22 @@ export default function SimulatorPage({
                     onClick={() => {
                       setShowModal(true);
                       // Remonter en haut de la page
-                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                      window.scrollTo({ top: 0, behavior: "smooth" });
                     }}
                     aria-label="Lancer la simulation maintenant"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 animate-pulse" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5 animate-pulse"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                      aria-hidden="true"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"
+                        clipRule="evenodd"
+                      />
                     </svg>
                     Simuler ma puissance
                   </button>
@@ -490,23 +692,35 @@ export default function SimulatorPage({
                     <div className="flex justify-between items-center mb-6">
                       {CATEGORIES.map((category, index) => {
                         const isActive = selectedCategoryTab === category.slug;
-                        const isPast = CATEGORIES.findIndex(c => c.slug === selectedCategoryTab) > index;
-                        const categoryCount = getCategoryEquipementCount(category.slug);
+                        const isPast =
+                          CATEGORIES.findIndex(
+                            (c) => c.slug === selectedCategoryTab
+                          ) > index;
+                        const categoryCount = getCategoryEquipementCount(
+                          category.slug
+                        );
 
                         return (
                           <div
                             key={category.slug}
-                            className={`flex flex-col items-center relative cursor-pointer w-full mx-1 ${isActive ? 'z-10' : ''}`}
-                            onClick={() => setSelectedCategoryTab(category.slug)}
+                            className={`flex flex-col items-center relative cursor-pointer w-full mx-1 ${
+                              isActive ? "z-10" : ""
+                            }`}
+                            onClick={() =>
+                              setSelectedCategoryTab(category.slug)
+                            }
                           >
                             <div className="text-center mb-1 relative">
-                              <p className={`text-xs md:text-sm font-medium transition-colors duration-300 ${isActive
-                                ? 'text-orange'
-                                : isPast
-                                  ? 'text-orange/70'
-                                  : 'text-gray-400'
-                                }`}>
-                                {category.label.split(' ')[0]}
+                              <p
+                                className={`text-xs md:text-sm font-medium transition-colors duration-300 ${
+                                  isActive
+                                    ? "text-orange"
+                                    : isPast
+                                    ? "text-orange/70"
+                                    : "text-gray-400"
+                                }`}
+                              >
+                                {category.label.split(" ")[0]}
                               </p>
 
                               {isActive && categoryCount > 0 && (
@@ -517,8 +731,17 @@ export default function SimulatorPage({
 
                               {isPast && (
                                 <div className="absolute -right-4 -top-2 w-5 h-5 bg-orange/80 rounded-full flex items-center justify-center">
-                                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 text-white" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    className="h-3 w-3 text-white"
+                                    viewBox="0 0 20 20"
+                                    fill="currentColor"
+                                  >
+                                    <path
+                                      fillRule="evenodd"
+                                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                      clipRule="evenodd"
+                                    />
                                   </svg>
                                 </div>
                               )}
@@ -533,7 +756,13 @@ export default function SimulatorPage({
                       <div
                         className="h-full bg-orange transition-all duration-500 ease-in-out"
                         style={{
-                          width: `${(CATEGORIES.findIndex(c => c.slug === selectedCategoryTab) + 1) * (100 / CATEGORIES.length)}%`
+                          width: `${
+                            (CATEGORIES.findIndex(
+                              (c) => c.slug === selectedCategoryTab
+                            ) +
+                              1) *
+                            (100 / CATEGORIES.length)
+                          }%`,
                         }}
                       ></div>
                     </div>
@@ -541,8 +770,11 @@ export default function SimulatorPage({
 
                   {/* Grille d'équipements */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10 px-4">
-                    {selectedCategory?.equipements.map(equipement => {
-                      const quantity = getEquipementQuantity(equipement.id, selectedCategoryTab);
+                    {selectedCategory?.equipements.map((equipement) => {
+                      const quantity = getEquipementQuantity(
+                        equipement.id,
+                        selectedCategoryTab
+                      );
                       const isSelected = quantity > 0;
 
                       return (
@@ -550,21 +782,34 @@ export default function SimulatorPage({
                           key={equipement.id}
                           className={`
                             flex items-center justify-between rounded-xl p-5 transition-all duration-200
-                            ${isSelected
-                              ? 'border-2 border-orange/30 bg-orange/5 shadow-sm'
-                              : 'border border-gray-200 hover:border-orange/20 hover:bg-orange/5'}
+                            ${
+                              isSelected
+                                ? "border-2 border-orange/30 bg-orange/5 shadow-sm"
+                                : "border border-gray-200 hover:border-orange/20 hover:bg-orange/5"
+                            }
                           `}
                         >
-                          <div className="font-medium text-gray-800">{equipement.label}</div>
+                          <div className="font-medium text-gray-800">
+                            {equipement.label}
+                          </div>
                           <div className="flex items-center">
                             <button
                               className={`
                                 w-9 h-9 flex items-center justify-center rounded-full transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-orange/50
-                                ${quantity > 0
-                                  ? 'bg-orange text-white shadow-md hover:shadow-lg'
-                                  : 'bg-gray-200 text-gray-600 hover:bg-orange/80 hover:text-white'}
+                                ${
+                                  quantity > 0
+                                    ? "bg-orange text-white shadow-md hover:shadow-lg"
+                                    : "bg-gray-200 text-gray-600 hover:bg-orange/80 hover:text-white"
+                                }
                               `}
-                              onClick={() => handleQuantityChange(equipement.id, selectedCategoryTab, equipement.puissance, -1)}
+                              onClick={() =>
+                                handleQuantityChange(
+                                  equipement.id,
+                                  selectedCategoryTab,
+                                  equipement.puissance,
+                                  -1
+                                )
+                              }
                               aria-label="Réduire la quantité"
                             >
                               <span className="text-lg font-medium">-</span>
@@ -574,7 +819,14 @@ export default function SimulatorPage({
                             </span>
                             <button
                               className="w-9 h-9 flex items-center justify-center rounded-full bg-orange text-white transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-orange/50"
-                              onClick={() => handleQuantityChange(equipement.id, selectedCategoryTab, equipement.puissance, 1)}
+                              onClick={() =>
+                                handleQuantityChange(
+                                  equipement.id,
+                                  selectedCategoryTab,
+                                  equipement.puissance,
+                                  1
+                                )
+                              }
                               aria-label="Augmenter la quantité"
                             >
                               <span className="text-lg font-medium">+</span>
@@ -586,20 +838,37 @@ export default function SimulatorPage({
 
                     {/* Équipements personnalisés */}
                     {selectedEquipements
-                      .filter(eq => eq.categorySlug === selectedCategoryTab && !selectedCategory?.equipements.some(e => e.id === eq.id))
-                      .map(customEq => (
+                      .filter(
+                        (eq) =>
+                          eq.categorySlug === selectedCategoryTab &&
+                          !selectedCategory?.equipements.some(
+                            (e) => e.id === eq.id
+                          )
+                      )
+                      .map((customEq) => (
                         <div
                           key={customEq.id}
                           className="flex items-center justify-between rounded-xl p-5 border-2 border-orange/30 bg-orange/5 shadow-sm"
                         >
                           <div className="font-medium text-gray-800 flex items-center">
-                            <span className="text-gray-800">{customEq.label || "Équipement personnalisé"}</span>
-                            <span className="ml-2 text-xs text-orange">(Personnalisé)</span>
+                            <span className="text-gray-800">
+                              {customEq.label || "Équipement personnalisé"}
+                            </span>
+                            <span className="ml-2 text-xs text-orange">
+                              (Personnalisé)
+                            </span>
                           </div>
                           <div className="flex items-center">
                             <button
                               className="w-9 h-9 flex items-center justify-center rounded-full bg-orange text-white transition-colors"
-                              onClick={() => handleQuantityChange(customEq.id, selectedCategoryTab, customEq.puissance, -1)}
+                              onClick={() =>
+                                handleQuantityChange(
+                                  customEq.id,
+                                  selectedCategoryTab,
+                                  customEq.puissance,
+                                  -1
+                                )
+                              }
                             >
                               <span className="text-lg font-medium">-</span>
                             </button>
@@ -608,36 +877,52 @@ export default function SimulatorPage({
                             </span>
                             <button
                               className="w-9 h-9 flex items-center justify-center rounded-full bg-orange text-white transition-opacity hover:opacity-90"
-                              onClick={() => handleQuantityChange(customEq.id, selectedCategoryTab, customEq.puissance, 1)}
+                              onClick={() =>
+                                handleQuantityChange(
+                                  customEq.id,
+                                  selectedCategoryTab,
+                                  customEq.puissance,
+                                  1
+                                )
+                              }
                             >
                               <span className="text-lg font-medium">+</span>
                             </button>
                           </div>
                         </div>
-                      ))
-                    }
+                      ))}
 
                     {/* Formulaire pour ajouter un équipement */}
                     {showAddEquipementForm && (
                       <div className="md:col-span-2 p-5 border-2 border-orange/30 bg-orange/5 rounded-xl">
-                        <h3 className="text-lg font-medium mb-4 text-gray-800">Ajouter un équipement personnalisé</h3>
+                        <h3 className="text-lg font-medium mb-4 text-gray-800">
+                          Ajouter un équipement personnalisé
+                        </h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                           <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Nom de l'équipement</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Nom de l'équipement
+                            </label>
                             <input
                               type="text"
                               value={newEquipementName}
-                              onChange={(e) => setNewEquipementName(e.target.value)}
+                              onChange={(e) =>
+                                setNewEquipementName(e.target.value)
+                              }
                               className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange/50"
                               placeholder="Ex: Machine à café"
                             />
                           </div>
                           <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Puissance (kWh)</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Puissance (kWh)
+                            </label>
                             <input
                               type="number"
                               value={newEquipementPower}
-                              onChange={(e) => setNewEquipementPower(e.target.value)}
+                              onChange={(e) =>
+                                setNewEquipementPower(e.target.value)
+                              }
                               className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange/50"
                               placeholder="Ex: 1500"
                             />
@@ -668,11 +953,22 @@ export default function SimulatorPage({
                           onClick={() => setShowAddEquipementForm(true)}
                         >
                           <span className="w-6 h-6 rounded-full bg-orange text-white flex items-center justify-center shadow-sm">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                              <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="h-4 w-4"
+                              viewBox="0 0 20 20"
+                              fill="currentColor"
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
+                                clipRule="evenodd"
+                              />
                             </svg>
                           </span>
-                          <span className="font-medium">Ajouter un équipement</span>
+                          <span className="font-medium">
+                            Ajouter un équipement
+                          </span>
                         </button>
                       </div>
                     )}
@@ -685,8 +981,17 @@ export default function SimulatorPage({
                         className="py-3 px-4 bg-gray-100 text-gray-700 rounded-full font-medium hover:bg-gray-200 transition-all duration-200 flex items-center justify-center gap-1 focus:outline-none focus:ring-2 focus:ring-gray-300"
                         onClick={handleCancel}
                       >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                          <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-4 w-4"
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                            clipRule="evenodd"
+                          />
                         </svg>
                         <span>Annuler</span>
                       </button>
@@ -703,8 +1008,17 @@ export default function SimulatorPage({
                           }, 1500);
                         }}
                       >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                          <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-4 w-4"
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                            clipRule="evenodd"
+                          />
                         </svg>
                         <span>Simuler</span>
                       </button>
@@ -712,24 +1026,42 @@ export default function SimulatorPage({
                         className="py-3 px-4 bg-orange text-white rounded-full font-medium hover:bg-orange/90 transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center gap-1 transform hover:translate-y-[-1px] focus:outline-none focus:ring-2 focus:ring-orange/50"
                         onClick={handleNext}
                       >
-                        {CATEGORIES.findIndex(cat => cat.slug === selectedCategoryTab) < CATEGORIES.length - 1
-                          ? (
-                            <>
-                              <span>Suivant</span>
-                              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                                <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
-                              </svg>
-                            </>
-                          )
-                          : (
-                            <>
-                              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                              </svg>
-                              <span>Terminer</span>
-                            </>
-                          )
-                        }
+                        {CATEGORIES.findIndex(
+                          (cat) => cat.slug === selectedCategoryTab
+                        ) <
+                        CATEGORIES.length - 1 ? (
+                          <>
+                            <span>Suivant</span>
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="h-4 w-4"
+                              viewBox="0 0 20 20"
+                              fill="currentColor"
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
+                          </>
+                        ) : (
+                          <>
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="h-4 w-4"
+                              viewBox="0 0 20 20"
+                              fill="currentColor"
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
+                            <span>Terminer</span>
+                          </>
+                        )}
                       </button>
                     </div>
                   </div>
@@ -758,7 +1090,9 @@ export default function SimulatorPage({
             >
               <div className="w-16 h-16 border-4 border-gray-200 border-t-orange rounded-full animate-spin mx-auto mb-6"></div>
               <h3 className="text-xl font-bold mb-2">Calcul en cours...</h3>
-              <p className="text-gray-600">Nous calculons l'ampérage nécessaire pour vos équipements.</p>
+              <p className="text-gray-600">
+                Nous calculons l'ampérage nécessaire pour vos équipements.
+              </p>
             </motion.div>
           </motion.div>
         )}
@@ -782,13 +1116,26 @@ export default function SimulatorPage({
             >
               <div className="p-8">
                 <div className="mb-6 flex justify-between items-center">
-                  <h2 className="text-2xl font-bold text-gray-900">Résultats de la simulation</h2>
+                  <h2 className="text-2xl font-bold text-gray-900">
+                    Résultats de la simulation
+                  </h2>
                   <button
                     className="text-gray-400 hover:text-gray-600"
                     onClick={() => setShowResultModal(false)}
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-6 w-6"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
                     </svg>
                   </button>
                 </div>
@@ -796,14 +1143,20 @@ export default function SimulatorPage({
                 <div className="bg-gradient-to-br from-orange/10 to-orange/5 rounded-2xl p-6 mb-8 shadow-md transform transition-all duration-300 hover:shadow-lg hover:scale-[1.01]">
                   <div className="grid grid-cols-2 gap-8 mb-6">
                     <div className="flex flex-col justify-center items-center bg-white/50 backdrop-blur-sm rounded-xl p-4 shadow-sm transition-transform duration-300 hover:shadow-md hover:translate-y-[-2px]">
-                      <p className="text-gray-500 mb-1 text-sm font-medium">PUISSANCE TOTALE</p>
+                      <p className="text-gray-500 mb-1 text-sm font-medium">
+                        PUISSANCE TOTALE
+                      </p>
                       <div className="flex items-baseline">
-                        <span className="text-5xl font-bold text-orange mb-1">{getTotalPuissance()}</span>
+                        <span className="text-5xl font-bold text-orange mb-1">
+                          {getTotalPuissance()}
+                        </span>
                         <span className="text-xl text-orange ml-2">kWh</span>
                       </div>
                     </div>
                     <div className="flex flex-col justify-center items-center bg-white/50 backdrop-blur-sm rounded-xl p-4 shadow-sm transition-transform duration-300 hover:shadow-md hover:translate-y-[-2px]">
-                      <p className="text-gray-500 mb-1 text-sm font-medium">AMPÉRAGE REQUIS</p>
+                      <p className="text-gray-500 mb-1 text-sm font-medium">
+                        AMPÉRAGE REQUIS
+                      </p>
                       <div className="flex items-baseline">
                         <span className="text-5xl font-bold text-orange mb-1">
                           {calculateAmperage(getTotalPuissance()).toFixed(0)}
@@ -815,39 +1168,65 @@ export default function SimulatorPage({
 
                   <div className="bg-white rounded-xl p-5 shadow-sm border border-orange/10">
                     <h3 className="font-semibold text-gray-800 mb-3 flex items-center">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-orange mr-2" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-5 w-5 text-orange mr-2"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                          clipRule="evenodd"
+                        />
                       </svg>
                       Informations CIE:
                     </h3>
                     <p className="text-gray-700 pl-7 border-l-2 border-orange/30">
-                      Ces valeurs représentent la consommation totale lorsque tous les appareils sélectionnés fonctionnent en même temps.
-                      Les puissances indiquées sont celles conseillées par la CIE pour les appareils sélectionnés.
+                      Ces valeurs représentent la consommation totale lorsque
+                      tous les appareils sélectionnés fonctionnent en même
+                      temps. Les puissances indiquées sont celles conseillées
+                      par la CIE pour les appareils sélectionnés.
                     </p>
                     <div className="mt-4 bg-gradient-to-r from-orange/5 to-orange/10 p-4 rounded-lg">
                       <p className="text-gray-700 font-medium">
-                        {calculateAmperage(getTotalPuissance()) <= 16
-                          ? (
-                            <span className="flex items-center">
-                              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
-                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                              </svg>
-                              Votre installation est compatible avec un abonnement standard de 16A.
-                            </span>
-                          )
-                          : calculateAmperage(getTotalPuissance()) <= 32
-                            ? (
-                              <span className="flex items-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-yellow-500 mr-2 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
-                                  <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                                </svg>
-                                Nous vous recommandons un abonnement renforcé de 32A pour votre installation.
-                              </span>
-                            )
-                            : (
-                              <span className="flex items-center"></span>
-                            )
-                        }
+                        {calculateAmperage(getTotalPuissance()) <= 16 ? (
+                          <span className="flex items-center">
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="h-5 w-5 text-green-500 mr-2 flex-shrink-0"
+                              viewBox="0 0 20 20"
+                              fill="currentColor"
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
+                            Votre installation est compatible avec un abonnement
+                            standard de 16A.
+                          </span>
+                        ) : calculateAmperage(getTotalPuissance()) <= 32 ? (
+                          <span className="flex items-center">
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="h-5 w-5 text-yellow-500 mr-2 flex-shrink-0"
+                              viewBox="0 0 20 20"
+                              fill="currentColor"
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
+                            Nous vous recommandons un abonnement renforcé de 32A
+                            pour votre installation.
+                          </span>
+                        ) : (
+                          <span className="flex items-center"></span>
+                        )}
                       </p>
                     </div>
                   </div>
@@ -855,7 +1234,12 @@ export default function SimulatorPage({
 
                 <div className="space-y-4">
                   <h3 className="font-medium text-gray-800 flex items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-orange mr-2" viewBox="0 0 20 20" fill="currentColor">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5 text-orange mr-2"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
                       <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
                     </svg>
                     Équipements sélectionnés:
@@ -864,23 +1248,42 @@ export default function SimulatorPage({
                     <table className="w-full">
                       <thead className="text-left sticky top-0 bg-gray-50 border-b border-gray-100 shadow-sm">
                         <tr>
-                          <th className="py-3 px-4 text-sm font-medium text-gray-600">Équipement</th>
-                          <th className="py-3 px-4 text-sm font-medium text-gray-600">Quantité</th>
-                          <th className="py-3 px-4 text-sm font-medium text-gray-600">Puissance</th>
+                          <th className="py-3 px-4 text-sm font-medium text-gray-600">
+                            Équipement
+                          </th>
+                          <th className="py-3 px-4 text-sm font-medium text-gray-600">
+                            Quantité
+                          </th>
+                          <th className="py-3 px-4 text-sm font-medium text-gray-600">
+                            Puissance
+                          </th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-100">
-                        {selectedEquipements.map(eq => {
-                          const category = CATEGORIES.find(cat => cat.slug === eq.categorySlug);
-                          const equipement = category?.equipements.find(e => e.id === eq.id);
+                        {selectedEquipements.map((eq) => {
+                          const category = CATEGORIES.find(
+                            (cat) => cat.slug === eq.categorySlug
+                          );
+                          const equipement = category?.equipements.find(
+                            (e) => e.id === eq.id
+                          );
 
                           return (
-                            <tr key={eq.id} className="hover:bg-orange/5 transition-colors duration-150">
+                            <tr
+                              key={eq.id}
+                              className="hover:bg-orange/5 transition-colors duration-150"
+                            >
                               <td className="py-3 px-4 text-sm font-medium">
-                                {equipement ? equipement.label : eq.label || "Équipement personnalisé"}
+                                {equipement
+                                  ? equipement.label
+                                  : eq.label || "Équipement personnalisé"}
                               </td>
-                              <td className="py-3 px-4 text-sm">{eq.quantity}</td>
-                              <td className="py-3 px-4 text-sm font-medium text-orange">{eq.puissance * eq.quantity} W</td>
+                              <td className="py-3 px-4 text-sm">
+                                {eq.quantity}
+                              </td>
+                              <td className="py-3 px-4 text-sm font-medium text-orange">
+                                {eq.puissance * eq.quantity} W
+                              </td>
                             </tr>
                           );
                         })}
@@ -895,8 +1298,17 @@ export default function SimulatorPage({
                     onClick={() => setShowResultModal(false)}
                   >
                     <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-white/0 via-white/20 to-white/0 transform -translate-x-full group-hover:animate-shimmer"></span>
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-4 w-4"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                        clipRule="evenodd"
+                      />
                     </svg>
                     <span>Fermer</span>
                   </button>
@@ -935,7 +1347,8 @@ export default function SimulatorPage({
           animation: floating 5s ease-in-out infinite;
         }
         @keyframes pulse-slow {
-          0%, 100% {
+          0%,
+          100% {
             opacity: 1;
           }
           50% {

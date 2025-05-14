@@ -1,5 +1,3 @@
-"use client";
-
 import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
@@ -13,9 +11,7 @@ const Footer = () => {
   }
 
   return (
-    <footer
-      className="relative px-4 sm:px-8 md:px-[60px] lg:px-[80px] w-[90%] mx-auto rounded-[40px] py-12 transition-all duration-500 bg-gris text-black"
-    >
+    <footer className="relative px-4 sm:px-8 md:px-[60px] lg:px-[80px] w-[90%] mx-auto rounded-[40px] py-12 transition-all duration-500 bg-gris text-black">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 w-full mx-auto py-8">
         {/* Section Logo et Mode Sombre */}
         <div className="flex flex-col items-center space-y-4">
