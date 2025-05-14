@@ -19,6 +19,88 @@ const headerStyles = `
     position: relative;
     z-index: 9999;
   }
+  
+  /* Styles spécifiques pour tablette (640px - 1023px) */
+  @media (min-width: 640px) and (max-width: 1023px) {
+    /* Forcer une disposition appropriée du header en mode tablette */
+    .tablet-header-container {
+      display: flex;
+      flex-direction: column;
+      padding: 8px;
+    }
+    
+    /* Rangée du logo */
+    .tablet-logo-row {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      margin-bottom: 8px;
+    }
+    
+    /* Conteneur du logo */
+    .tablet-logo-container {
+      display: block !important;
+      width: 100px !important;
+      height: auto !important;
+    }
+    
+    /* Rangée de navigation */
+    .tablet-nav-row {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      margin-bottom: 8px;
+    }
+    
+    /* Rangée des boutons d'action */
+    .tablet-cta-row {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+    }
+  }
+  
+  /* Styles spécifiques pour tablette en mode paysage */
+  @media (min-width: 640px) and (max-width: 1023px) and (orientation: landscape) {
+    .tablet-header-container {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 16px;
+    }
+    
+    .tablet-logo-row {
+      width: auto;
+      margin-bottom: 0;
+      margin-right: 12px;
+    }
+    
+    .tablet-logo-container {
+      width: 90px !important;
+    }
+    
+    .tablet-nav-row {
+      width: auto;
+      margin-bottom: 0;
+      flex-grow: 1;
+    }
+    
+    .tablet-cta-row {
+      width: auto;
+      margin-left: 16px;
+    }
+  }
+  
+  /* Styles spécifiques pour petite tablette (640px - 767px) */
+  @media (min-width: 640px) and (max-width: 767px) {
+    .tablet-logo-container {
+      width: 90px !important;
+    }
+    
+    .tablet-nav-row button {
+      font-size: 14px !important;
+    }
+  }
 `;
 
 const Header = () => {
@@ -134,29 +216,51 @@ const Header = () => {
     }
   }, [pathname, isMobile]);
 
-  // Détecter scroll + mobile
+  // Détecter scroll + mobile + tablette
   useEffect(() => {
     const handleScroll = () => setHasScrolled(window.scrollY > 0);
     const handleResize = () => {
-      setIsMobile(window.innerWidth < 640);
-      setIsTablet(window.innerWidth >= 640 && window.innerWidth < 1024);
+      const windowWidth = window.innerWidth;
+      const newIsMobile = windowWidth < 640;
+      const newIsTablet = windowWidth >= 640 && windowWidth < 1024;
+      const isLandscape = window.matchMedia("(orientation: landscape)").matches;
+
+      setIsMobile(newIsMobile);
+      setIsTablet(newIsTablet);
+
+      // Sur changement de mode, réinitialiser le menu
+      if (newIsTablet !== isTablet) {
+        setIsMenuOpen(false);
+        setActiveTab(null);
+      }
+
+      // Ajouter un attribut d'orientation au body pour les styles CSS
+      if (isLandscape) {
+        document.body.setAttribute("data-orientation", "landscape");
+      } else {
+        document.body.setAttribute("data-orientation", "portrait");
+      }
     };
 
     handleResize();
     window.addEventListener("scroll", handleScroll);
     window.addEventListener("resize", handleResize);
+    // Écouter les changements d'orientation
+    window.addEventListener("orientationchange", handleResize);
+
     return () => {
       window.removeEventListener("scroll", handleScroll);
       window.removeEventListener("resize", handleResize);
+      window.removeEventListener("orientationchange", handleResize);
     };
-  }, []);
+  }, [isTablet]);
 
   /* ──────────────────────────  Handlers  ────────────────────────── */
 
   // Gestion du clic sur un onglet (sur mobile uniquement)
   const handleTabClick = (tab: TabType) => {
-    if (isMobile) {
-      // Sur mobile, on bascule juste l'état du menu
+    if (isMobile || isTablet) {
+      // Sur mobile ou tablette, on bascule juste l'état du menu
       if (tab === activeTab) {
         setIsMenuOpen(!isMenuOpen);
       } else {
@@ -168,7 +272,7 @@ const Header = () => {
 
   // Gestion du survol d'un onglet
   const handleTabHover = (tab: TabType | null) => {
-    if (isMobile) return;
+    if (isMobile || isTablet) return;
     if (hoverTimeout) clearTimeout(hoverTimeout);
 
     // Si la souris quitte la zone, fermer le menu après un délai
@@ -217,125 +321,280 @@ const Header = () => {
         >
           {/* ─────────────  Bandeau supérieur  ───────────── */}
           <div className="py-2 sm:py-3 md:py-5">
-            <div className="px-3 sm:px-6 md:px-8 lg:px-12 xl:px-20 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
-              {/* Logo + Tabs */}
-              <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 md:gap-6 lg:gap-12 w-full sm:w-auto">
-                <Link href="/" className="flex items-center group">
-                  <Image
-                    src="/logo.png"
-                    alt="Ma CIE en ligne"
-                    width={180}
-                    height={60}
-                    className="w-[120px] sm:w-[140px] md:w-[160px] lg:w-[180px] h-auto transition-transform duration-300 group-hover:scale-105"
-                    priority
-                  />
-                </Link>
+            <div
+              className={`
+              px-3 sm:px-6 md:px-8 lg:px-12 xl:px-20 
+              ${
+                isTablet
+                  ? "tablet-header-container"
+                  : "flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4"
+              }
+            `}
+            >
+              {/* Modifications spécifiques pour tablette */}
+              {isTablet ? (
+                // Structure spéciale pour tablette
+                <>
+                  {/* Rangée du logo */}
+                  <div className="tablet-logo-row">
+                    <Link
+                      href="/"
+                      className="flex items-center group tablet-logo-container"
+                    >
+                      <Image
+                        src="/logo.png"
+                        alt="Ma CIE en ligne"
+                        width={180}
+                        height={60}
+                        className="w-full h-auto transition-transform duration-300 group-hover:scale-105"
+                        priority
+                      />
+                    </Link>
+                  </div>
 
-                <nav
-                  className="relative flex items-center space-x-2 xs:space-x-3 sm:space-x-4 md:space-x-6 lg:space-x-8 mt-2 sm:mt-0"
-                  onMouseLeave={() => handleTabHover(null)}
-                >
-                  {(["particulier", "business", "institution"] as const).map(
-                    (tab) => (
-                      <button
-                        key={tab}
-                        className={`relative text-sm xs:text-base sm:text-lg md:text-xl text-noir hover:text-orange transition-all duration-300 ${
-                          activeTab === tab || currentSectionTab === tab
-                            ? "font-semibold"
-                            : ""
-                        }`}
-                        onClick={() => handleTabClick(tab)}
-                        onMouseEnter={() => handleTabHover(tab)}
+                  {/* Rangée de navigation */}
+                  <div className="tablet-nav-row">
+                    <nav
+                      className="relative flex items-center space-x-4 justify-center"
+                      onMouseLeave={() => handleTabHover(null)}
+                    >
+                      {(
+                        ["particulier", "business", "institution"] as const
+                      ).map((tab) => (
+                        <button
+                          key={tab}
+                          className={`relative text-lg text-noir hover:text-orange transition-all duration-300 ${
+                            activeTab === tab || currentSectionTab === tab
+                              ? "font-semibold"
+                              : ""
+                          }`}
+                          onClick={() => handleTabClick(tab)}
+                          onMouseEnter={() => handleTabHover(tab)}
+                        >
+                          {tab === "particulier"
+                            ? "Particulier"
+                            : tab === "business"
+                            ? "Business"
+                            : "Institution"}
+                          {(activeTab === tab ||
+                            (!isMenuOpen && currentSectionTab === tab)) && (
+                            <motion.div
+                              layoutId="underline"
+                              className="absolute left-0 right-0 -bottom-2 mx-auto h-[6px] w-full bg-orange shadow-sm rounded-full"
+                              style={{ opacity: 1 }}
+                            />
+                          )}
+                        </button>
+                      ))}
+                    </nav>
+                  </div>
+
+                  {/* Rangée des boutons d'action */}
+                  <div className="tablet-cta-row">
+                    <div className="flex items-center gap-3 justify-center">
+                      <Link
+                        href="/solutions-eco"
+                        className="text-vert group flex items-center gap-[10px] font-medium text-xs transition-all duration-300"
                       >
-                        {tab === "particulier"
-                          ? "Particulier"
-                          : tab === "business"
-                          ? "Business"
-                          : "Institution"}
-                        {(activeTab === tab ||
-                          (!isMenuOpen && currentSectionTab === tab)) && (
-                          <motion.div
-                            layoutId="underline"
-                            className="absolute left-0 right-0 -bottom-1 sm:-bottom-2 md:-bottom-3 mx-auto h-[4px] sm:h-[6px] md:h-[10px] w-full bg-orange shadow-sm rounded-full"
-                            style={{ opacity: 1 }}
-                          />
+                        <Ecostore className="group-hover:scale-110 transition-transform duration-300" />
+                        <span className="relative after:absolute after:w-0 after:h-[3px] after:bg-vert after:bottom-[-2px] after:left-0 group-hover:after:w-full after:transition-all after:duration-300 group-hover:text-vert">
+                          Ecostore
+                        </span>
+                      </Link>
+
+                      <Link
+                        href={isAuthenticated ? "/dashboard" : "/login"}
+                        className={`
+                          ${
+                            isAuthenticated &&
+                            user &&
+                            user.firstname &&
+                            user.lastname
+                              ? "bg-gradient-to-r from-[#F47D02] via-[#F9B234] to-[#F47D02] border-none text-white"
+                              : "bg-orange text-white"
+                          }
+                          hover:bg-noir hover:text-white
+                          font-semibold 
+                          min-w-[120px]
+                          max-w-[160px]
+                          h-[45px]
+                          px-4 
+                          py-[10px]
+                          rounded-[30px]
+                          transition-all duration-300 
+                          text-xs
+                          flex items-center justify-center 
+                          gap-[10px]
+                          hover:scale-105 hover:shadow-lg
+                          truncate shrink-0
+                          ${
+                            isAuthenticated &&
+                            user &&
+                            user.firstname &&
+                            user.lastname
+                              ? "shadow-md shadow-orange/30"
+                              : ""
+                          }
+                        `}
+                      >
+                        {isAuthenticated &&
+                        user &&
+                        user.firstname &&
+                        user.lastname ? (
+                          <>
+                            <div className="relative group shrink-0">
+                              <div className="h-6 w-6 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white font-bold ring-2 ring-white/50 group-hover:ring-white/80 transition-all">
+                                {user.firstname.charAt(0).toUpperCase()}
+                              </div>
+                              <div className="absolute -bottom-1 -right-1 h-3 w-3 bg-green-400 rounded-full border-2 border-white"></div>
+                            </div>
+                            <div className="flex flex-col items-start leading-tight">
+                              <span className="font-bold text-[10px]">
+                                {user.firstname}
+                              </span>
+                              <span className="font-medium text-[9px] opacity-90">
+                                {user.lastname}
+                              </span>
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <UserSolo />
+                            <span>Mon compte</span>
+                          </>
                         )}
-                      </button>
-                    )
-                  )}
-                </nav>
-              </div>
+                      </Link>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                // Structure normale pour desktop et mobile
+                <>
+                  {/* Logo + Tabs */}
+                  <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 md:gap-6 lg:gap-12 w-full sm:w-auto">
+                    <Link href="/" className="flex items-center group shrink-0">
+                      <Image
+                        src="/logo.png"
+                        alt="Ma CIE en ligne"
+                        width={180}
+                        height={60}
+                        className="w-[120px] sm:w-[140px] md:w-[160px] lg:w-[180px] h-auto transition-transform duration-300 group-hover:scale-105"
+                        priority
+                      />
+                    </Link>
 
-              {/* CTA */}
-              <div className="flex items-center gap-2 sm:gap-3 md:gap-4 mt-2 sm:mt-0 w-full sm:w-auto justify-center sm:justify-end shrink-0">
-                {/* Modification ici: Ecostore avec un style de lien moderne et effet d'animation */}
-                <Link
-                  href="/solutions-eco"
-                  className="text-vert group flex items-center gap-[6px] sm:gap-[10px] font-medium text-[10px] xs:text-xs sm:text-sm transition-all duration-300"
-                >
-                  <Ecostore className="group-hover:scale-110 transition-transform duration-300" />
-                  <span className="relative after:absolute after:w-0 after:h-[3px] after:bg-vert after:bottom-[-2px] after:left-0 group-hover:after:w-full after:transition-all after:duration-300 group-hover:text-vert">
-                    Ecostore
-                  </span>
-                </Link>
+                    <nav
+                      className="relative flex items-center space-x-2 xs:space-x-3 sm:space-x-4 md:space-x-6 lg:space-x-8 mt-2 sm:mt-0"
+                      onMouseLeave={() => handleTabHover(null)}
+                    >
+                      {(
+                        ["particulier", "business", "institution"] as const
+                      ).map((tab) => (
+                        <button
+                          key={tab}
+                          className={`relative text-sm xs:text-base sm:text-lg md:text-xl text-noir hover:text-orange transition-all duration-300 ${
+                            activeTab === tab || currentSectionTab === tab
+                              ? "font-semibold"
+                              : ""
+                          }`}
+                          onClick={() => handleTabClick(tab)}
+                          onMouseEnter={() => handleTabHover(tab)}
+                        >
+                          {tab === "particulier"
+                            ? "Particulier"
+                            : tab === "business"
+                            ? "Business"
+                            : "Institution"}
+                          {(activeTab === tab ||
+                            (!isMenuOpen && currentSectionTab === tab)) && (
+                            <motion.div
+                              layoutId="underline"
+                              className="absolute left-0 right-0 -bottom-1 sm:-bottom-2 md:-bottom-3 mx-auto h-[4px] sm:h-[6px] md:h-[10px] w-full bg-orange shadow-sm rounded-full"
+                              style={{ opacity: 1 }}
+                            />
+                          )}
+                        </button>
+                      ))}
+                    </nav>
+                  </div>
 
-                <Link
-                  href={isAuthenticated ? "/dashboard" : "/login"}
-                  className={`
-                    ${
-                      isAuthenticated && user && user.firstname && user.lastname
-                        ? "bg-gradient-to-r from-[#F47D02] via-[#F9B234] to-[#F47D02] border-none text-white"
-                        : "bg-orange text-white"
-                    }
-                    hover:bg-noir hover:text-white
-                    font-semibold 
-                    min-w-[80px] xs:min-w-[120px] sm:min-w-[120px] md:min-w-[120px] lg:min-w-[160px]
-                    max-w-[140px] xs:max-w-[140px] sm:max-w-[160px] md:max-w-[180px] lg:max-w-[233px]
-                    h-[35px] sm:h-[45px] md:h-[55px]
-                    px-2 xs:px-3 sm:px-4 md:px-6 lg:px-10 
-                    py-[8px] sm:py-[10px] md:py-[15px]
-                    rounded-[20px] sm:rounded-[30px] md:rounded-[40px]
-                    transition-all duration-300 
-                    text-[10px] xs:text-xs sm:text-sm
-                    flex items-center justify-center 
-                    gap-[6px] sm:gap-[10px]
-                    hover:scale-105 hover:shadow-lg
-                    truncate shrink-0
-                    ${
-                      isAuthenticated && user && user.firstname && user.lastname
-                        ? "shadow-md shadow-orange/30"
-                        : ""
-                    }
-                  `}
-                >
-                  {isAuthenticated &&
-                  user &&
-                  user.firstname &&
-                  user.lastname ? (
-                    <>
-                      <div className="relative group shrink-0">
-                        <div className="h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white font-bold ring-2 ring-white/50 group-hover:ring-white/80 transition-all">
-                          {user.firstname.charAt(0).toUpperCase()}
-                        </div>
-                        <div className="absolute -bottom-1 -right-1 h-2 w-2 sm:h-3 sm:w-3 bg-green-400 rounded-full border-[1px] sm:border-2 border-white"></div>
-                      </div>
-                      <div className="flex flex-col items-start leading-tight">
-                        <span className="font-bold text-[9px] xs:text-[10px] sm:text-xs">
-                          {user.firstname}
-                        </span>
-                        <span className="font-medium text-[8px] xs:text-[9px] sm:text-[11px] opacity-90">
-                          {user.lastname}
-                        </span>
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <UserSolo />
-                      <span>Mon compte</span>
-                    </>
-                  )}
-                </Link>
-              </div>
+                  {/* CTA */}
+                  <div className="flex items-center gap-2 sm:gap-3 md:gap-4 mt-2 sm:mt-0 w-full sm:w-auto justify-center sm:justify-end shrink-0">
+                    <Link
+                      href="/solutions-eco"
+                      className="text-vert group flex items-center gap-[6px] sm:gap-[10px] font-medium text-[10px] xs:text-xs sm:text-sm transition-all duration-300"
+                    >
+                      <Ecostore className="group-hover:scale-110 transition-transform duration-300" />
+                      <span className="relative after:absolute after:w-0 after:h-[3px] after:bg-vert after:bottom-[-2px] after:left-0 group-hover:after:w-full after:transition-all after:duration-300 group-hover:text-vert">
+                        Ecostore
+                      </span>
+                    </Link>
+
+                    <Link
+                      href={isAuthenticated ? "/dashboard" : "/login"}
+                      className={`
+                        ${
+                          isAuthenticated &&
+                          user &&
+                          user.firstname &&
+                          user.lastname
+                            ? "bg-gradient-to-r from-[#F47D02] via-[#F9B234] to-[#F47D02] border-none text-white"
+                            : "bg-orange text-white"
+                        }
+                        hover:bg-noir hover:text-white
+                        font-semibold 
+                        min-w-[80px] xs:min-w-[120px] sm:min-w-[120px] md:min-w-[120px] lg:min-w-[160px]
+                        max-w-[140px] xs:max-w-[140px] sm:max-w-[160px] md:max-w-[180px] lg:max-w-[233px]
+                        h-[35px] sm:h-[45px] md:h-[55px]
+                        px-2 xs:px-3 sm:px-4 md:px-6 lg:px-10 
+                        py-[8px] sm:py-[10px] md:py-[15px]
+                        rounded-[20px] sm:rounded-[30px] md:rounded-[40px]
+                        transition-all duration-300 
+                        text-[10px] xs:text-xs sm:text-sm
+                        flex items-center justify-center 
+                        gap-[6px] sm:gap-[10px]
+                        hover:scale-105 hover:shadow-lg
+                        truncate shrink-0
+                        ${
+                          isAuthenticated &&
+                          user &&
+                          user.firstname &&
+                          user.lastname
+                            ? "shadow-md shadow-orange/30"
+                            : ""
+                        }
+                      `}
+                    >
+                      {isAuthenticated &&
+                      user &&
+                      user.firstname &&
+                      user.lastname ? (
+                        <>
+                          <div className="relative group shrink-0">
+                            <div className="h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white font-bold ring-2 ring-white/50 group-hover:ring-white/80 transition-all">
+                              {user.firstname.charAt(0).toUpperCase()}
+                            </div>
+                            <div className="absolute -bottom-1 -right-1 h-2 w-2 sm:h-3 sm:w-3 bg-green-400 rounded-full border-[1px] sm:border-2 border-white"></div>
+                          </div>
+                          <div className="flex flex-col items-start leading-tight">
+                            <span className="font-bold text-[9px] xs:text-[10px] sm:text-xs">
+                              {user.firstname}
+                            </span>
+                            <span className="font-medium text-[8px] xs:text-[9px] sm:text-[11px] opacity-90">
+                              {user.lastname}
+                            </span>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <UserSolo />
+                          <span>Mon compte</span>
+                        </>
+                      )}
+                    </Link>
+                  </div>
+                </>
+              )}
             </div>
           </div>
 

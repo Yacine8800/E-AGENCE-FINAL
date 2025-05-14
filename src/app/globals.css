@@ -3,6 +3,7 @@
 @tailwind utilities;
 
 :root {
+  /* Variables existantes */
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 249, 249, 249;
   --background-end-rgb: 255, 255, 255;
@@ -10,6 +11,14 @@
   --scrollbar-thumb: #47b5b0;
   --scrollbar-thumb-hover: #358e8a;
   --scrollbar-width: 12px;
+
+  /* Nouvelles variables pour la gestion responsive */
+  --header-height-mobile: 70px;
+  --header-height-tablet-portrait-small: 160px;
+  --header-height-tablet-portrait-large: 180px;
+  --header-height-tablet-landscape: 90px;
+  --header-height-desktop: 96px;
+  --header-height-desktop-lg: 120px;
 }
 
 body {
@@ -44,6 +53,43 @@ body {
 
   .animate-scaleIn {
     animation: scaleIn 0.3s ease-out forwards;
+  }
+
+  /* Nouvelles classes utilitaires pour la gestion responsive */
+  .tablet-only {
+    @apply hidden;
+  }
+
+  .tablet-hidden {
+    @apply block;
+  }
+
+  .portrait-only {
+    @apply block;
+  }
+
+  .landscape-only {
+    @apply hidden;
+  }
+
+  @screen tablet {
+    .tablet-only {
+      @apply block;
+    }
+
+    .tablet-hidden {
+      @apply hidden;
+    }
+  }
+
+  @media (orientation: landscape) {
+    .portrait-only {
+      @apply hidden;
+    }
+
+    .landscape-only {
+      @apply block;
+    }
   }
 }
 
@@ -172,35 +218,6 @@ body {
   color: #374151;
 }
 
-/* Mode sombre */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --scrollbar-track: #181818;
-    --scrollbar-thumb: #47b5b0;
-    --scrollbar-thumb-hover: #358e8a;
-  }
-
-  ::-webkit-scrollbar-track {
-    box-shadow: inset 0 0 6px rgba(71, 181, 176, 0.2);
-  }
-
-  ::-webkit-scrollbar-thumb {
-    box-shadow: 0 0 8px rgba(71, 181, 176, 0.5);
-  }
-
-  ::selection {
-    background-color: rgba(71, 181, 176, 0.4);
-    color: white;
-    text-shadow: 0 0 8px rgba(71, 181, 176, 1);
-  }
-
-  ::-moz-selection {
-    background-color: rgba(71, 181, 176, 0.4);
-    color: white;
-    text-shadow: 0 0 8px rgba(71, 181, 176, 1);
-  }
-}
-
 /* Add the shimmer animation for magical effect */
 @keyframes shimmer {
   0% {
@@ -229,4 +246,126 @@ body {
   animation-duration: 10s;
   animation-timing-function: linear;
   animation-iteration-count: infinite;
+}
+
+/* ============== NOUVEAUX STYLES RESPONSIVES ============== */
+
+/* Transition fluide pour le main content */
+main {
+  transition: margin-top 0.3s ease;
+}
+
+/* Styles responsives basés sur les attributs de données */
+[data-device-type="mobile"] {
+  margin-top: var(--header-height-mobile);
+}
+
+[data-device-type="tablet"][data-orientation="portrait"][data-tablet-size="small"] {
+  margin-top: var(--header-height-tablet-portrait-small);
+}
+
+[data-device-type="tablet"][data-orientation="portrait"][data-tablet-size="large"] {
+  margin-top: var(--header-height-tablet-portrait-large);
+}
+
+[data-device-type="tablet"][data-orientation="landscape"] {
+  margin-top: var(--header-height-tablet-landscape);
+}
+
+[data-device-type="desktop"] {
+  margin-top: var(--header-height-desktop);
+}
+
+@media (min-width: 1280px) {
+  [data-device-type="desktop"] {
+    margin-top: var(--header-height-desktop-lg);
+  }
+}
+
+/* Ajustement pour le flottant bot */
+.floating-bot-container {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 40;
+  transition: all 0.3s ease;
+}
+
+/* Ajustements pour tablette */
+@media (min-width: 640px) and (max-width: 1023px) {
+  /* Ajouter un espacement au bas du footer pour éviter que le bot flottant ne le cache */
+  footer {
+    padding-bottom: 70px;
+  }
+
+  /* Ajuster la taille du bot flottant sur tablette */
+  .floating-bot-container {
+    bottom: 16px;
+    right: 16px;
+    transform: scale(0.9);
+  }
+
+  /* Ajustement spécifique pour petite tablette */
+  @media (max-width: 767px) {
+    .floating-bot-container {
+      transform: scale(0.85);
+    }
+  }
+}
+
+/* Ajustements spécifiques pour l'orientation paysage sur tablette */
+@media (min-width: 640px) and (max-width: 1023px) and (orientation: landscape) {
+  /* Style du header en mode paysage */
+  .tablet-header-container {
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 8px 16px !important;
+  }
+
+  .tablet-logo-row {
+    width: auto !important;
+    margin-bottom: 0 !important;
+    margin-right: 12px !important;
+  }
+
+  .tablet-nav-row {
+    width: auto !important;
+    margin-bottom: 0 !important;
+    flex-grow: 1 !important;
+  }
+
+  .tablet-cta-row {
+    width: auto !important;
+    margin-left: 16px !important;
+  }
+}
+
+/* Mode sombre - mettre à la fin pour override les styles précédents */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --scrollbar-track: #181818;
+    --scrollbar-thumb: #47b5b0;
+    --scrollbar-thumb-hover: #358e8a;
+  }
+
+  ::-webkit-scrollbar-track {
+    box-shadow: inset 0 0 6px rgba(71, 181, 176, 0.2);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    box-shadow: 0 0 8px rgba(71, 181, 176, 0.5);
+  }
+
+  ::selection {
+    background-color: rgba(71, 181, 176, 0.4);
+    color: white;
+    text-shadow: 0 0 8px rgba(71, 181, 176, 1);
+  }
+
+  ::-moz-selection {
+    background-color: rgba(71, 181, 176, 0.4);
+    color: white;
+    text-shadow: 0 0 8px rgba(71, 181, 176, 1);
+  }
 }

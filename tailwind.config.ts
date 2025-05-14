@@ -7,6 +7,25 @@ const config: Config = {
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
+    screens: {
+      xs: "480px",
+      sm: "640px",
+      md: "768px",
+      lg: "1024px",
+      xl: "1280px",
+      "2xl": "1536px",
+      // Breakpoints spécifiques pour tablettes
+      tablet: { min: "640px", max: "1023px" },
+      // Breakpoints pour orientations spécifiques
+      portrait: { raw: "(orientation: portrait)" },
+      landscape: { raw: "(orientation: landscape)" },
+      // Breakpoints pour différentes tailles d'écran
+      mobile: { max: "639px" },
+      "tablet-sm": { min: "640px", max: "767px" },
+      "tablet-md": { min: "768px", max: "1023px" },
+      desktop: { min: "1024px" },
+      "desktop-lg": { min: "1280px" },
+    },
     extend: {
       colors: {
         eco: "#94C33E",

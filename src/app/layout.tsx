@@ -145,7 +145,7 @@ const RouteGuard = ({ children }: { children: React.ReactNode }) => {
   return (
     <>
       {showHeader && <Header />}
-      <main className={!showMT ? "mt-32" : ""}>
+      <main className={!showMT ? "mt-36 sm:42 md:32" : ""}>
         <div className="flex-1 overflow-x-hidden">
           <DesktopEffects />
           <ToastContainer />
@@ -287,7 +287,7 @@ export default function RootLayout({
 
   return (
     <html lang="fr">
-       <head>
+      <head>
         <Script id="auth-check" strategy="beforeInteractive">
           {`
             // Intercepter les requêtes fetch pour ajouter l'en-tête d'authentification
