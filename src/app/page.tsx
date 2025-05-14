@@ -6,6 +6,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { CarouselIcon } from "./components/icons/CarouselIcon";
+import Ecostore from "./components/icons/EcoStore";
 
 const VideoCarousel = dynamic(() => import("./components/VideoCarousel"), {
   ssr: false,
@@ -149,6 +150,119 @@ export default function Home() {
       toggleDarkMode();
     }
   }, []);
+
+  const CarouselIcon = ({ className }) => (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      {/* SVG paths pour l'icône */}
+      <path
+        d="M8 2V5"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M16 2V5"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M3.5 9.09H20.5"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M21 8.5V17C21 20 19.5 22 16 22H8C4.5 22 3 20 3 17V8.5C3 5.5 4.5 3.5 8 3.5H16C19.5 3.5 21 5.5 21 8.5Z"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M15.6947 13.7H15.7037"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M15.6947 16.7H15.7037"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M11.9955 13.7H12.0045"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M11.9955 16.7H12.0045"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M8.29431 13.7H8.30329"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M8.29431 16.7H8.30329"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+
+  // Composant SimulationIcon pour le nouvel écran de simulation
+  const SimulationIcon = ({ className }) => (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M7.5 12H16.5"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M12 7.5V16.5"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
 
   return (
     <div className="overflow-x-hidden w-full">
@@ -391,8 +505,8 @@ export default function Home() {
                 className="object-contain"
               />
               <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold">
-                Votre agence<br />
-                à portée de main
+                Votre agence
+                <br />à portée de main
               </h2>
             </div>
 
@@ -940,128 +1054,143 @@ export default function Home() {
             transition: { duration: 0.4, ease: [0.4, 0, 0.2, 1] },
           }}
           className={`
-          w-[90%] lg:w-[90%]
-          mx-auto 
-          border-2 
-          border-gray-400/30 
-          bg-[#1C1C1C]
-          rounded-[30px] sm:rounded-[40px] 
-          p-4 sm:p-6 md:p-8 
-          backdrop-blur-sm 
-          transition-all 
-          duration-500 
-          relative 
-          cursor-pointer 
-          transform-gpu 
-          h-auto md:h-[600px] lg:h-[700px] 
-          mb-12 sm:mb-16 md:mb-20 
-          hover:border-opacity-50
-        `}
+      w-[95%] sm:w-[92%] lg:w-[90%]
+      mx-auto 
+      border-2 
+      border-gray-400/30 
+      bg-[#1C1C1C]
+      rounded-[30px] sm:rounded-[40px] 
+      p-4 sm:p-5 md:p-8 
+      backdrop-blur-sm 
+      transition-all 
+      duration-500 
+      relative 
+      cursor-pointer 
+      transform-gpu 
+      h-auto md:h-[600px] lg:h-[700px] 
+      mb-12 sm:mb-16 md:mb-20 
+      hover:border-opacity-50
+    `}
         >
-          <div className="flex flex-col md:flex-row items-center justify-center gap-x-20 md:gap-x-20 mx-auto max-w-5xl w-full h-full">
+          <div className="flex flex-col md:flex-row items-center justify-center gap-y-6 sm:gap-y-8 gap-x-4 sm:gap-x-6 lg:gap-x-20 mx-auto max-w-5xl w-full h-full">
             {/* Colonne gauche : ClemBot + Textes + Bouton */}
-            <div className="flex-1 flex flex-col items-start text-left space-y-3 sm:space-y-4 md:space-y-5 px-2 sm:px-4">
-              <div className="flex flex-col space-y-2 sm:space-y-3 group">
-                <img
-                  src="assistance/bot.png"
-                  alt="ClemBot"
-                  className="w-[60px] h-[60px] sm:w-[80px] sm:h-[80px] md:w-[100px] md:h-[100px] object-contain mb-1 sm:mb-2 transition-transform duration-500 hover:scale-105"
-                />
-                <div className="mt-0 sm:mt-2">
-                  <h3
-                    className="
-                    text-lg sm:text-xl md:text-2xl font-bold flex items-center flex-wrap 
-                    transition-colors duration-300 
-                    text-[#F47D02]
-                  "
-                  >
-                    Le tout
-                    <span
+            <div className="flex-1 flex flex-col items-center md:items-start text-center md:text-left space-y-3 sm:space-y-4 md:space-y-6 px-2 sm:px-4">
+              <div className="flex flex-col space-y-3 sm:space-y-4 group w-full sm:w-auto">
+                <div className="flex flex-col sm:flex-row items-center sm:items-start gap-3 sm:gap-4">
+                  {/* Image du bot - taille réduite pour tablette */}
+                  <Image
+                    src="/assistance/bot.png"
+                    width={90}
+                    height={90}
+                    alt="ClemBot"
+                    className="w-[80px] h-[80px] sm:w-[90px] sm:h-[90px] md:w-[110px] md:h-[110px] object-contain transition-transform duration-500 hover:scale-105"
+                  />
+
+                  {/* Conteneur de texte - police réduite pour tablette */}
+                  <div className="flex flex-col items-center sm:items-start">
+                    <h3
                       className="
-                      ml-1 sm:ml-2 px-2 sm:px-3 py-0.5 sm:py-1 
-                      rounded-lg 
-                      text-white
-                      transition-all duration-300 
-                      hover:shadow-lg 
-                      bg-[#EC4F48]
-                    "
+                  text-xl sm:text-xl md:text-3xl font-bold 
+                  flex items-center flex-wrap justify-center sm:justify-start
+                  transition-colors duration-300 
+                  text-[#F47D02]
+                "
                     >
-                      nouveau
-                    </span>
-                  </h3>
-                  <h2
-                    className="
-                    mt-2 
-                    text-2xl sm:text-3xl font-bold 
-                    transition-colors duration-300 
-                    text-[#F47D02]
+                      Le tout
+                      <span
+                        className="
+                    ml-1 sm:ml-1 px-2 sm:px-2 py-0.5 
+                    rounded-lg 
+                    text-white
+                    transition-all duration-300 
+                    hover:shadow-lg 
+                    bg-[#EC4F48]
                   "
-                  >
-                    Chat-Bot
-                  </h2>
+                      >
+                        nouveau
+                      </span>
+                    </h3>
+                    <h2
+                      className="
+                  mt-1 sm:mt-1 md:mt-2 
+                  text-2xl sm:text-3xl md:text-5xl font-bold 
+                  transition-colors duration-300 
+                  text-[#F47D02]
+                "
+                    >
+                      Chat-Bot
+                    </h2>
+                  </div>
                 </div>
               </div>
 
-              <p className="text-sm sm:text-base text-white">
-                Découvrez <strong>Clem&apos;Bot</strong>, votre assistant
-                intelligent
-                <strong> disponible 24/7</strong> !
-              </p>
-              <p className="text-sm sm:text-base text-white">
-                <strong>Besoin d&apos;aide ?</strong> Clem&apos;Bot répond à vos
-                questions et vous guide dans toutes vos démarches.
-              </p>
+              {/* Paragraphes - taille de texte réduite et espacement optimisé */}
+              <div className="max-w-md sm:max-w-sm md:max-w-xl mx-auto md:mx-0">
+                <p className="text-sm sm:text-sm md:text-base text-white">
+                  Découvrez <strong>Clem&apos;Bot</strong>, votre assistant
+                  intelligent
+                  <strong> disponible 24/7</strong> !
+                </p>
+                <p className="text-sm sm:text-sm md:text-base text-white mt-2">
+                  <strong>Besoin d&apos;aide ?</strong> Clem&apos;Bot répond à
+                  vos questions et vous guide dans toutes vos démarches.
+                </p>
+              </div>
 
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="
-                px-6 py-3 
-                rounded-xl font-medium 
-                flex items-center gap-2 
-                hover:shadow-lg 
-                transform hover:-translate-y-0.5 
-                transition-all duration-300
-                bg-white text-black
-              "
-              >
-                Essayer Clem&apos;bot
-                <svg
-                  width="22"
-                  height="20"
-                  viewBox="0 0 22 20"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
+              {/* Bouton - taille réduite sur tablette */}
+              <div className="w-full flex justify-center sm:justify-center md:justify-start pt-1 sm:pt-2">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="
+              px-5 sm:px-6 py-2.5 sm:py-3 md:py-3.5
+              rounded-xl font-medium text-sm 
+              flex items-center gap-2
+              hover:shadow-lg 
+              transform hover:-translate-y-0.5 
+              transition-all duration-300
+              bg-white text-black
+            "
                 >
-                  <path
-                    d="M8.39583 6.37484H8.40625M13.6042 6.37484H13.6146M17.25 1.1665C18.0788 1.1665 18.8737 1.49574 19.4597 2.0818C20.0458 2.66785 20.375 3.4627 20.375 4.2915V12.6248C20.375 13.4536 20.0458 14.2485 19.4597 14.8345C18.8737 15.4206 18.0788 15.7498 17.25 15.7498H12.0417L6.83333 18.8748V15.7498H4.75C3.9212 15.7498 3.12634 15.4206 2.54029 14.8345C1.95424 14.2485 1.625 13.4536 1.625 12.6248V4.2915C1.625 3.4627 1.95424 2.66785 2.54029 2.0818C3.12634 1.49574 3.9212 1.1665 4.75 1.1665H17.25Z"
-                    stroke="black"
-                    strokeWidth="2.08333"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <path
-                    d="M8.39844 10.5415C8.73789 10.888 9.14307 11.1632 9.59024 11.3511C10.0374 11.539 10.5176 11.6358 11.0026 11.6358C11.4876 11.6358 11.9678 11.539 12.415 11.3511C12.8621 11.1632 13.2673 10.888 13.6068 10.5415"
-                    stroke="black"
-                    strokeWidth="2.08333"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </motion.button>
+                  Essayer Clem&apos;bot
+                  <svg
+                    width="20"
+                    height="18"
+                    viewBox="0 0 22 20"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="w-4 h-4 sm:w-5 sm:h-5"
+                  >
+                    <path
+                      d="M8.39583 6.37484H8.40625M13.6042 6.37484H13.6146M17.25 1.1665C18.0788 1.1665 18.8737 1.49574 19.4597 2.0818C20.0458 2.66785 20.375 3.4627 20.375 4.2915V12.6248C20.375 13.4536 20.0458 14.2485 19.4597 14.8345C18.8737 15.4206 18.0788 15.7498 17.25 15.7498H12.0417L6.83333 18.8748V15.7498H4.75C3.9212 15.7498 3.12634 15.4206 2.54029 14.8345C1.95424 14.2485 1.625 13.4536 1.625 12.6248V4.2915C1.625 3.4627 1.95424 2.66785 2.54029 2.0818C3.12634 1.49574 3.9212 1.1665 4.75 1.1665H17.25Z"
+                      stroke="black"
+                      strokeWidth="2.08333"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <path
+                      d="M8.39844 10.5415C8.73789 10.888 9.14307 11.1632 9.59024 11.3511C10.0374 11.539 10.5176 11.6358 11.0026 11.6358C11.4876 11.6358 11.9678 11.539 12.415 11.3511C12.8621 11.1632 13.2673 10.888 13.6068 10.5415"
+                      stroke="black"
+                      strokeWidth="2.08333"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </motion.button>
+              </div>
             </div>
 
-            {/* Colonne droite : Téléphone + Switch + Barres décoratives */}
-            <div className="flex-1 w-full flex justify-center mt-4 md:mt-0">
+            {/* Colonne droite : Téléphone - taille réduite pour tablette */}
+            <div className="flex-1 w-full flex justify-center mt-2 sm:mt-3 md:mt-0">
               <div className="relative flex flex-col items-center">
-                {/* Conteneur du téléphone */}
-                <div className="relative w-[300px] sm:w-[380px] md:w-[430px] h-[400px] sm:h-[500px] mt-4 sm:mt-8">
-                  {/* Image du téléphone */}
+                {/* Conteneur du téléphone avec dimensions réduites */}
+                <div className="relative w-[230px] sm:w-[280px] md:w-[380px] lg:w-[430px] h-[320px] sm:h-[400px] md:h-[500px] mt-0">
+                  {/* Image du téléphone avec position ajustée */}
                   <Image
                     src="/telephone/phoneNoir.png"
                     alt="Phone Interface"
                     fill
-                    className="object-contain mt-[26px] sm:mt-[108px]"
+                    className="object-contain sm:mt-[30px] md:mt-[60px] lg:mt-[80px]"
                     priority
                   />
                 </div>
@@ -1130,7 +1259,7 @@ export default function Home() {
           flex-col md:flex-row 
           items-center 
           justify-between 
-          gap-8 sm:gap-12 md:gap-16 
+          gap-8 sm:gap-10 md:gap-16 
           relative
         "
         >
@@ -1148,7 +1277,6 @@ export default function Home() {
                 transition={{ duration: 0.5, ease: "easeOut" }}
                 className="space-y-8"
               >
-
                 <h2
                   className="
                   text-3xl 
@@ -1164,6 +1292,7 @@ export default function Home() {
                   Maîtriser ma <br />
                   <span className="text-[#47B5B0]">consommation</span>
                 </h2>
+                {/* Texte mis à jour pour être plus cohérent avec l'objectif de la section */}
                 <p
                   className="
                   text-sm 
@@ -1174,11 +1303,13 @@ export default function Home() {
                   leading-relaxed
                 "
                 >
-                  Suivez votre consommation en temps réel, estimez le montant de
-                  votre facture et découvrez les bons gestes pour économiser de
-                  l&apos;énergie.
+                  Suivez et optimisez votre consommation énergétique en temps
+                  réel, simulez vos factures et votre puissance idéale, et
+                  adoptez les meilleures pratiques pour économiser l'énergie au
+                  quotidien.
                 </p>
                 <div className="flex items-center gap-4">
+                  {/* Texte du bouton changé de "Essayez notre simulateur" à "Rendez-vous sur l'ecostore" */}
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
@@ -1199,27 +1330,12 @@ export default function Home() {
                     hover:translate-y-[-2px] 
                     shadow-lg shadow-black/5
                   "
+                    onClick={() => router.push("/solutions-eco")}
                   >
                     <span className="text-base sm:text-lg">
-                      Essayez notre simulateur
+                      Rendez-vous sur l&apos;ecostore
                     </span>
-                    <svg
-                      width="25"
-                      height="26"
-                      viewBox="0 0 25 26"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        opacity="0.5"
-                        d="M12.5 23.4163C8.08021 23.4163 5.87083 23.4163 4.49792 21.8903C3.125 20.3663 3.125 17.9101 3.125 12.9997C3.125 8.08926 3.125 5.63405 4.49792 4.10801C5.87083 2.58197 8.08125 2.58301 12.5 2.58301C16.9187 2.58301 19.1292 2.58301 20.5021 4.10801C21.875 5.63509 21.875 8.08926 21.875 12.9997C21.875 17.9101 21.875 20.3653 20.5021 21.8903C19.1292 23.4153 16.9187 23.4163 12.5 23.4163Z"
-                        fill="white"
-                      />
-                      <path
-                        d="M15.6224 6.75H9.3724C8.88802 6.75 8.64635 6.75 8.4474 6.80313C8.18268 6.87416 7.9413 7.01358 7.74749 7.20738C7.55368 7.40119 7.41426 7.64257 7.34323 7.90729C7.28906 8.10833 7.28906 8.35 7.28906 8.83333C7.28906 9.31667 7.28906 9.55937 7.34219 9.75833C7.41322 10.0231 7.55264 10.2644 7.74645 10.4582C7.94025 10.652 8.18163 10.7915 8.44635 10.8625C8.6474 10.9167 8.88906 10.9167 9.3724 10.9167H15.6224C16.1068 10.9167 16.3484 10.9167 16.5474 10.8635C16.8121 10.7925 17.0535 10.6531 17.2473 10.4593C17.4411 10.2655 17.5805 10.0241 17.6516 9.75937C17.7057 9.55833 17.7057 9.31667 17.7057 8.83333C17.7057 8.35 17.7057 8.10729 17.6526 7.90833C17.5816 7.64361 17.4422 7.40223 17.2483 7.20843C17.0545 7.01462 16.8132 6.8752 16.5484 6.80417C16.3484 6.75 16.1057 6.75 15.6224 6.75ZM8.33073 15.0833C8.607 15.0833 8.87195 14.9736 9.0673 14.7782C9.26265 14.5829 9.3724 14.3179 9.3724 14.0417C9.3724 13.7654 9.26265 13.5004 9.0673 13.3051C8.87195 13.1097 8.607 13 8.33073 13C8.05446 13 7.78951 13.1097 7.59416 13.3051C7.39881 13.5004 7.28906 13.7654 7.28906 14.0417C7.28906 14.3179 7.39881 14.5829 7.59416 14.7782C7.78951 14.9736 8.05446 15.0833 8.33073 15.0833ZM8.33073 19.25C8.607 19.25 8.87195 19.1403 9.0673 18.9449C9.26265 18.7496 9.3724 18.4846 9.3724 18.2083C9.3724 17.9321 9.26265 17.6671 9.0673 17.4718C8.87195 17.2764 8.607 17.1667 8.33073 17.1667C8.05446 17.1667 7.78951 17.2764 7.59416 17.4718C7.39881 17.6671 7.28906 17.9321 7.28906 18.2083C7.28906 18.4846 7.39881 18.7496 7.59416 18.9449C7.78951 19.1403 8.05446 19.25 8.33073 19.25ZM12.4974 15.0833C12.7737 15.0833 13.0386 14.9736 13.234 14.7782C13.4293 14.5829 13.5391 14.3179 13.5391 14.0417C13.5391 13.7654 13.4293 13.5004 13.234 13.3051C13.0386 13.1097 12.7737 13 12.4974 13C12.2211 13 11.9562 13.1097 11.7608 13.3051C11.5655 13.5004 11.4557 13.7654 11.4557 14.0417C11.4557 14.3179 11.5655 14.5829 11.7608 14.7782C11.9562 14.9736 12.2211 15.0833 12.4974 15.0833ZM12.4974 19.25C12.7737 19.25 13.0386 19.1403 13.234 18.9449C13.4293 18.7496 13.5391 18.4846 13.5391 18.2083C13.5391 17.9321 13.4293 17.6671 13.234 17.4718C13.0386 17.2764 12.7737 17.1667 12.4974 17.1667C12.2211 17.1667 11.9562 17.2764 11.7608 17.4718C11.5655 17.6671 11.4557 17.9321 11.4557 18.2083C11.4557 18.4846 11.5655 18.7496 11.7608 18.9449C11.9562 19.1403 12.2211 19.25 12.4974 19.25ZM16.6641 15.0833C16.9403 15.0833 17.2053 14.9736 17.4006 14.7782C17.596 14.5829 17.7057 14.3179 17.7057 14.0417C17.7057 13.7654 17.596 13.5004 17.4006 13.3051C17.2053 13.1097 16.9403 13 16.6641 13C16.3878 13 16.1228 13.1097 15.9275 13.3051C15.7321 13.5004 15.6224 13.7654 15.6224 14.0417C15.6224 14.3179 15.7321 14.5829 15.9275 14.7782C16.1228 14.9736 16.3878 15.0833 16.6641 15.0833ZM16.6641 19.25C16.9403 19.25 17.2053 19.1403 17.4006 18.9449C17.596 18.7496 17.7057 18.4846 17.7057 18.2083C17.7057 17.9321 17.596 17.6671 17.4006 17.4718C17.2053 17.2764 16.9403 17.1667 16.6641 17.1667C16.3878 17.1667 16.1228 17.2764 15.9275 17.4718C15.7321 17.6671 15.6224 17.9321 15.6224 18.2083C15.6224 18.4846 15.7321 18.7496 15.9275 18.9449C16.1228 19.1403 16.3878 19.25 16.6641 19.25Z"
-                        fill="white"
-                      />
-                    </svg>
+                    <Ecostore className="text-white" />
                   </motion.button>
                 </div>
               </motion.div>
@@ -1297,7 +1413,7 @@ export default function Home() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.8 }}
-            className="relative z-10 flex items-center justify-center min-h-[400px]"
+            className="relative z-10 flex items-center justify-center md:w-1/2 min-h-[400px] w-full"
           >
             <AnimatePresence mode="wait" initial={false}>
               <motion.div
@@ -1311,17 +1427,18 @@ export default function Home() {
                   type: "tween",
                 }}
                 style={{ willChange: "transform" }}
-                className="absolute left-0 top-1/2 -translate-y-1/2"
+                className="absolute left-0 top-1/2 -translate-y-1/2 hidden md:block"
               >
-                <div className="bg-[#191818] backdrop-blur-lg p-6 rounded-3xl shadow-xl w-[300px] border border-white/10">
+                {/* Carte redessinée pour l'aperçu de la slide précédente */}
+                <div className="bg-gradient-to-r from-[#1D1E20] to-[#2D2E30] backdrop-blur-lg p-6 rounded-2xl shadow-xl w-[280px] border border-[#47B5B0]/10">
                   <h3 className="text-lg font-semibold mb-3 text-white/90">
                     {activeSlide === 0
                       ? "Adopter les bons gestes"
                       : activeSlide === 1
                       ? "Maîtriser ma consommation"
                       : activeSlide === 2
-                      ? "Simuler ma facture"
-                      : "Réaliser les économies"}
+                      ? "Effectuer des simulations"
+                      : "Réaliser des économies"}
                   </h3>
                   <p className="text-sm text-white/60">
                     {activeSlide === 0
@@ -1329,13 +1446,13 @@ export default function Home() {
                       : activeSlide === 1
                       ? "Suivez votre consommation en temps réel"
                       : activeSlide === 2
-                      ? "Estimez le montant de votre facture"
-                      : "Réduisez votre consommation"}
+                      ? "Simulez votre facture et votre puissance idéale"
+                      : "Réduisez votre consommation efficacement"}
                   </p>
                 </div>
               </motion.div>
 
-              {/* Current slide (logic basé sur activeSlide) */}
+              {/* Current slide (logique basée sur activeSlide) */}
               {activeSlide === 0 && (
                 <motion.div
                   key="slide0"
@@ -1352,10 +1469,10 @@ export default function Home() {
                   bg-gradient-to-br 
                   from-white/90 to-white/70 
                   backdrop-blur-lg 
-                  p-8 
+                  p-6 sm:p-8 
                   rounded-3xl 
                   shadow-2xl 
-                  w-[300px] sm:w-[400px]
+                  w-[90%] sm:w-[350px] md:w-[400px]
                   border border-white/20 
                   z-20 mx-auto
                 "
@@ -1431,6 +1548,7 @@ export default function Home() {
               )}
 
               {activeSlide === 1 && (
+                // Carte redessinée: "Simuler ma facture" -> "Effectuer des simulations"
                 <motion.div
                   key="slide1"
                   initial={{ opacity: 0, y: 20 }}
@@ -1446,65 +1564,105 @@ export default function Home() {
                   bg-gradient-to-br 
                   from-white/90 to-white/70 
                   backdrop-blur-lg 
-                  p-8 
+                  p-6 sm:p-8 
                   rounded-3xl 
                   shadow-2xl 
-                  w-[300px] sm:w-[400px]
+                  w-[90%] sm:w-[350px] md:w-[400px]
                   border border-white/20 
                   z-20 mx-auto
                 "
                 >
                   <div className="flex items-center gap-4 mb-6">
                     <div className="p-3 bg-[#47B5B0]/10 rounded-xl">
-                      <CarouselIcon className="w-8 h-8 text-[#47B5B0]" />
+                      <SimulationIcon className="w-8 h-8 text-[#47B5B0]" />
                     </div>
                     <h3 className="text-xl sm:text-2xl font-bold text-[#191818]">
-                      Simuler ma facture
+                      Effectuer des simulations
                     </h3>
                   </div>
-                  <p className="text-gray-600 mb-8">
-                    Estimez facilement le montant de votre prochaine facture.
+                  <p className="text-gray-600 mb-6">
+                    Estimez votre facture et déterminez votre puissance idéale
+                    pour une gestion optimale.
                   </p>
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="
-                    w-full 
-                    bg-[#47B5B0] 
-                    text-white 
-                    px-6 py-4 
-                    rounded-xl 
-                    hover:bg-opacity-90 
-                    transition-all 
-                    duration-300 
-                    flex items-center 
-                    justify-center 
-                    gap-3 
-                    group
-                  "
-                    onClick={() => {
-                      router.push("/simulateur-facture");
-                    }}
-                  >
-                    <span>Accéder au simulateur</span>
-                    <svg
-                      width="25"
-                      height="26"
-                      viewBox="0 0 25 26"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
+                  <div className="space-y-4 mb-6">
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      className="
+                      w-full 
+                      bg-[#47B5B0]/10
+                      hover:bg-[#47B5B0]/20
+                      text-[#47B5B0]
+                      font-medium
+                      px-6 py-4 
+                      rounded-xl 
+                      transition-all 
+                      duration-300 
+                      flex items-center 
+                      justify-                      between
+                    "
+                      onClick={() => {
+                        router.push("/simulateur-facture");
+                      }}
                     >
-                      <path
-                        opacity="0.5"
-                        d="M12.5 23.4163C8.08021 23.4163 5.87083 23.4163 4.49792 21.8903C3.125 20.3663 3.125 17.9101 3.125 12.9997C3.125 8.08926 3.125 5.63405 4.49792 4.10801C5.87083 2.58197 8.08125 2.58301 12.5 2.58301C16.9187 2.58301 19.1292 2.58301 20.5021 4.10801C21.875 5.63509 21.875 8.08926 21.875 12.9997C21.875 17.9101 21.875 20.3653 20.5021 21.8903C19.1292 23.4153 16.9187 23.4163 12.5 23.4163Z"
-                        fill="white"
-                      />
-                      <path
-                        d="M15.6224 6.75H9.3724C8.88802 6.75 8.64635 6.75 8.4474 6.80313C8.18268 6.87416 7.9413 7.01358 7.74749 7.20738C7.55368 7.40119 7.41426 7.64257 7.34323 7.90729C7.28906 8.10833 7.28906 8.35 7.28906 8.83333C7.28906 9.31667 7.28906 9.55937 7.34219 9.75833C7.41322 10.0231 7.55264 10.2644 7.74645 10.4582C7.94025 10.652 8.18163 10.7915 8.44635 10.8625C8.6474 10.9167 8.88906 10.9167 9.3724 10.9167H15.6224C16.1068 10.9167 16.3484 10.9167 16.5474 10.8635C16.8121 10.7925 17.0535 10.6531 17.2473 10.4593C17.4411 10.2655 17.5805 10.0241 17.6516 9.75937C17.7057 9.55833 17.7057 9.31667 17.7057 8.83333C17.7057 8.35 17.7057 8.10729 17.6526 7.90833C17.5816 7.64361 17.4422 7.40223 17.2483 7.20843C17.0545 7.01462 16.8132 6.8752 16.5484 6.80417C16.3484 6.75 16.1057 6.75 15.6224 6.75ZM8.33073 15.0833C8.607 15.0833 8.87195 14.9736 9.0673 14.7782C9.26265 14.5829 9.3724 14.3179 9.3724 14.0417C9.3724 13.7654 9.26265 13.5004 9.0673 13.3051C8.87195 13.1097 8.607 13 8.33073 13C8.05446 13 7.78951 13.1097 7.59416 13.3051C7.39881 13.5004 7.28906 13.7654 7.28906 14.0417C7.28906 14.3179 7.39881 14.5829 7.59416 14.7782C7.78951 14.9736 8.05446 15.0833 8.33073 15.0833ZM8.33073 19.25C8.607 19.25 8.87195 19.1403 9.0673 18.9449C9.26265 18.7496 9.3724 18.4846 9.3724 18.2083C9.3724 17.9321 9.26265 17.6671 9.0673 17.4718C8.87195 17.2764 8.607 17.1667 8.33073 17.1667C8.05446 17.1667 7.78951 17.2764 7.59416 17.4718C7.39881 17.6671 7.28906 17.9321 7.28906 18.2083C7.28906 18.4846 7.39881 18.7496 7.59416 18.9449C7.78951 19.1403 8.05446 19.25 8.33073 19.25ZM12.4974 15.0833C12.7737 15.0833 13.0386 14.9736 13.234 14.7782C13.4293 14.5829 13.5391 14.3179 13.5391 14.0417C13.5391 13.7654 13.4293 13.5004 13.234 13.3051C13.0386 13.1097 12.7737 13 12.4974 13C12.2211 13 11.9562 13.1097 11.7608 13.3051C11.5655 13.5004 11.4557 13.7654 11.4557 14.0417C11.4557 14.3179 11.5655 14.5829 11.7608 14.7782C11.9562 14.9736 12.2211 15.0833 12.4974 15.0833ZM12.4974 19.25C12.7737 19.25 13.0386 19.1403 13.234 18.9449C13.4293 18.7496 13.5391 18.4846 13.5391 18.2083C13.5391 17.9321 13.4293 17.6671 13.234 17.4718C13.0386 17.2764 12.7737 17.1667 12.4974 17.1667C12.2211 17.1667 11.9562 17.2764 11.7608 17.4718C11.5655 17.6671 11.4557 17.9321 11.4557 18.2083C11.4557 18.4846 11.5655 18.7496 11.7608 18.9449C11.9562 19.1403 12.2211 19.25 12.4974 19.25ZM16.6641 15.0833C16.9403 15.0833 17.2053 14.9736 17.4006 14.7782C17.596 14.5829 17.7057 14.3179 17.7057 14.0417C17.7057 13.7654 17.596 13.5004 17.4006 13.3051C17.2053 13.1097 16.9403 13 16.6641 13C16.3878 13 16.1228 13.1097 15.9275 13.3051C15.7321 13.5004 15.6224 13.7654 15.6224 14.0417C15.6224 14.3179 15.7321 14.5829 15.9275 14.7782C16.1228 14.9736 16.3878 15.0833 16.6641 15.0833ZM16.6641 19.25C16.9403 19.25 17.2053 19.1403 17.4006 18.9449C17.596 18.7496 17.7057 18.4846 17.7057 18.2083C17.7057 17.9321 17.596 17.6671 17.4006 17.4718C17.2053 17.2764 16.9403 17.1667 16.6641 17.1667C16.3878 17.1667 16.1228 17.2764 15.9275 17.4718C15.7321 17.6671 15.6224 17.9321 15.6224 18.2083C15.6224 18.4846 15.7321 18.7496 15.9275 18.9449C16.1228 19.1403 16.3878 19.25 16.6641 19.25Z"
-                        fill="white"
-                      />
-                    </svg>
-                  </motion.button>
+                      <span>Simuler ma facture</span>
+                      <svg
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="transition-transform duration-300"
+                      >
+                        <path
+                          d="M9 18L15 12L9 6"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    </motion.button>
+
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      className="
+                      w-full 
+                      bg-[#47B5B0]/10
+                      hover:bg-[#47B5B0]/20
+                      text-[#47B5B0]
+                      font-medium
+                      px-6 py-4 
+                      rounded-xl 
+                      transition-all 
+                      duration-300 
+                      flex items-center 
+                      justify-between
+                    "
+                      onClick={() => {
+                        router.push("/simulateur-puissance");
+                      }}
+                    >
+                      <span>Simuler ma puissance</span>
+                      <svg
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="transition-transform duration-300"
+                      >
+                        <path
+                          d="M9 18L15 12L9 6"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    </motion.button>
+                  </div>
                 </motion.div>
               )}
 
@@ -1675,25 +1833,26 @@ export default function Home() {
                 type: "tween",
               }}
               style={{ willChange: "transform" }}
-              className="absolute right-0 top-1/2 -translate-y-1/2"
+              className="absolute right-0 top-1/2 -translate-y-1/2 hidden md:block"
             >
-              <div className="bg-[#191818] backdrop-blur-lg p-6 rounded-3xl shadow-xl w-[300px] border border-white/10">
+              {/* Redesign de la carte de droite */}
+              <div className="bg-gradient-to-r from-[#1D1E20] to-[#2D2E30] backdrop-blur-lg p-6 rounded-2xl shadow-xl w-[280px] border border-[#47B5B0]/10">
                 <h3 className="text-lg font-semibold mb-3 text-white/90">
                   {activeSlide === 0
-                    ? "Simuler ma facture"
+                    ? "Effectuer des simulations"
                     : activeSlide === 1
-                    ? "Réaliser les économies"
+                    ? "Réaliser des économies"
                     : activeSlide === 2
                     ? "Adopter les bons gestes"
                     : "Maîtriser ma consommation"}
                 </h3>
                 <p className="text-sm text-white/60">
                   {activeSlide === 0
-                    ? "Estimez le montant de votre facture"
+                    ? "Simulez votre facture et votre puissance idéale"
                     : activeSlide === 1
-                    ? "Réduisez votre consommation"
+                    ? "Réduisez votre consommation efficacement"
                     : activeSlide === 2
-                    ? "Changez vos réflexes"
+                    ? "Changez vos réflexes, économisez"
                     : "Suivez votre consommation en temps réel"}
                 </p>
               </div>
@@ -1701,27 +1860,27 @@ export default function Home() {
           </motion.div>
         </div>
 
-        {/* Navigation du carrousel (pastilles) avec contrôles supplémentaires */}
+        {/* Navigation du carrousel (pastilles) avec contrôles redessinés */}
         <div
           className="
-  absolute 
-  bottom-8 sm:bottom-12 
-  left-1/2 
-  transform -translate-x-1/2 
-  flex 
-  justify-center 
-  items-center 
-  gap-3 sm:gap-4
-  bg-white/30
-  backdrop-blur-sm
-  px-4 sm:px-6
-  py-2 sm:py-3
-  rounded-full
-  shadow-sm
-  border border-white/20
-  transition-all duration-300
-  hover:bg-white/40
-"
+          absolute 
+          bottom-6 sm:bottom-8 md:bottom-12 
+          left-1/2 
+          transform -translate-x-1/2 
+          flex 
+          justify-center 
+          items-center 
+          gap-2 sm:gap-3 md:gap-4
+          bg-white/40
+          backdrop-blur-sm
+          px-3 sm:px-5 md:px-7
+          py-2 sm:py-3 md:py-4
+          rounded-full
+          shadow-lg
+          border border-white/30
+          transition-all duration-300
+          hover:bg-white/50
+        "
         >
           {/* Bouton précédent */}
           <motion.button
@@ -1729,7 +1888,7 @@ export default function Home() {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             transition={{ type: "spring", stiffness: 300, damping: 20 }}
-            className="w-7 h-7 flex items-center justify-center text-[#47B5B0]/80 hover:text-[#47B5B0] transition-colors duration-200"
+            className="w-8 h-8 flex items-center justify-center text-[#47B5B0] hover:text-[#309590] transition-colors duration-200 bg-white/60 rounded-full shadow-sm"
             aria-label="Slide précédente"
           >
             <svg
@@ -1749,7 +1908,7 @@ export default function Home() {
             </svg>
           </motion.button>
 
-          {/* Points de navigation */}
+          {/* Points de navigation redessinés */}
           {[0, 1, 2, 3].map((index) => (
             <motion.button
               key={index}
@@ -1758,16 +1917,16 @@ export default function Home() {
               transition={{ type: "spring", stiffness: 400, damping: 25 }}
               onClick={() => setActiveSlide(index)}
               className={`
-        h-2 sm:h-2.5
-        rounded-full 
-        transition-all 
-        duration-300 
-        ${
-          activeSlide === index
-            ? "w-6 sm:w-8 bg-[#47B5B0]/70 shadow-sm"
-            : "w-2 sm:w-2.5 bg-gray-400/40 hover:bg-gray-400/60"
-        }
-      `}
+              h-3 sm:h-3.5
+              rounded-full 
+              transition-all 
+              duration-300 
+              ${
+                activeSlide === index
+                  ? "w-8 sm:w-10 bg-[#47B5B0] shadow-md"
+                  : "w-3 sm:w-3.5 bg-gray-400/60 hover:bg-gray-400/80"
+              }
+            `}
               aria-label={`Aller à la slide ${index + 1}`}
             />
           ))}
@@ -1778,7 +1937,7 @@ export default function Home() {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             transition={{ type: "spring", stiffness: 300, damping: 20 }}
-            className="w-7 h-7 flex items-center justify-center text-[#47B5B0]/80 hover:text-[#47B5B0] transition-colors duration-200"
+            className="w-8 h-8 flex items-center justify-center text-[#47B5B0] hover:text-[#309590] transition-colors duration-200 bg-white/60 rounded-full shadow-sm"
             aria-label="Slide suivante"
           >
             <svg

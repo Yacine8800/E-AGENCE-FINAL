@@ -389,15 +389,26 @@ const Header = () => {
                     </nav>
                   </div>
 
-                  {/* Rangée des boutons d'action */}
                   <div className="tablet-cta-row">
                     <div className="flex items-center gap-3 justify-center">
                       <Link
                         href="/solutions-eco"
-                        className="text-vert group flex items-center gap-[10px] font-medium text-xs transition-all duration-300"
+                        className="text-vert group flex items-center gap-[6px] sm:gap-[10px] font-medium text-[10px] xs:text-xs sm:text-sm transition-all duration-300"
                       >
-                        <Ecostore className="group-hover:scale-110 transition-transform duration-300" />
-                        <span className="relative after:absolute after:w-0 after:h-[3px] after:bg-vert after:bottom-[-2px] after:left-0 group-hover:after:w-full after:transition-all after:duration-300 group-hover:text-vert">
+                        <Ecostore
+                          className={`transition-transform duration-300 ${
+                            pathname === "/solutions-eco"
+                              ? "scale-110"
+                              : "group-hover:scale-110"
+                          }`}
+                        />
+                        <span
+                          className={`relative after:absolute after:h-[3px] after:bg-vert after:bottom-[-2px] after:left-0 after:transition-all after:duration-300 ${
+                            pathname === "/solutions-eco"
+                              ? "font-semibold after:w-full text-vert"
+                              : "after:w-0 group-hover:after:w-full group-hover:text-vert"
+                          }`}
+                        >
                           Ecostore
                         </span>
                       </Link>
@@ -524,8 +535,22 @@ const Header = () => {
                       href="/solutions-eco"
                       className="text-vert group flex items-center gap-[6px] sm:gap-[10px] font-medium text-[10px] xs:text-xs sm:text-sm transition-all duration-300"
                     >
-                      <Ecostore className="group-hover:scale-110 transition-transform duration-300" />
-                      <span className="relative after:absolute after:w-0 after:h-[3px] after:bg-vert after:bottom-[-2px] after:left-0 group-hover:after:w-full after:transition-all after:duration-300 group-hover:text-vert">
+                      <Ecostore
+                        className={`transition-transform duration-300 ${
+                          pathname === "/solutions-eco" ||
+                          pathname.startsWith("/solutions-eco/")
+                            ? "scale-110"
+                            : "group-hover:scale-110"
+                        }`}
+                      />
+                      <span
+                        className={`relative after:absolute after:h-[3px] after:bg-vert after:bottom-[-2px] after:left-0 after:transition-all after:duration-300 ${
+                          pathname === "/solutions-eco" ||
+                          pathname.startsWith("/solutions-eco/")
+                            ? "font-semibold after:w-full text-vert"
+                            : "after:w-0 group-hover:after:w-full group-hover:text-vert"
+                        }`}
+                      >
                         Ecostore
                       </span>
                     </Link>
