@@ -377,50 +377,86 @@ export default function Home() {
           </div>
 
           {/* Zone du texte et des boutons de téléchargement */}
-          <div className="w-full md:w-1/2 flex flex-col justify-center text-center md:text-left space-y-2 sm:space-y-3 md:space-y-4">
-            <div className="flex items-center justify-center md:justify-start gap-4">
-              <Image
-                src="/qrcode/qrcode.png"
-                alt="Code QR"
-                width={180}
-                height={180}
-                className="object-contain"
-              />
-              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold">
-                Votre agence<br />
-                à portée de main
-              </h2>
-            </div>
+          <div className="w-full md:w-1/2 flex flex-col justify-center items-center">
+            {/* Card Flip Container */}
+            <div className="w-full max-w-[500px] h-[300px] md:h-[350px] perspective-[1000px] mx-auto cursor-pointer group">
+              {/* Inner container that will rotate */}
+              <div className="relative w-full h-full transition-transform duration-700 transform-gpu group-hover:[transform:rotateY(180deg)] [transform-style:preserve-3d]">
 
-            <p className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-700">
-              Franchissez le pas, <strong>téléchargez</strong> maintenant
-              l&apos;application mobile
-            </p>
+                {/* Front Side */}
+                <div className="absolute w-full h-full [backface-visibility:hidden] bg-white rounded-2xl p-6 shadow-lg flex flex-col justify-center items-center md:items-start text-center md:text-left space-y-4">
+                  <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold">
+                    Votre agence<br />
+                    à portée de main
+                  </h2>
 
-            <div className="mt-2 sm:mt-3 md:mt-4 flex flex-wrap justify-center md:justify-start items-center gap-2 sm:gap-4">
-              <Image
-                src="/storepng/appstore.png"
-                alt="App Store"
-                width={120}
-                height={40}
-                className="cursor-pointer w-[120px] sm:w-[150px]"
-              />
-              <Image
-                src="/storepng/googleplay.png"
-                alt="Google Play"
-                width={120}
-                height={40}
-                className="cursor-pointer w-[120px] sm:w-[150px]"
-              />
-              <Image
-                src="/storepng/appgallery.png"
-                alt="AppGallery"
-                width={120}
-                height={40}
-                className="cursor-pointer w-[120px] sm:w-[150px]"
-              />
+                  <p className="text-sm sm:text-base md:text-lg text-gray-700">
+                    Franchissez le pas, <strong>téléchargez</strong> maintenant
+                    l&apos;application mobile
+                  </p>
+
+                  <div className="mt-2 flex flex-wrap justify-center md:justify-start items-center gap-2 sm:gap-4">
+                    <Image
+                      src="/storepng/appstore.png"
+                      alt="App Store"
+                      width={120}
+                      height={40}
+                      className="cursor-pointer w-[120px] sm:w-[150px]"
+                    />
+                    <Image
+                      src="/storepng/googleplay.png"
+                      alt="Google Play"
+                      width={120}
+                      height={40}
+                      className="cursor-pointer w-[120px] sm:w-[150px]"
+                    />
+                    <Image
+                      src="/storepng/appgallery.png"
+                      alt="AppGallery"
+                      width={120}
+                      height={40}
+                      className="cursor-pointer w-[120px] sm:w-[150px]"
+                    />
+                  </div>
+
+                  <div className="absolute bottom-2 right-2 text-xs text-gray-400">Survolez pour voir le QR code</div>
+                </div>
+
+                {/* Back Side */}
+                <div className="absolute w-full h-full [backface-visibility:hidden] bg-gray-50 rounded-2xl p-6 shadow-lg [transform:rotateY(180deg)] flex flex-col justify-center items-center">
+                  <div className="text-center">
+                    <h3 className="text-xl sm:text-2xl font-bold mb-6">Scannez le QR code</h3>
+                    <Image
+                      src="/qrcode/qrcode.png"
+                      alt="Code QR"
+                      width={220}
+                      height={220}
+                      className="mx-auto"
+                    />
+                    <p className="mt-6 text-sm text-gray-600">
+                      Téléchargez notre application<br />pour accéder à tous nos services
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
+
+          {/* Add CSS styles */}
+          <style jsx global>{`
+            .perspective-1000 {
+              perspective: 1000px;
+            }
+            .preserve-3d {
+              transform-style: preserve-3d;
+            }
+            .backface-hidden {
+              backface-visibility: hidden;
+            }
+            .rotate-y-180 {
+              transform: rotateY(180deg);
+            }
+          `}</style>
         </div>
       </motion.section>
 
@@ -1144,7 +1180,9 @@ export default function Home() {
                 transition={{ duration: 0.5, ease: "easeOut" }}
                 className="space-y-8"
               >
-
+                <span className="inline-block px-4 py-2 bg-[#47B5B0]/10 text-[#47B5B0] rounded-full text-sm font-medium">
+                  Maîtrisez votre énergie
+                </span>
                 <h2
                   className="
                   text-3xl 
