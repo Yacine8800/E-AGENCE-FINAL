@@ -16,6 +16,8 @@ import { handleApiError } from "@/utils/apiErrorHandler";
 import ConsumptionBarChart from "../components/barchat";
 import LinkIcon from "@/src/components/icons/LinkIcon";
 import PlusIcon from "@/src/components/icons/PlusIcon";
+import ReclamationModal from "../components/modales/ReclamationModal";
+import ReclamationSuccess from "../components/modales/ReclamationSuccess";
 
 
 
@@ -769,7 +771,7 @@ export default function Dashboard() {
   // États pour gérer le chargement des données
   const [compteursPrepaid, setCompteursPrepaid] = useState<Compteur[]>([]);
   const [compteursPostpaid, setCompteursPostpaid] = useState<Compteur[]>([]);
-  
+
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingPrepaid, setIsLoadingPrepaid] = useState(false);
   const [isLoadingPostpaid, setIsLoadingPostpaid] = useState(false);
@@ -1624,6 +1626,8 @@ export default function Dashboard() {
   const [isLevel2ModalOpen, setIsLevel2ModalOpen] = useState(false);
   // Ajouter un nouvel état pour le modal de réclamation
   const [isReclModalOpen, setIsReclModalOpen] = useState(false);
+  const [isReclSuccessOpen, setIsReclSuccessOpen] = useState(false);
+  const [requestNumber, setRequestNumber] = useState("D2025050001955RC");
 
   // Effet pour vérifier s'il y a une demande en attente à ouvrir automatiquement
   useEffect(() => {
@@ -1832,6 +1836,14 @@ export default function Dashboard() {
       timers.forEach(timer => clearTimeout(timer));
     };
   }, []);
+
+  const handleReclamationSubmit = (data: any) => {
+    console.log("Réclamation submitted:", data);
+    // Simuler un numéro de demande
+    setRequestNumber("D" + Math.floor(Math.random() * 9000000000 + 1000000000) + "RC");
+    setIsReclModalOpen(false);
+    setIsReclSuccessOpen(true);
+  };
 
   return (
     <>
@@ -3052,6 +3064,18 @@ export default function Dashboard() {
           </div>
         </div>
       )}
+
+      <ReclamationModal
+        isOpen={isReclModalOpen}
+        onClose={() => setIsReclModalOpen(false)}
+        onSubmit={handleReclamationSubmit}
+      />
+
+      <ReclamationSuccess
+        isOpen={isReclSuccessOpen}
+        onClose={() => setIsReclSuccessOpen(false)}
+        requestNumber={requestNumber}
+      />
     </>
   );
 }
