@@ -2,169 +2,67 @@
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import Stepper from "./stepper";
-
-const typesDeDemandeParType = {
-  "particulier-domicile": [
-    {
-      id: "branchement",
-      src: "/demande/branchement.png",
-      label: "Branchement d'abonnement",
-      width: 30,
-      height: 30,
-      disabled: true // Désactivé car la vue n'est pas disponible
-    },
-    // {
-    //   id: "abonnement",
-    //   src: "/demande/abonnement.png",
-    //   label: "Abonnement simple",
-    //   width: 50,
-    //   height: 50,
-    // },
-    {
-      id: "mutation",
-      src: "/demande/mutation.png",
-      label: "Mutation",
-      width: 50,
-      height: 50,
-    },
-
-    {
-      id: "puissance",
-      src: "/demande/puissance.png",
-      label: "Augmentation de puissance",
-      width: 50,
-      height: 50,
-      disabled: true // Désactivé car la vue n'est pas disponible
-    },
-    {
-      id: "reabonnement",
-      src: "/demande/reabon.png",
-      label: "Réabonnement",
-      width: 50,
-      height: 50,
-    },
-    // {
-    //   id: "inscription",
-    //   src: "/demande/inscription.png",
-    //   label: "Nouvelle Inscription",
-    //   width: 50,
-    //   height: 50,
-    // },
-    // {
-    //   id: "newAbonnement",
-    //   src: "/demande/newAbonnement.png",
-    //   label: "Renouvellement d'abonnement",
-    //   width: 50,
-    //   height: 50,
-    // },
-  ],
-  // "particulier-professionnel": [
-  //   {
-  //     id: "installation",
-  //     src: "/compteur/compteur1.png",
-  //     label: "Installation compteur",
-  //     width: 60,
-  //     height: 60,
-  //   },
-  //   {
-  //     id: "puissance",
-  //     src: "/demande/puissance.png",
-  //     label: "Changement de puissance",
-  //     width: 60,
-  //     height: 60,
-  //   },
-  //   {
-  //     id: "mutation",
-  //     src: "/demande/mutation.png",
-  //     label: "Transfert de contrat",
-  //     width: 60,
-  //     height: 60,
-  //   },
-  //   {
-  //     id: "reabonnement",
-  //     src: "/demande/reabon.png",
-  //     label: "Renouvellement abonnement",
-  //     width: 60,
-  //     height: 60,
-  //   },
-  // ],
-  // entreprise: [
-  //   {
-  //     id: "raccordement",
-  //     src: "/telephone/phoneNoir.png",
-  //     label: "Étude de raccordement",
-  //     width: 60,
-  //     height: 60,
-  //   },
-  //   {
-  //     id: "extension",
-  //     src: "/ampoule.png",
-  //     label: "Extension réseau",
-  //     width: 60,
-  //     height: 60,
-  //   },
-  //   {
-  //     id: "tarif",
-  //     src: "/profile.png",
-  //     label: "Changement tarifaire",
-  //     width: 60,
-  //     height: 60,
-  //   },
-  //   {
-  //     id: "connexion",
-  //     src: "/main.png",
-  //     label: "Nouvelle connexion",
-  //     width: 60,
-  //     height: 60,
-  //   },
-  // ],
-};
-
-const typesDeSelection = [
-  { id: "particulier-domicile", label: "Particulier domicile" },
-  { id: "particulier-professionnel", label: "Particulier professionnel" },
-  { id: "entreprise", label: "Entreprise" },
-];
+import {
+  DEMANDES,
+  TYPE_CATEGORIES,
+  getDemandesByCategory,
+  getDemandeLabel,
+  DemandeType,
+  DemandeCategory
+} from "../constants/demandes";
 
 const ModalDEmande = ({ onClose }: { onClose: () => void }) => {
-  const [selectedTypeId, setSelectedTypeId] = useState<string>(
-    localStorage.getItem("selectedTypeId") || typesDeSelection[0].id
+  const [selectedCategoryId, setSelectedCategoryId] = useState<DemandeCategory>(
+    (localStorage.getItem("selectedCategoryId") as DemandeCategory) || TYPE_CATEGORIES[0].id as DemandeCategory
   );
 
   useEffect(() => {
-    localStorage.setItem("selectedTypeId", selectedTypeId);
-  }, [selectedTypeId]);
+    localStorage.setItem("selectedCategoryId", selectedCategoryId);
+  }, [selectedCategoryId]);
 
-  const [selectedDemande, setSelectedDemande] = useState<string | null>(null);
+  const [selectedDemande, setSelectedDemande] = useState<DemandeType | null>(null);
+
+  // On récupère les demandes pour la catégorie sélectionnée
+  const demandesForCurrentCategory = getDemandesByCategory(selectedCategoryId);
+
+  // Dispatch custom event to notify that modal has opened
+  useEffect(() => {
+    // Dispatch modal opened event
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new Event('modal-opened'));
+    }
+
+    return () => {
+      // Dispatch modal closed event when component unmounts
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('modal-closed'));
+      }
+    };
+  }, []);
 
   // Effet pour vérifier s'il y a une demande à ouvrir automatiquement
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const openDemandeType = localStorage.getItem('openDemandeType');
+      const openDemandeType = localStorage.getItem('openDemandeType') as DemandeType | null;
       if (openDemandeType) {
         console.log("Demande à ouvrir automatiquement:", openDemandeType);
 
-        // Vérifier si le type de demande existe dans les options disponibles
-        const isValidType = Object.values(typesDeDemandeParType)
-          .some(demandes => demandes.some(demande => demande.id === openDemandeType && !demande.disabled));
+        // Chercher la demande dans notre structure DEMANDES
+        const demandeToOpen = Object.values(DEMANDES).find(d => d.id === openDemandeType && !d.disabled);
 
-        if (isValidType) {
-          // Trouver le bon type de profil qui contient cette demande
-          for (const [typeId, demandes] of Object.entries(typesDeDemandeParType)) {
-            if (demandes.some(demande => demande.id === openDemandeType && !demande.disabled)) {
-              setSelectedTypeId(typeId);
-              break;
-            }
+        if (demandeToOpen) {
+          // Trouver la catégorie appropriée
+          if (demandeToOpen.category.length > 0) {
+            setSelectedCategoryId(demandeToOpen.category[0]);
           }
 
           // Définir la demande sélectionnée
-          setSelectedDemande(openDemandeType);
+          setSelectedDemande(demandeToOpen.id);
 
           // Signaler que la demande a été traitée avec succès
           console.log("Demande ouverte avec succès dans ModalDEmande");
 
-          // Supprimer la demande du localStorage pour éviter de l'ouvrir à nouveau
-          // mais avec un délai pour être sûr que tout est bien configuré
+          // Supprimer la demande du localStorage
           setTimeout(() => {
             localStorage.removeItem('openDemandeType');
             console.log("openDemandeType supprimé du localStorage");
@@ -177,8 +75,6 @@ const ModalDEmande = ({ onClose }: { onClose: () => void }) => {
     }
   }, []);
 
-  console.log(selectedDemande, "selectedDemande")
-
   return (
     <div className="fixed inset-0 z-50 flex justify-end">
       {/* BACKDROP */}
@@ -186,7 +82,11 @@ const ModalDEmande = ({ onClose }: { onClose: () => void }) => {
         className="absolute inset-0 bg-black/50 backdrop-blur-md"
         onClick={() => {
           onClose();
-          setSelectedTypeId(typesDeSelection[0].id);
+          // Dispatch modal-closed event when backdrop is clicked
+          if (typeof window !== 'undefined') {
+            window.dispatchEvent(new Event('modal-closed'));
+          }
+          setSelectedCategoryId(TYPE_CATEGORIES[0].id as DemandeCategory);
           setSelectedDemande(null);
         }}
       ></div>
@@ -200,7 +100,7 @@ const ModalDEmande = ({ onClose }: { onClose: () => void }) => {
               if (selectedDemande) {
                 setSelectedDemande(null);
               } else {
-                setSelectedTypeId(typesDeSelection[0].id);
+                setSelectedCategoryId(TYPE_CATEGORIES[0].id as DemandeCategory);
               }
             }}
             className="text-gray-600 hover:text-gray-800"
@@ -224,9 +124,7 @@ const ModalDEmande = ({ onClose }: { onClose: () => void }) => {
 
           <h2 className="text-lg md:text-xl font-semibold text-gray-800 text-center flex-1">
             {selectedDemande
-              ? typesDeDemandeParType[
-                selectedTypeId! as keyof typeof typesDeDemandeParType
-              ]?.find((d) => d.id === selectedDemande)?.label
+              ? getDemandeLabel(selectedDemande)
               : "Demandes"}
           </h2>
           {/* Bouton de fermeture */}
@@ -234,10 +132,14 @@ const ModalDEmande = ({ onClose }: { onClose: () => void }) => {
             type="button"
             onClick={(e) => {
               onClose();
+              // Dispatch modal-closed event when the close button is clicked
+              if (typeof window !== 'undefined') {
+                window.dispatchEvent(new Event('modal-closed'));
+              }
               if (selectedDemande) {
                 setSelectedDemande(null);
               } else {
-                setSelectedTypeId(typesDeSelection[0].id);
+                setSelectedCategoryId(TYPE_CATEGORIES[0].id as DemandeCategory);
               }
             }}
             className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-full shadow-md cursor-pointer pointer-events-auto"
@@ -274,12 +176,12 @@ const ModalDEmande = ({ onClose }: { onClose: () => void }) => {
                 Je souhaite faire une demande pour :
               </p>
               <div className="flex flex-col md:flex-row justify-center items-center gap-3 w-full">
-                {typesDeSelection.map((type) => (
+                {TYPE_CATEGORIES.map((type) => (
                   <button
                     key={type.id}
-                    onClick={() => setSelectedTypeId(type.id)}
+                    onClick={() => setSelectedCategoryId(type.id as DemandeCategory)}
                     className={`flex-1 h-[70px] rounded-lg font-bold text-base transition-all duration-300 shadow-sm
-                      ${selectedTypeId === type.id
+                      ${selectedCategoryId === type.id
                         ? "bg-red-500 text-white scale-105 shadow-md"
                         : "bg-white text-gray-800 hover:bg-gray-200"
                       }`}
@@ -291,22 +193,22 @@ const ModalDEmande = ({ onClose }: { onClose: () => void }) => {
             </div>
 
             {/* SECTION : Choix du type de demande */}
-            {selectedTypeId && (
+            {!selectedDemande && (
               <div className="flex flex-col gap-4 px-4 md:px-6 py-6 md:py-8">
                 <p className="font-semibold text-gray-800 text-sm md:text-base">
                   Choisissez le type de demande souhaité :
                 </p>
                 <div className="grid grid-cols-2 gap-6 w-full items-center">
-                  {typesDeDemandeParType[selectedTypeId as keyof typeof typesDeDemandeParType]?.map(
+                  {demandesForCurrentCategory.map(
                     (demande, index, array) => (
                       <button
                         key={demande.id}
                         onClick={() => !demande.disabled && setSelectedDemande(demande.id)}
                         className={`bg-white h-[115px] rounded-xl shadow-md flex flex-col items-center justify-center p-5 gap-3 
-          transition-all duration-300 hover:shadow-lg ${!demande.disabled ? "hover:scale-105" : "cursor-not-allowed opacity-50"}
-          ${selectedDemande === demande.id ? "border-2 border-red-500 scale-105" : "border border-transparent"}
-          ${index === array.length - 1 && array.length % 2 !== 0 ? "col-span-2 mx-auto" : ""}
-        `}
+                        transition-all duration-300 hover:shadow-lg ${!demande.disabled ? "hover:scale-105" : "cursor-not-allowed opacity-50"}
+                        ${selectedDemande === demande.id ? "border-2 border-red-500 scale-105" : "border border-transparent"}
+                        ${index === array.length - 1 && array.length % 2 !== 0 ? "col-span-2 mx-auto" : ""}
+                        `}
                       >
                         <Image
                           src={demande.src}
@@ -323,7 +225,6 @@ const ModalDEmande = ({ onClose }: { onClose: () => void }) => {
                     )
                   )}
                 </div>
-
               </div>
             )}
           </>
@@ -332,9 +233,7 @@ const ModalDEmande = ({ onClose }: { onClose: () => void }) => {
         {/* STEPPER : S'affiche uniquement si une demande est sélectionnée */}
         {selectedDemande && (
           <Stepper
-            type={
-              selectedDemande as "mutation" | "branchement" | "reabonnement"
-            }
+            type={selectedDemande}
             closeModal={onClose}
           />
         )}

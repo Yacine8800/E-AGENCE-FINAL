@@ -217,16 +217,38 @@ body {
 
 @keyframes float {
   0% {
-    transform: translateY(100vh);
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-8px);
   }
   100% {
-    transform: translateY(-100px);
+    transform: translateY(0px);
   }
 }
 
 .animate-float {
-  animation-name: float;
-  animation-duration: 10s;
-  animation-timing-function: linear;
-  animation-iteration-count: infinite;
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Styles pour les toasts d'erreur avec détails */
+.toast-error-details {
+  max-width: 500px !important;
+  padding: 16px !important;
+  line-height: 1.5 !important;
+  white-space: pre-line !important;
+}
+
+.toast-error-details .Toastify__toast-body {
+  margin-left: 8px;
+  font-size: 14px;
+}
+
+.toast-error-details .Toastify__toast-body strong {
+  font-weight: 600;
+  color: #f8d7da;
+}
+
+.toast-error-details .Toastify__progress-bar {
+  height: 4px;
 }

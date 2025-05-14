@@ -37,6 +37,7 @@ export default function FloatingBot() {
   const [animationData, setAnimationData] = useState<any>(null);
   const defaultClientId = "AQ123456789";
   const [initialMessage, setInitialMessage] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Récupérer les informations de l'utilisateur connecté depuis Redux store
   const { user, isAuthenticated } = useAppSelector((state) => state.auth);
@@ -51,6 +52,62 @@ export default function FloatingBot() {
     import("../../../public/bot-anime-flow.json").then((data) => {
       setAnimationData(data.default);
     });
+  }, []);
+
+  // Check if a modal is open
+  useEffect(() => {
+    const checkForOpenModals = () => {
+      // Look for fixed elements with z-50 class that might be modals
+      const modals = document.querySelectorAll('.fixed.inset-0.z-50');
+      let modalFound = false;
+
+      modals.forEach(modal => {
+        // Check if this is a demand-related modal by looking for heading content
+        const headings = modal.querySelectorAll('h2');
+        headings.forEach(heading => {
+          if (heading.textContent?.includes('Demande')) {
+            modalFound = true;
+          }
+        });
+
+        // Also check for any modal with ModalDEmande structure
+        if (modal.querySelector('.bg-[#F8F9F9].rounded-l-2xl')) {
+          modalFound = true;
+        }
+      });
+
+      setIsModalOpen(modalFound);
+    };
+
+    // Listen for custom events for modal state
+    const handleModalOpened = () => {
+      setIsModalOpen(true);
+    };
+
+    const handleModalClosed = () => {
+      setIsModalOpen(false);
+    };
+
+    // Add event listeners for custom events
+    window.addEventListener('modal-opened', handleModalOpened);
+    window.addEventListener('modal-closed', handleModalClosed);
+
+    // Run the check initially
+    checkForOpenModals();
+
+    // Set up a mutation observer to detect when modals are added or removed
+    const observer = new MutationObserver(checkForOpenModals);
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true
+    });
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('modal-opened', handleModalOpened);
+      window.removeEventListener('modal-closed', handleModalClosed);
+    };
   }, []);
 
   // Ajouter un écouteur d'événement pour ouvrir le chatbot
@@ -282,7 +339,7 @@ export default function FloatingBot() {
   return (
     <>
       <AnimatePresence mode="sync">
-        {isHovered && !isChatOpen && (
+        {isHovered && !isChatOpen && !isModalOpen && (
           <SimpleMessage onClose={() => setIsHovered(false)} />
         )}
         {isChatOpen && (
@@ -295,43 +352,46 @@ export default function FloatingBot() {
         )}
       </AnimatePresence>
 
-      <motion.div
-        className="
-          fixed 
-          bottom-4 right-4 
-          sm:bottom-16 sm:right-8 
-          md:bottom-2 md:right-12 
-          z-50
-        "
-        initial={{ scale: 0, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-      >
-        <motion.button
+      {!isModalOpen && (
+        <motion.div
           className="
-            rounded-full 
-            shadow-lg 
-            hover:shadow-xl 
-            transition-all 
-            duration-300
-            w-[60px] h-[60px]
-            overflow-hidden
-            bg-white
+            fixed 
+            bottom-4 right-4 
+            sm:bottom-16 sm:right-8 
+            md:bottom-2 md:right-12 
+            z-50
           "
-          whileHover={{ scale: 1.05 }}
-          onClick={handleOpenChat}
-          onMouseEnter={() => !isChatOpen && setIsHovered(true)}
-          onMouseLeave={() => !isChatOpen && setIsHovered(true)}
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          exit={{ opacity: 0, scale: 0 }}
         >
-          {animationData && (
-            <Lottie
-              animationData={animationData}
-              loop={true}
-              style={{ width: "100%", height: "100%" }}
-              className="rounded-full"
-            />
-          )}
-        </motion.button>
-      </motion.div>
+          <motion.button
+            className="
+              rounded-full 
+              shadow-lg 
+              hover:shadow-xl 
+              transition-all 
+              duration-300
+              w-[60px] h-[60px]
+              overflow-hidden
+              bg-white
+            "
+            whileHover={{ scale: 1.05 }}
+            onClick={handleOpenChat}
+            onMouseEnter={() => !isChatOpen && setIsHovered(true)}
+            onMouseLeave={() => !isChatOpen && setIsHovered(true)}
+          >
+            {animationData && (
+              <Lottie
+                animationData={animationData}
+                loop={true}
+                style={{ width: "100%", height: "100%" }}
+                className="rounded-full"
+              />
+            )}
+          </motion.button>
+        </motion.div>
+      )}
     </>
   );
 }
