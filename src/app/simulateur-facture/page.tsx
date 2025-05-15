@@ -445,7 +445,7 @@ export default function SimulateurFacturePage() {
                         <table className="w-full">
                           <thead className="bg-gray-50 text-xs uppercase text-gray-600">
                             <tr>
-                              <th className="px-4 py-2 border-b text-left">Description</th>
+                              <th className="px-4 py-2 border-b text-left"></th>
                               <th className="px-4 py-2 border-b text-right">Consommation (kWh)</th>
                               <th className="px-4 py-2 border-b text-right">Prix unitaire HT</th>
                               <th className="px-4 py-2 border-b text-right">Montant (FCFA)</th>
@@ -487,9 +487,15 @@ export default function SimulateurFacturePage() {
                       {/* Taxes et Redevances */}
                       <div className="border rounded-lg overflow-hidden mb-6">
                         <div className="bg-gray-50 px-4 py-2 border-b">
-                          <h4 className="text-xs uppercase font-medium text-gray-600">Taxes et Redevances</h4>
+                          <h4 className="text-xs uppercase font-bold text-gray-600">Taxes et Redevances</h4>
                         </div>
                         <table className="w-full">
+                          <thead>
+                            <tr className="bg-gray-50">
+                              <th className="px-4 py-2 text-xs text-left text-gray-600"></th>
+                              <th className="px-4 py-2 border-b text-right">Montant (FCFA)</th>
+                            </tr>
+                          </thead>
                           <tbody className="divide-y divide-gray-100">
                             <tr>
                               <td className="px-4 py-3 text-sm">Redevance Electrification Rurale</td>
@@ -518,12 +524,12 @@ export default function SimulateurFacturePage() {
                       {/* Total Facture */}
                       <div className="bg-orange/10 p-4 rounded-lg mb-6 border border-orange/20">
                         <div className="flex justify-between items-center">
-                          <h4 className="font-semibold text-gray-800">Total Facture 04/2024</h4>
+                          <h4 className="font-semibold text-gray-800">Total Facture </h4>
                           <span className="font-bold text-xl text-orange">78 235 FCFA</span>
                         </div>
-                        <p className="text-sm text-gray-600 mt-2">
+                        {/* <p className="text-sm text-gray-600 mt-2">
                           Passée la date limite de paiement, il sera perçu 10% du solde dû de cette facture
-                        </p>
+                        </p> */}
                       </div>
 
                       {/* Informations sur la consommation */}

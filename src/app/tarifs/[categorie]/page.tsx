@@ -510,7 +510,7 @@ export default function TarifDetail() {
                             <div className="overflow-x-auto">
                                 <table className="w-full divide-y divide-gray-200">
                                     <thead>
-                                        <tr style={{ background: `linear-gradient(to right, ${color}, ${color}cc)` }} className="text-white">
+                                        <tr className="text-white bg-orange">
                                             <th scope="col" className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider">
                                                 Libellé
                                             </th>
@@ -579,10 +579,10 @@ export default function TarifDetail() {
                             <div className="p-3 bg-gray-50/80 backdrop-blur-sm rounded-lg">
                                 <p className="text-sm flex flex-wrap gap-x-4 gap-y-2">
                                     <span className="inline-flex items-center">
-                                        <span className="font-semibold mr-1">* REDEV :</span> Redevance
+                                        <span className="font-semibold mr-1">REDEV :</span> Redevance
                                     </span>
                                     <span className="inline-flex items-center">
-                                        <span className="font-semibold mr-1">** TREOM :</span> Taxe de Ramassage et
+                                        <span className="font-semibold mr-1">TREOM :</span> Taxe de Ramassage et
                                         Enlèvement des Ordures Ménagères
                                     </span>
                                 </p>

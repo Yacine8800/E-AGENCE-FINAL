@@ -22,7 +22,7 @@ Formations certifiantes dispensées par des formateurs experts et disponibles en
       <GenericPage
         title="Formation professionnelle"
         description={description}
-        buttonText="S'inscrire à une formation"
+        buttonText="S'inscrire "
         secondButtonText="Faites vous assister par clembot"
         secondButtonLink="#"
         imageRight="/depannage/formation.png"

@@ -22,7 +22,7 @@ Service personnalisé avec créneau horaire précis, confirmation par SMS et tec
       <GenericPage
         title="Prise de rendez-vous"
         description={description}
-        buttonText="Prendre RDV en ligne"
+        buttonText="Prendre un RDV"
 
         secondButtonText="Faites vous assister par clembot"
         secondButtonLink="#"
