@@ -18,6 +18,7 @@ import LinkIcon from "@/src/components/icons/LinkIcon";
 import PlusIcon from "@/src/components/icons/PlusIcon";
 import ReclamationModal from "../components/modales/ReclamationModal";
 import ReclamationSuccess from "../components/modales/ReclamationSuccess";
+import { SidebarProvider } from "../layout/SidebarContext";
 
 
 
@@ -186,6 +187,29 @@ const Level2Form = ({
 };
 
 // MeterSection Component moved before Dashboard
+const SkeletonMeter = () => {
+  return (
+    <div className="bg-white p-4 rounded-[20px] shadow-sm w-full h-[159px] flex flex-col">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <div className="skeleton skeleton-circle w-8 h-8"></div>
+          <div className="skeleton skeleton-text w-24"></div>
+        </div>
+        <div className="skeleton skeleton-text w-16"></div>
+      </div>
+      
+      <div className="space-y-3">
+        <div className="skeleton skeleton-text w-3/4"></div>
+        <div className="skeleton skeleton-text w-1/2"></div>
+      </div>
+
+      <div className="mt-auto">
+        <div className="skeleton h-10 w-full rounded-xl"></div>
+      </div>
+    </div>
+  );
+};
+
 const MeterSection = ({
   title,
   iconFill,
@@ -785,6 +809,8 @@ export default function Dashboard() {
     lastname: string;
     userId: string;
   } | null>(null);
+
+  // Suppression de l'état local, tout passe par le contexte
 
   // Fonction pour afficher un message toast
   const showToastMessage = useCallback(
@@ -1846,7 +1872,7 @@ export default function Dashboard() {
   };
 
   return (
-    <>
+    <SidebarProvider>
       {/* Modal pour afficher la facture en grand (zoom possible) */}
       {selectedFacture.isOpen && (
         <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
@@ -2092,17 +2118,16 @@ export default function Dashboard() {
       `}</style>
 
       <div className="flex overflow-hidden bg-gradient-to-br from-white to-gray-50">
-        <aside className=" ">
-          <Sidebar />
-        </aside>
+        {/* Sidebar rendue après la navbar pour être au-dessus en mobile */}
+        <Sidebar />
 
         <div className="flex-1 w-full ml-0 lg:ml-[374px] min-h-screen transition-all duration-300">
-          <header className="sticky  pl-12 lg:pl-0 px-1 bg-white shadow-sm">
+          <header className="sticky top-0 left-0 w-full z-50 bg-white shadow-sm">
             <Navbar />
           </header>
 
-          <main className="sm:px-5 pt-4 sm:pt-6 pr-2 sm:pr-3 lg:pr-6 overflow-hidden max-w-[2280px] mx-auto">
-            <div className="h-[calc(100vh-80px)] overflow-y-auto pb-6 pr-1 custom-scrollbar">
+          <main className="px-2 sm:px-5 pt-4 sm:pt-6 pr-2 sm:pr-3 lg:pr-6 overflow-hidden w-full">
+            <div className="h-[calc(100vh-80px)] dashboard-scroll pb-6 pr-1">
               {/* Bloc de bienvenue */}
               <div className="mb-6 sm:mb-8 to-transparent py-4 rounded-xl">
                 <h1 className="text-2xl sm:text-2xl md:text-3xl font-bold">
@@ -2121,7 +2146,7 @@ export default function Dashboard() {
               </div>
 
               {/* Section compteurs prépayés / postpayés + cartes */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 pb-10 items-start">
+              <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-4 gap-4 pb-10 items-start max-w-[1590px] mx-auto custom-cards-responsive">
                 <div className="h-[201px]">
                   <MeterSection
                     title="Mes postpayés"
@@ -2277,7 +2302,7 @@ export default function Dashboard() {
                         : ""}
                     </span>
                   </h1>
-                  <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-4 rounded-xl transition-all duration-300 overflow-hidden max-w-full">
+                  <div className="w-full grid grid-cols-1 xl:grid-cols-12 gap-4 rounded-xl transition-all duration-300 overflow-hidden max-w-full">
                     {/* Solde à régler - Ne s'affiche que lorsque les deux requêtes sont terminées */}
                     {itemDetails &&
                       !isLoadingDetails &&
@@ -2557,7 +2582,7 @@ export default function Dashboard() {
                     ) : null}
 
                     {/* Conteneur pour les composants de droite */}
-                    <div className="lg:col-span-7 relative overflow-hidden max-w-full">
+                    <div className="xl:col-span-7 relative overflow-hidden max-w-full">
                       <div className="relative">
                         {/* Blur overlay */}
                         {itemDetails &&
@@ -2593,7 +2618,7 @@ export default function Dashboard() {
                           </div>
                         ) : null}
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 relative overflow-hidden">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 relative overflow-hidden">
                           {/* Historique de consommation */}
                           <div className="dashboard-card transition-all duration-300">
                             <div className="dashboard-header">
@@ -3076,6 +3101,15 @@ export default function Dashboard() {
         onClose={() => setIsReclSuccessOpen(false)}
         requestNumber={requestNumber}
       />
-    </>
+
+      <style jsx global>{`
+        @media (min-width: 768px) and (max-width: 1590px) {
+          .custom-cards-responsive {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+          }
+        }
+      `}</style>
+    </SidebarProvider>
   );
 }
