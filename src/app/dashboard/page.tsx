@@ -19,6 +19,7 @@ import PlusIcon from "@/src/components/icons/PlusIcon";
 import ReclamationModal from "../components/modales/ReclamationModal";
 import ReclamationSuccess from "../components/modales/ReclamationSuccess";
 import { SidebarProvider } from "../layout/SidebarContext";
+import { API_EAGENCE } from "@/config/constants";
 
 
 
@@ -197,7 +198,7 @@ const SkeletonMeter = () => {
         </div>
         <div className="skeleton skeleton-text w-16"></div>
       </div>
-      
+
       <div className="space-y-3">
         <div className="skeleton skeleton-text w-3/4"></div>
         <div className="skeleton skeleton-text w-1/2"></div>
@@ -1313,8 +1314,8 @@ export default function Dashboard() {
       // URL de l'endpoint en fonction du type
       const endpoint =
         type === "postpaid"
-          ? `/api/proxy/rattachement/postpaye/niveau/1`
-          : `/api/proxy/rattachement/prepaye/niveau/1`;
+          ? `${API_EAGENCE}/rattachement/postpaye/niveau/1`
+          : `${API_EAGENCE}/rattachement/prepaye/niveau/1`;
 
       // Effectuer la requête
       const response = await fetch(endpoint, {
@@ -1749,7 +1750,7 @@ export default function Dashboard() {
       }
 
       // API endpoint for level 2 attachment
-      const endpoint = `/api/proxy/rattachement/${selectedItem.type === "postpaid" ? "postpaye" : "prepaye"}/niveau/2`;
+      const endpoint = `${API_EAGENCE}/${selectedItem.type === "postpaid" ? "postpaye" : "prepaye"}/niveau/2`;
 
       // Make the request
       const response = await fetch(endpoint, {
@@ -2302,6 +2303,7 @@ export default function Dashboard() {
                         : ""}
                     </span>
                   </h1>
+
                   <div className="w-full grid grid-cols-1 xl:grid-cols-12 gap-4 rounded-xl transition-all duration-300 overflow-hidden max-w-full">
                     {/* Solde à régler - Ne s'affiche que lorsque les deux requêtes sont terminées */}
                     {itemDetails &&
