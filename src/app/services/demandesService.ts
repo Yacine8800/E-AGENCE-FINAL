@@ -638,10 +638,17 @@ const demandesService = {
     formData: BranchementFormData
   ): Promise<any> => {
     try {
+      // Valider que le document Securel est présent
+      if (!formData.attachments.securel) {
+        throw new Error(
+          "Le document SECUREL (certificat technique) est obligatoire"
+        );
+      }
+
       // Convertir les fichiers en base64
       const attachmentsBase64: BranchementAttachments = {
         securel: formData.attachments.securel
-          ? await fileToBase64(formData.attachments.securel)
+          ? await JSON.stringify(formData.attachments.securel)
           : "",
         official_request: formData.attachments.official_request
           ? await fileToBase64(formData.attachments.official_request)

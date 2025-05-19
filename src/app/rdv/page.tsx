@@ -26,7 +26,7 @@ Service personnalisé avec créneau horaire précis, confirmation par SMS et tec
 
         secondButtonText="Faites vous assister par clembot"
         secondButtonLink="#"
-        imageRight="/depannage/rendez-vous.png"
+        imageRight="/demande/prise de rendez_vous.png"
         highlightWord="rendez-vous"
         onButtonClick={handleButtonClick}
 

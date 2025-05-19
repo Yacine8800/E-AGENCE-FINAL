@@ -26,7 +26,7 @@ Recevez un rapport détaillé avec des recommandations concrètes et un plan d'a
         // buttonLink="/contact"
         secondButtonText="Faites vous assister par clembot"
         secondButtonLink="#"
-        imageRight="/depannage/audit-eco.png"
+        imageRight="/demande/audit efficacite energetique.png"
         highlightWord="énergétique"
         onButtonClick={handleButtonClick}
 

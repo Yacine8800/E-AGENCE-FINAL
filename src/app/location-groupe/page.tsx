@@ -26,7 +26,7 @@ Service clé en main incluant livraison, installation, mise en service et assist
 
         secondButtonText="Faites vous assister par clembot"
         secondButtonLink="#"
-        imageRight="/depannage/groupe-electrogene.png"
+        imageRight="/demande/groupe electrogene.png"
         highlightWord="électrogène"
         onButtonClick={handleButtonClick}
 

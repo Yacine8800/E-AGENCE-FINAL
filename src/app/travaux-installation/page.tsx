@@ -25,7 +25,7 @@ Nous vous garantissons un travail soignÃ©, conforme aux normes NF C 15-100 et rÃ
         onButtonClick={handleButtonClick}
         secondButtonText="Faites vous assister par clembot"
         secondButtonLink="#"
-        imageRight="/depannage/installation.png"
+        imageRight="/risque/TRAVAUX ET INSTALLATION.png"
         highlightWord="installation"
       />
       <EfficaciteTransfoModal
