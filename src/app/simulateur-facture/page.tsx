@@ -561,18 +561,18 @@ export default function SimulateurFacturePage() {
                       </div>
 
                       {/* Informations de paiement */}
-                      <div className="bg-white border border-gray-100 rounded-lg p-4 mb-6">
+                      {/* <div className="bg-white border border-gray-100 rounded-lg p-4 mb-6">
                         <h4 className="text-sm font-medium text-gray-700 mb-3">Information importante</h4>
-                        <div className="text-sm text-red-600 font-medium mb-2">
+                         <div className="text-sm text-red-600 font-medium mb-2">
                           Passée la date limite de paiement, il sera perçu 10% du solde dû de cette facture
-                        </div>
+                        </div> 
                         <div className="flex items-center mt-2">
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-orange mr-2" viewBox="0 0 20 20" fill="currentColor">
                             <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                           </svg>
                           <span className="text-sm text-gray-600">Pour toute réclamation, veuillez contacter notre service client au 179</span>
                         </div>
-                      </div>
+                      </div> */}
 
                       {/* Note de bas de facture */}
                       <div className="text-xs text-gray-500 border-t border-gray-100 pt-4">
