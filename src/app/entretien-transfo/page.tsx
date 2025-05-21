@@ -21,7 +21,7 @@ export default function EntretienTransfoPage() {
           // buttonLink="/contact"
           secondButtonText="Faites vous assister par clembot"
           secondButtonLink="#"
-          imageRight="/depannage/depannage.png"
+          imageRight="/demande/transfromateur.png"
           onButtonClick={handleButtonClick}
         />
       </PageWrapper>

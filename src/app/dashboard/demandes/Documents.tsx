@@ -17,7 +17,6 @@ const Documents: React.FC<DocumentsProps> = ({ endpoint, updateFormData }) => {
     // Documents spécifiques pour branchement abonnement
     securel: null as File | null,
     official_request: null as File | null,
-    leaseholder_id_card: null as File | null,
     // Document spécifique pour résiliation
     id_card: null as File | null,
   });
@@ -83,29 +82,8 @@ const Documents: React.FC<DocumentsProps> = ({ endpoint, updateFormData }) => {
     });
   };
 
-  // Titre différent selon le type de demande
-  // const getTitre = () => {
-  //   switch (endpoint) {
-  //     case "mutation":
-  //       return "Documents pour la mutation";
-  //     case "reabonnement":
-  //       return "Documents pour le réabonnement";
-  //     case "branchement":
-  //       return "Documents pour le branchement";
-  //     default:
-  //       return "Documents requis";
-  //   }
-  // };
-
   return (
     <div className="w-full flex flex-col space-y-8 px-10">
-      {/* Titre spécifique au type de demande */}
-      {/* <div className={`p-4 rounded-lg ${endpoint === "branchement" ? "bg-green-50" : endpoint === "reabonnement" ? "bg-blue-50" : "bg-red-50"}`}>
-        <p className={`text-sm font-medium ${endpoint === "branchement" ? "text-green-700" : endpoint === "reabonnement" ? "text-blue-700" : "text-red-700"}`}>
-          {getTitre()}
-        </p>
-      </div> */}
-
       {/* Documents spécifiques pour branchement abonnement */}
       {(endpoint === "branchement" || endpoint === "abonnement") && (
         <>
@@ -127,6 +105,7 @@ const Documents: React.FC<DocumentsProps> = ({ endpoint, updateFormData }) => {
                     type="file"
                     className="hidden"
                     onChange={(e) => handleFileChange(e, "securel")}
+                    required
                   />
                 </label>
               </div>
@@ -149,7 +128,7 @@ const Documents: React.FC<DocumentsProps> = ({ endpoint, updateFormData }) => {
 
           <div className="w-full flex flex-col gap-2">
             <label htmlFor="official_request" className="text-sm font-semibold">
-              Demande officielle <span className="text-primary">*</span>
+              Demande officielle
             </label>
             <div className="border border-[#EDEDED] rounded-lg p-3">
               <div className="flex items-center justify-center w-full">
@@ -175,44 +154,6 @@ const Documents: React.FC<DocumentsProps> = ({ endpoint, updateFormData }) => {
                     <button
                       type="button"
                       onClick={() => setFormData({ ...formData, official_request: null })}
-                      className="text-red-500 hover:text-red-700"
-                    >
-                      ×
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="w-full flex flex-col gap-2">
-            <label htmlFor="leaseholder_id_card" className="text-sm font-semibold">
-              Pièce d'identité du demandeur <span className="text-primary">*</span>
-            </label>
-            <div className="border border-[#EDEDED] rounded-lg p-3">
-              <div className="flex items-center justify-center w-full">
-                <label className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
-                  <div className="flex flex-col items-center justify-center pt-4 pb-5">
-                    <svg className="w-6 h-6 mb-2 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                    </svg>
-                    <p className="text-xs text-gray-500">PDF, JPG, PNG (MAX. 5 Mo)</p>
-                  </div>
-                  <input
-                    id="leaseholder_id_card"
-                    type="file"
-                    className="hidden"
-                    onChange={(e) => handleFileChange(e, "leaseholder_id_card")}
-                  />
-                </label>
-              </div>
-              {formData.leaseholder_id_card && (
-                <div className="mt-2">
-                  <div className="flex items-center justify-between bg-gray-50 p-2 rounded-md">
-                    <span className="text-sm truncate">{formData.leaseholder_id_card.name}</span>
-                    <button
-                      type="button"
-                      onClick={() => setFormData({ ...formData, leaseholder_id_card: null })}
                       className="text-red-500 hover:text-red-700"
                     >
                       ×

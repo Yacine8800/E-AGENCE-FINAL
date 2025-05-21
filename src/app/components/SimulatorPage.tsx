@@ -365,28 +365,15 @@ export default function SimulatorPage({
                           <div className="p-4 pt-0">
                             <ul className="space-y-3">
                               <li className="flex items-start gap-2">
-                                <div className="bg-orange/20 p-1.5 rounded-full mt-0.5" aria-hidden="true">
-                                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 text-orange-700" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
-                                  </svg>
-                                </div>
+
                                 <p className="text-gray-700 text-sm"><span className="font-semibold">Évitez les surcharges</span> - Déterminez si votre installation électrique est adaptée</p>
                               </li>
                               <li className="flex items-start gap-2">
-                                <div className="bg-orange/20 p-1.5 rounded-full mt-0.5" aria-hidden="true">
-                                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 text-orange-700" viewBox="0 0 20 20" fill="currentColor">
-                                    <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z" />
-                                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clipRule="evenodd" />
-                                  </svg>
-                                </div>
+
                                 <p className="text-gray-700 text-sm"><span className="font-semibold">Optimisez votre contrat</span> - Choisissez l'abonnement adapté</p>
                               </li>
                               <li className="flex items-start gap-2">
-                                <div className="bg-orange/20 p-1.5 rounded-full mt-0.5" aria-hidden="true">
-                                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 text-orange-700" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fillRule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                                  </svg>
-                                </div>
+
                                 <p className="text-gray-700 text-sm"><span className="font-semibold">Planifiez en sécurité</span> - Anticipez vos besoins actuels et futurs</p>
                               </li>
                             </ul>
@@ -686,9 +673,9 @@ export default function SimulatorPage({
                         onClick={handleCancel}
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                          <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                          <path fillRule="evenodd" d="M10.707 5.293a1 1 0 010 1.414L7.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
                         </svg>
-                        <span>Annuler</span>
+                        <span>Précédent</span>
                       </button>
                       <button
                         className="py-3 px-4 bg-green-600 text-white rounded-full font-medium hover:bg-green-700 transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center gap-1 transform hover:translate-y-[-1px] focus:outline-none focus:ring-2 focus:ring-green-500"
@@ -712,24 +699,10 @@ export default function SimulatorPage({
                         className="py-3 px-4 bg-orange text-white rounded-full font-medium hover:bg-orange/90 transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center gap-1 transform hover:translate-y-[-1px] focus:outline-none focus:ring-2 focus:ring-orange/50"
                         onClick={handleNext}
                       >
-                        {CATEGORIES.findIndex(cat => cat.slug === selectedCategoryTab) < CATEGORIES.length - 1
-                          ? (
-                            <>
-                              <span>Suivant</span>
-                              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                                <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
-                              </svg>
-                            </>
-                          )
-                          : (
-                            <>
-                              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                              </svg>
-                              <span>Terminer</span>
-                            </>
-                          )
-                        }
+                        <span>Suivant</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                        </svg>
                       </button>
                     </div>
                   </div>

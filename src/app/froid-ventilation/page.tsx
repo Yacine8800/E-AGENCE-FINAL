@@ -25,7 +25,7 @@ Solutions sur mesure adaptées à vos besoins et à votre budget.`;
         onButtonClick={handleButtonClick}
         secondButtonText="Faites vous assister par clembot"
         secondButtonLink="#"
-        imageRight="/depannage/climatisation.png"
+        imageRight="/risque/FROID ET VENTILATION.png"
         highlightWord="ventilation"
       />
       <EfficaciteTransfoModal

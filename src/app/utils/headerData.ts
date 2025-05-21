@@ -10,8 +10,8 @@ export const TAB_CONTENT = {
       icon: AssistanceIcon,
       links: [
         { href: "/depannage", label: "Pour un dépannage" },
-        { href: "/incident", label: "Pour signaler un incident" },
         { href: "/reclamation", label: "Pour faire une réclamation" },
+        { href: "/incident", label: "Pour signaler un incident" },
       ],
       isFirst: true,
     },

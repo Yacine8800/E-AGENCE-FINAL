@@ -26,7 +26,7 @@ Bénéficiez d'aides financières et de crédits d'impôt grâce à nos solution
         onButtonClick={handleButtonClick}
         secondButtonText="Faites vous assister par clembot"
         secondButtonLink="#"
-        imageRight="/depannage/energie.png"
+        imageRight="/risque/ACCOMPAGNEMENT TRANSITION ENERGETIQUE.png"
         highlightWord="énergétique"
       />
 
