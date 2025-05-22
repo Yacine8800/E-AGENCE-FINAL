@@ -118,7 +118,7 @@ const VideoCarousel = () => {
             transition={{ duration: 1, ease: "easeOut", delay: 0.4 }}
             className="text-xl sm:text-2xl md:text-3xl lg:text-5xl text-black italic font-semibold whitespace-nowrap"
           >
-            e-agence
+            agence en ligne
           </motion.span>
         </motion.div>
 

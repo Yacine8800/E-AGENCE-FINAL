@@ -1613,7 +1613,7 @@ export default function ChatBot({
             />
             <div>
               <h2 className={`${theme.text} font-medium`}>
-                Assistant E-Agence
+                Agence en ligne
               </h2>
               <div className="flex items-center gap-1.5">
                 <div
