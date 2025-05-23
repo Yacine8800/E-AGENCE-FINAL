@@ -5,7 +5,6 @@ import dynamic from "next/dynamic";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { CarouselIcon } from "./components/icons/CarouselIcon";
 import Ecostore from "./components/icons/EcoStore";
 
 const VideoCarousel = dynamic(() => import("./components/VideoCarousel"), {
@@ -17,6 +16,7 @@ interface ServiceItem {
   description: string;
   image: string;
   className?: string;
+  featured?: true;
 }
 
 const services: ServiceItem[] = [
@@ -29,6 +29,7 @@ const services: ServiceItem[] = [
     title: "Prépayé",
     description: "Rechargez à l'avance pour contrôler votre consommation.",
     image: "/compteur/compteur3.png",
+    featured: true,
   },
   {
     title: "PEPT",
@@ -48,6 +49,7 @@ export default function Home() {
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
+  const [isVisible, setIsVisible] = useState(false);
 
   // Détecter si on est sur mobile
   useEffect(() => {
@@ -140,6 +142,10 @@ export default function Home() {
       }
     };
   }, [isPaused, nextSlide]);
+
+  useEffect(() => {
+    setIsVisible(true);
+  }, []);
 
   useEffect(() => {
     // Vérifier si l'utilisateur préfère le mode sombre
@@ -289,17 +295,31 @@ export default function Home() {
             <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-semibold mb-4 sm:mb-6 relative z-10">
               Nos Offres d&apos;abonnement
             </h2>
-            <motion.div
-              className="absolute -bottom-1 left-0 h-3 bg-amber-200 w-full opacity-50 z-0"
-              initial={{ width: "0%" }}
-              whileInView={{ width: "100%" }}
-              transition={{ duration: 0.8, delay: 0.6 }}
-              viewport={{ once: true }}
-            />
+            <motion.svg
+              className="absolute -bottom-0 left-0 w-full"
+              viewBox="0 0 200 8"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              initial={{ pathLength: 0, opacity: 0 }}
+              animate={{
+                pathLength: isVisible ? 1 : 0,
+                opacity: isVisible ? 1 : 0,
+              }}
+              transition={{ duration: 0.8, delay: 0.4, ease: "easeInOut" }}
+            >
+              <motion.path
+                d="M1 5.5C47.3333 2.16667 146.667 2.16667 199 5.5"
+                stroke={"#47B5B0"}
+                strokeWidth="2"
+                strokeLinecap="round"
+                initial={{ pathLength: 0 }}
+                animate={{ pathLength: isVisible ? 1 : 0 }}
+                transition={{ duration: 0.8, delay: 0.4, ease: "easeInOut" }}
+              />
+            </motion.svg>
           </motion.div>
           <p className="max-w-2xl mx-auto text-sm sm:text-base md:text-lg">
             Sélectionnez le profil qui reflète vos habitudes de consommation
-            pour une facture précise et un suivi optimisé de votre énergie.
           </p>
         </motion.section>
 
@@ -330,7 +350,6 @@ export default function Home() {
             </div>
           )}
 
-          {/* Conteneur avec défilement horizontal sur mobile, grid espacé sur desktop */}
           <div
             ref={carouselRef}
             className={`
@@ -376,7 +395,7 @@ export default function Home() {
                 whileHover={{ y: -5 }}
               >
                 {/* Image plus grande et respirante */}
-                <div className="relative w-full aspect-[4/3] mx-auto rounded-2xl overflow-hidden shadow-lg">
+                <div className="relative w-full h-[30rem] aspect-[4/3] mx-auto rounded-2xl overflow-hidden shadow-lg">
                   <Image
                     src={service.image}
                     alt={service.title}
@@ -426,7 +445,7 @@ export default function Home() {
                   <h3 className="text-lg sm:text-xl font-semibold text-black mb-2">
                     {service.title}
                   </h3>
-                  {service.description && (
+                  {/* {service.description && (
                     <motion.p
                       className="mt-2 text-gray-700 text-sm sm:text-base max-w-[95%] mx-auto line-clamp-2 group-hover:line-clamp-none"
                       initial={{ opacity: 0.7 }}
@@ -435,7 +454,7 @@ export default function Home() {
                     >
                       {service.description}
                     </motion.p>
-                  )}
+                  )} */}
                 </div>
               </motion.div>
             ))}
@@ -607,13 +626,13 @@ export default function Home() {
             >
               Besoin d&apos;assistance ?
             </motion.h2>
-            <motion.div
+            {/* <motion.div
               className="absolute -bottom-1 left-0 right-0 h-1.5 bg-white opacity-60 rounded-full"
               initial={{ width: 0, x: "50%" }}
               whileInView={{ width: "100%", x: 0 }}
               transition={{ duration: 0.7, delay: 0.3 }}
               viewport={{ once: true }}
-            />
+            /> */}
           </div>
 
           {/* Sous-titre amélioré */}
@@ -782,7 +801,7 @@ export default function Home() {
       "
             >
               {/* Barre d'accent supérieure */}
-              <div className="absolute top-0 left-0 right-0 h-1 bg-blue-500 transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-300" />
+              <div className="absolute top-0 left-0 right-0 h-1 bg-green-500 transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-300" />
 
               {/* En-tête de la carte */}
               <div className="w-full text-center">
@@ -798,30 +817,11 @@ export default function Home() {
                       times: [0, 0.3, 0.6, 1],
                     }}
                   >
-                    <div className="absolute inset-0 bg-blue-300 opacity-0 group-hover:opacity-30 blur-md rounded-full scale-150 transition-opacity duration-500" />
+                    <div className="absolute inset-0 bg-green-300 opacity-0 group-hover:opacity-30 blur-md rounded-full scale-150 transition-opacity duration-500" />
                     <motion.img
                       src="assistance/wha.png"
                       alt="WhatsApp"
                       className="w-10 h-10 sm:w-12 sm:h-12 relative z-10"
-                    />
-                  </motion.div>
-
-                  <motion.div
-                    className="relative"
-                    whileHover={{
-                      scale: 1.2,
-                      rotateZ: [0, -8, 8, 0],
-                    }}
-                    transition={{
-                      duration: 0.4,
-                      times: [0, 0.3, 0.6, 1],
-                    }}
-                  >
-                    <div className="absolute inset-0 bg-blue-300 opacity-0 group-hover:opacity-30 blur-md rounded-full scale-150 transition-opacity duration-500" />
-                    <motion.img
-                      src="assistance/fb.png"
-                      alt="Facebook"
-                      className="w-8 h-8 sm:w-10 sm:h-10 relative z-10"
                     />
                   </motion.div>
                 </div>
@@ -836,7 +836,7 @@ export default function Home() {
               </div>
 
               <div className="flex items-center gap-2 my-2">
-                <span className="bg-blue-100 text-blue-800 text-xs px-2 py-0.5 rounded-full">
+                <span className="bg-green-100 text-green-800 text-xs px-2 py-0.5 rounded-full">
                   Communication directe
                 </span>
               </div>
@@ -848,27 +848,29 @@ export default function Home() {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="
-            py-2.5
-            flex-1
-            flex 
-            items-center 
-            justify-center 
-            gap-1.5
-            bg-green-500
-            hover:bg-green-600
-            text-white 
-            text-sm
-            font-medium 
-            rounded-lg
-            transition-all 
-            duration-200
-            transform
-            translate-y-0
-            hover:-translate-y-1
-            focus:outline-none
-            focus:ring-2
-            focus:ring-green-500
-          "
+          mt-2
+          py-3 
+          px-5
+          w-full
+          flex 
+          items-center 
+          justify-center 
+          gap-2 
+          bg-green-500 
+          hover:bg-green-600
+          text-white 
+          font-medium 
+          rounded-lg
+          transition-all 
+          duration-200
+          transform
+          translate-y-0
+          hover:-translate-y-1
+          focus:outline-none
+          focus:ring-2
+          focus:ring-green-500
+          focus:ring-opacity-50
+        "
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -880,47 +882,9 @@ export default function Home() {
                   </svg>
                   <span>WhatsApp</span>
                 </a>
-
-                <a
-                  href="https://m.me/companyfacebook"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="
-            py-2.5
-            flex-1
-            flex 
-            items-center 
-            justify-center 
-            gap-1.5
-            bg-blue-600
-            hover:bg-blue-700
-            text-white 
-            text-sm
-            font-medium 
-            rounded-lg
-            transition-all 
-            duration-200
-            transform
-            translate-y-0
-            hover:-translate-y-1
-            focus:outline-none
-            focus:ring-2
-            focus:ring-blue-500
-          "
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-4 w-4"
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                  >
-                    <path d="M12 0c-6.627 0-12 4.975-12 11.111 0 3.497 1.745 6.616 4.472 8.652v4.237l4.086-2.242c1.09.301 2.246.464 3.442.464 6.627 0 12-4.974 12-11.111 0-6.136-5.373-11.111-12-11.111zm1.193 14.963l-3.056-3.259-5.963 3.259 6.559-6.963 3.13 3.259 5.889-3.259-6.559 6.963z" />
-                  </svg>
-                  <span>Messenger</span>
-                </a>
               </div>
 
-              <motion.div className="absolute bottom-0 left-0 right-0 h-1 bg-blue-500 transform origin-right scale-x-0 group-hover:scale-x-100 transition-transform duration-300" />
+              <motion.div className="absolute bottom-0 left-0 right-0 h-1 bg-green-500 transform origin-right scale-x-0 group-hover:scale-x-100 transition-transform duration-300" />
             </motion.div>
 
             {/* Carte 3 - Chatbot - Action contextuelle de chat */}
@@ -983,7 +947,7 @@ export default function Home() {
               </div>
 
               <div className="flex items-center gap-2 my-2">
-                <span className="bg-green-100 text-green-800 text-xs px-2 py-0.5 rounded-full">
+                <span className="bg-[#dd67433b] text-[#dd6743] text-xs px-2 py-0.5 rounded-full">
                   Intelligence artificielle
                 </span>
               </div>
@@ -1000,8 +964,8 @@ export default function Home() {
                       items-center 
                       justify-center 
                       gap-2 
-                      bg-green-500 
-                      hover:bg-green-600 
+                      bg-[#dd6743]
+                      hover:bg-[#dd6743] 
                       text-white 
                       font-medium 
                       rounded-lg
@@ -1285,6 +1249,8 @@ export default function Home() {
                   lg:text-6xl 
                   font-bold 
                   text-[#191818] 
+                  text-center
+                  sm:text-start
                   leading-tight 
                   tracking-tight
                 "
@@ -1299,6 +1265,8 @@ export default function Home() {
                   sm:text-base 
                   md:text-lg 
                   lg:text-xl 
+                  text-center
+                  sm:text-start
                   text-gray-600 
                   leading-relaxed
                 "
@@ -1308,7 +1276,7 @@ export default function Home() {
                   adoptez les meilleures pratiques pour économiser l'énergie au
                   quotidien.
                 </p>
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-4 justify-center sm:justify-normal">
                   {/* Texte du bouton changé de "Essayez notre simulateur" à "Rendez-vous sur l'ecostore" */}
                   <motion.button
                     whileHover={{ scale: 1.05 }}
@@ -1413,7 +1381,7 @@ export default function Home() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.8 }}
-            className="relative z-10 flex items-center justify-center md:w-1/2 min-h-[400px] w-full"
+            className="relative z-10 flex items-center justify-center min-h-[400px]"
           >
             <AnimatePresence mode="wait" initial={false}>
               <motion.div
@@ -1429,8 +1397,7 @@ export default function Home() {
                 style={{ willChange: "transform" }}
                 className="absolute left-0 top-1/2 -translate-y-1/2 hidden md:block"
               >
-                {/* Carte redessinée pour l'aperçu de la slide précédente */}
-                <div className="bg-gradient-to-r from-[#1D1E20] to-[#2D2E30] backdrop-blur-lg p-6 rounded-2xl shadow-xl w-[280px] border border-[#47B5B0]/10">
+                <div className="bg-gradient-to-r from-[#1D1E20] to-[#2D2E30] backdrop-blur-lg p-6 rounded-2xl shadow-xl w-[280px] h-[10rem] border border-[#47B5B0]/10">
                   <h3 className="text-lg font-semibold mb-3 text-white/90">
                     {activeSlide === 0
                       ? "Adopter les bons gestes"
@@ -1452,7 +1419,6 @@ export default function Home() {
                 </div>
               </motion.div>
 
-              {/* Current slide (logique basée sur activeSlide) */}
               {activeSlide === 0 && (
                 <motion.div
                   key="slide0"
@@ -1599,7 +1565,7 @@ export default function Home() {
                       transition-all 
                       duration-300 
                       flex items-center 
-                      justify-                      between
+                      justify-between
                     "
                       onClick={() => {
                         router.push("/simulateur-facture");
@@ -1679,7 +1645,7 @@ export default function Home() {
                   }}
                   style={{ willChange: "transform" }}
                   className="
-                  bg-gradient-to-br 
+                  bg-gradient-to-br
                   from-white/90 to-white/70 
                   backdrop-blur-lg 
                   p-8 
@@ -1836,7 +1802,7 @@ export default function Home() {
               className="absolute right-0 top-1/2 -translate-y-1/2 hidden md:block"
             >
               {/* Redesign de la carte de droite */}
-              <div className="bg-gradient-to-r from-[#1D1E20] to-[#2D2E30] backdrop-blur-lg p-6 rounded-2xl shadow-xl w-[280px] border border-[#47B5B0]/10">
+              <div className="bg-gradient-to-r from-[#1D1E20] to-[#2D2E30] backdrop-blur-lg p-6 rounded-2xl shadow-xl w-[280px] h-[10rem] border border-[#47B5B0]/10">
                 <h3 className="text-lg font-semibold mb-3 text-white/90">
                   {activeSlide === 0
                     ? "Effectuer des simulations"
@@ -1871,15 +1837,11 @@ export default function Home() {
           justify-center 
           items-center 
           gap-2 sm:gap-3 md:gap-4
-          bg-white/40
           backdrop-blur-sm
           px-3 sm:px-5 md:px-7
           py-2 sm:py-3 md:py-4
           rounded-full
-          shadow-lg
-          border border-white/30
           transition-all duration-300
-          hover:bg-white/50
         "
         >
           {/* Bouton précédent */}
@@ -1888,12 +1850,12 @@ export default function Home() {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             transition={{ type: "spring", stiffness: 300, damping: 20 }}
-            className="w-8 h-8 flex items-center justify-center text-[#47B5B0] hover:text-[#309590] transition-colors duration-200 bg-white/60 rounded-full shadow-sm"
+            className="w-8 h-8 flex items-center justify-center text-[#47B5B0] hover:text-[#309590] transition-colors duration-200 rounded-full shadow-sm"
             aria-label="Slide précédente"
           >
             <svg
-              width="16"
-              height="16"
+              width="30"
+              height="30"
               viewBox="0 0 24 24"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
@@ -1937,12 +1899,12 @@ export default function Home() {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             transition={{ type: "spring", stiffness: 300, damping: 20 }}
-            className="w-8 h-8 flex items-center justify-center text-[#47B5B0] hover:text-[#309590] transition-colors duration-200 bg-white/60 rounded-full shadow-sm"
+            className="w-8 h-8 flex items-center justify-center text-[#47B5B0] hover:text-[#309590] transition-colors duration-200 rounded-full shadow-sm"
             aria-label="Slide suivante"
           >
             <svg
-              width="16"
-              height="16"
+              width="30"
+              height="30"
               viewBox="0 0 24 24"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"

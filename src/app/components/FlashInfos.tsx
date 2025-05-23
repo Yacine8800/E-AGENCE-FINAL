@@ -1,5 +1,6 @@
 "use client";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 
 export default function FlashInfos() {
@@ -16,15 +17,20 @@ export default function FlashInfos() {
   useEffect(() => {
     // Handler for foreground notifications (when app is active)
     const handleNotification = (event: Event) => {
-      const customEvent = event as CustomEvent<{ title: string; body: string; data?: any }>;
+      const customEvent = event as CustomEvent<{
+        title: string;
+        body: string;
+        data?: any;
+      }>;
       console.log("Foreground notification received:", customEvent.detail);
-      
+
       // Vérifier si c'est une notification de test
-      const isTestNotification = 
-        (customEvent.detail.title === "Notification pour Safari" && 
-         customEvent.detail.body.includes("temps réel même sur Safari")) ||
-        (customEvent.detail.data && customEvent.detail.data.type === "safari-test");
-        
+      const isTestNotification =
+        (customEvent.detail.title === "Notification pour Safari" &&
+          customEvent.detail.body.includes("temps réel même sur Safari")) ||
+        (customEvent.detail.data &&
+          customEvent.detail.data.type === "safari-test");
+
       // Ne pas afficher les notifications de test
       if (!isTestNotification) {
         setNotification({
@@ -39,35 +45,40 @@ export default function FlashInfos() {
     // Setup broadcast channel to receive messages from service worker
     // This helps receive notifications when the browser tab is not active
     let broadcastChannel: BroadcastChannel | null = null;
-    
-    if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
+
+    if (typeof window !== "undefined" && "BroadcastChannel" in window) {
       try {
-        broadcastChannel = new BroadcastChannel('firebase-messaging-sw-channel');
-        
+        broadcastChannel = new BroadcastChannel(
+          "firebase-messaging-sw-channel"
+        );
+
         broadcastChannel.onmessage = (event) => {
           console.log("Broadcast channel message received:", event.data);
-          
-          if (event.data && event.data.type === 'BACKGROUND_NOTIFICATION') {
+
+          if (event.data && event.data.type === "BACKGROUND_NOTIFICATION") {
             const notificationData = event.data.payload;
-            
+
             // Vérifier si c'est une notification de test
-            const isTestNotification = 
-              (notificationData.title === "Notification pour Safari" && 
-               notificationData.body.includes("temps réel même sur Safari")) ||
-              (notificationData.data && notificationData.data.type === "safari-test");
-              
+            const isTestNotification =
+              (notificationData.title === "Notification pour Safari" &&
+                notificationData.body.includes("temps réel même sur Safari")) ||
+              (notificationData.data &&
+                notificationData.data.type === "safari-test");
+
             // Ne pas afficher les notifications de test
             if (!isTestNotification) {
               setNotification({
                 title: notificationData.title,
-                body: notificationData.body
+                body: notificationData.body,
               });
             } else {
-              console.log("Notification de test ignorée dans l'UI (broadcast channel)");
+              console.log(
+                "Notification de test ignorée dans l'UI (broadcast channel)"
+              );
             }
           }
         };
-        
+
         // Log connection status
         console.log("Broadcast channel connected for notifications");
       } catch (err) {
@@ -81,7 +92,7 @@ export default function FlashInfos() {
     return () => {
       // Clean up event listeners
       window.removeEventListener("firebase-notification", handleNotification);
-      
+
       // Close broadcast channel if it exists
       if (broadcastChannel) {
         try {
@@ -175,18 +186,12 @@ export default function FlashInfos() {
           `}
           animate={notification ? pulseAnimation : {}}
         >
-          <svg
-            width="14"
-            height="14"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M20 4H4C2.9 4 2.01 4.9 2.01 6L2 18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6C22 4.9 21.1 4 20 4ZM20 18H4V8L12 13L20 8V18ZM12 11L4 6H20L12 11Z"
-              fill="white"
-            />
-          </svg>
+          <Image
+            src={"/icons/fluent--mail-alert-28-filled.svg"}
+            width={24}
+            height={24}
+            alt="test"
+          />
         </motion.div>
 
         <div className="flex-1">
@@ -197,8 +202,8 @@ export default function FlashInfos() {
             {notification && (
               <div className="absolute -right-4 -top-2">
                 <svg
-                  width="12"
-                  height="12"
+                  width="16"
+                  height="16"
                   viewBox="0 0 24 24"
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"

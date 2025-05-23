@@ -1,4 +1,4 @@
-import Image from 'next/image';
+import Image from "next/image";
 
 interface IconProps {
   className?: string;
@@ -6,7 +6,7 @@ interface IconProps {
 
 export const AssistanceIcon = ({ className = "" }: IconProps) => (
   <Image
-    src="/icons/assistance.svg"
+    src="/icons/mingcute--service-fill.svg"
     alt="Assistance"
     width={24}
     height={24}
@@ -16,7 +16,7 @@ export const AssistanceIcon = ({ className = "" }: IconProps) => (
 
 export const SimulateurIcon = ({ className = "" }: IconProps) => (
   <Image
-    src="/icons/simulateur.svg"
+    src="/icons/ion--calculator-outline.svg"
     alt="Simulateur"
     width={24}
     height={24}
