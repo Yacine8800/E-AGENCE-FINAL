@@ -1,13 +1,7 @@
-import { AnimatePresence, motion } from "framer-motion";
-import { Metadata } from "next";
-import { useCallback, useEffect, useState } from "react";
+"use client";
 
-// Métadonnées pour le SEO
-export const metadata: Metadata = {
-  title: "Bon à savoir - E-AGENCE",
-  description:
-    "Informations utiles sur les compteurs, disjoncteurs et tableaux de comptage électriques.",
-};
+import { AnimatePresence, motion } from "framer-motion";
+import { useCallback, useEffect, useState } from "react";
 
 interface Slide {
   id: number;
