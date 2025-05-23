@@ -2,11 +2,7 @@ import React, { useState } from "react";
 import ElectricButton from "../ui/ElectricButton";
 
 interface RattacherCompteurFormProps {
-  onSubmit: (data: {
-    identifiant: string;
-    label: string;
-    isAlerte: boolean;
-  }) => void;
+  onSubmit: (identifiant: string, label: string, type: string) => void;
   onCancel: () => void;
   colorTheme?: "orange" | "green";
 }
@@ -19,7 +15,7 @@ export default function RattacherCompteurForm({
   const [formData, setFormData] = useState({
     identifiant: "",
     label: "",
-    isAlerte: false,
+    type: "prepaid",
   });
 
   // Color configuration based on theme
@@ -40,7 +36,7 @@ export default function RattacherCompteurForm({
   // Empêche l'envoi direct du formulaire et délègue au Dashboard
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(formData);
+    onSubmit(formData.identifiant, formData.label, formData.type);
   };
 
   return (
@@ -50,7 +46,7 @@ export default function RattacherCompteurForm({
         <div className="space-y-2">
           <label
             htmlFor="identifiant"
-            className="block text-sm font-medium text-gray-700 mb-1 flex items-center"
+            className="block text-sm font-medium text-gray-700 mb-1 items-center"
           >
             <span className={`h-1 w-1 ${colorTheme === "orange"
                 ? "bg-[#F7942E]"
@@ -88,7 +84,7 @@ export default function RattacherCompteurForm({
         <div className="space-y-2">
           <label
             htmlFor="label"
-            className="block text-sm font-medium text-gray-700 mb-1 flex items-center"
+            className="block text-sm font-medium text-gray-700 mb-1 items-center"
           >
             <span className={`h-1 w-1 ${colorTheme === "orange"
                 ? "bg-[#F7942E]"

@@ -3,11 +3,7 @@ import ElectricButton from "../ui/ElectricButton";
 
 interface RattacherCompteurFormProps {
   colorTheme?: "orange" | "green";
-  onSubmit: (data: {
-    identifiant: string;
-    label: string;
-    isAlerte: boolean;
-  }) => void;
+  onSubmit: (identifiant: string, label: string, type: string) => void;
   onCancel: () => void;
 }
 
@@ -24,7 +20,7 @@ export default function RattacherIdentifiantForm({
   const [formData, setFormData] = useState({
     identifiant: "",
     label: "",
-    isAlerte: false,
+    type: "postpaid",
   });
 
   // Gère la saisie dans les champs (y compris checkbox si besoin)
@@ -36,10 +32,12 @@ export default function RattacherIdentifiantForm({
     }));
   };
 
+  console.log(formData, "formData");
+
   // Empêche l'envoi direct du formulaire et délègue au Dashboard
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(formData);
+    onSubmit(formData.identifiant, formData.label, formData.type);
   };
 
   return (
@@ -116,10 +114,11 @@ export default function RattacherIdentifiantForm({
           <ElectricButton
             type="submit"
             variant="primary"
-            className={`px-4 py-2.5 rounded-lg ${colorTheme === "green"
+            className={`px-4 py-2.5 rounded-lg ${
+              colorTheme === "green"
                 ? "bg-gradient-to-r from-[#56C1B5] to-[#56C1B5]/90 hover:from-[#4AB0A4] hover:to-[#4AB0A4]/90"
                 : ""
-              }`}
+            }`}
           >
             Rattacher
           </ElectricButton>

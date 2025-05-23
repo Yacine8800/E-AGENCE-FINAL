@@ -12,6 +12,7 @@ import { AuthLayout } from "../authLayout";
 import Title from "../components/title";
 import Script from "next/script";
 import { API_GOOGLE_CLIENT_ID } from "@/config/constants";
+import { axiosService } from "@/src/services/axios.service";
 
 // Déclaration des types pour Facebook SDK
 declare global {
@@ -123,18 +124,13 @@ const Login = () => {
   const handleSocialLogin = async (provider: 'google' | 'facebook', token: string) => {
     try {
       setIsLoading(true);
-      const apiToken = await getApiToken();
+      // const apiToken = await getApiToken();
 
-      const response = await fetch(`${API_URL}/v3/user/client/login/${provider}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${apiToken}`,
-        },
-        body: JSON.stringify({ token }),
+      const response : any = await axiosService.post(`/v3/user/client/login/${provider}`, {
+        token: token,
       });
 
-      const data = await response.json();
+      const data = response.data;
 
       if (response.ok && data.message === "Action éffectuée avec succès") {
         // Store user info and redirect
@@ -155,45 +151,61 @@ const Login = () => {
   useEffect(() => {
     // Charger le SDK Google
     const loadGoogleSDK = () => {
-      const script = document.createElement("script");
-      script.src = "https://accounts.google.com/gsi/client";
-      script.async = true;
-      script.defer = true;
-      document.body.appendChild(script);
-
-      return () => {
-        document.body.removeChild(script);
-      };
+      return new Promise<void>((resolve) => {
+        const script = document.createElement("script");
+        script.src = "https://accounts.google.com/gsi/client";
+        script.async = true;
+        script.defer = true;
+        script.onload = () => resolve();
+        document.body.appendChild(script);
+      });
     };
 
     // Charger le SDK Facebook
     const loadFacebookSDK = () => {
-      window.fbAsyncInit = function () {
-        window.FB.init({
-          appId: process.env.NEXT_PUBLIC_FACEBOOK_APP_ID as string,
-          cookie: true,
-          xfbml: true,
-          version: 'v18.0'
-        });
-      };
+      return new Promise<void>((resolve) => {
+        // Initialiser FB une fois que le SDK est chargé
+        window.fbAsyncInit = function () {
+          window.FB.init({
+            appId: process.env.NEXT_PUBLIC_FACEBOOK_APP_ID as string,
+            cookie: true,
+            xfbml: true,
+            version: 'v18.0'
+          });
+          resolve();
+        };
 
-      const script = document.createElement("script");
-      script.src = "https://connect.facebook.net/en_US/sdk.js";
-      script.async = true;
-      script.defer = true;
-      document.body.appendChild(script);
-
-      return () => {
-        document.body.removeChild(script);
-      };
+        const script = document.createElement("script");
+        script.src = "https://connect.facebook.net/en_US/sdk.js";
+        script.async = true;
+        script.defer = true;
+        document.body.appendChild(script);
+      });
     };
 
-    const googleCleanup = loadGoogleSDK();
-    const facebookCleanup = loadFacebookSDK();
+    // Charger les deux SDKs de manière asynchrone
+    const initializeSocialSDKs = async () => {
+      try {
+        await Promise.all([loadGoogleSDK(), loadFacebookSDK()]);
+        console.log("SDKs sociaux chargés avec succès");
+      } catch (error) {
+        console.error("Erreur lors du chargement des SDKs:", error);
+      }
+    };
 
+    initializeSocialSDKs();
+
+    // Cleanup function
     return () => {
-      googleCleanup();
-      facebookCleanup();
+      const scripts = document.getElementsByTagName("script");
+      Array.from(scripts).forEach(script => {
+        if (
+          script.src.includes("sdk.js") ||
+          script.src.includes("gsi/client")
+        ) {
+          script.remove();
+        }
+      });
     };
   }, []);
 
@@ -202,9 +214,10 @@ const Login = () => {
     // Vérifier si le SDK Google est chargé
     if (typeof window !== 'undefined' && window.google) {
       const client = window.google.accounts.oauth2.initTokenClient({
-        client_id: API_GOOGLE_CLIENT_ID,
+        client_id: "597218590015-9ksk7c8vqttdbkas6p2jcrg65kb6c7b7.apps.googleusercontent.com",
         scope: 'email profile',
         callback: (tokenResponse: any) => {
+          console.log(tokenResponse, "tokenResponse");
           if (tokenResponse && tokenResponse.access_token) {
             handleSocialLogin('google', tokenResponse.access_token);
           }
@@ -217,18 +230,34 @@ const Login = () => {
     }
   };
 
-  const initFacebookLogin = () => {
-    // Vérifier si le SDK Facebook est chargé
-    if (typeof window !== 'undefined' && window.FB) {
-      window.FB.login((response) => {
-        if (response.authResponse) {
-          handleSocialLogin('facebook', response.authResponse.accessToken);
-        } else {
-          console.log('Connexion Facebook annulée par l\'utilisateur');
-        }
-      }, { scope: 'email,public_profile' });
-    } else {
-      console.error("Le SDK Facebook n'est pas chargé");
+  const initFacebookLogin = async () => {
+    try {
+      // Vérifier si nous sommes en HTTPS
+      if (typeof window !== 'undefined' && window.location.protocol !== 'https:') {
+        console.error("La connexion Facebook nécessite HTTPS");
+        alert("La connexion Facebook n'est disponible qu'en HTTPS. Veuillez utiliser une connexion sécurisée.");
+        return;
+      }
+
+      // Vérifier si FB est initialisé
+      if (typeof window !== 'undefined' && window.FB) {
+        window.FB.login(
+          (response) => {
+            if (response.authResponse) {
+              handleSocialLogin('facebook', response.authResponse.accessToken);
+            } else {
+              console.log('Connexion Facebook annulée par l\'utilisateur');
+            }
+          },
+          { scope: 'email,public_profile' }
+        );
+      } else {
+        console.error("Facebook SDK n'est pas initialisé");
+        alert("Une erreur s'est produite lors de l'initialisation de Facebook. Veuillez réessayer.");
+      }
+    } catch (error) {
+      console.error("Erreur lors de la connexion Facebook:", error);
+      alert("Une erreur s'est produite lors de la connexion Facebook. Veuillez réessayer.");
     }
   };
 
