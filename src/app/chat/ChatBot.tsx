@@ -336,18 +336,18 @@ export default function ChatBot({ onClose }: ChatBotProps) {
         prev.map((msg) =>
           msg.id === botMessage.id
             ? {
-                ...msg,
-                isLoading: false,
-                content: [
-                  {
-                    type: "text",
-                    content:
-                      "Je comprends votre demande concernant " +
-                      selectedOption +
-                      ". Je vais vous aider...",
-                  },
-                ],
-              }
+              ...msg,
+              isLoading: false,
+              content: [
+                {
+                  type: "text",
+                  content:
+                    "Je comprends votre demande concernant " +
+                    selectedOption +
+                    ". Je vais vous aider...",
+                },
+              ],
+            }
             : msg
         )
       );
@@ -433,14 +433,14 @@ export default function ChatBot({ onClose }: ChatBotProps) {
             setSelectedFiles((prev) =>
               prev.map((file) =>
                 file.type === "location" &&
-                file.address === "Récupération en cours..."
+                  file.address === "Récupération en cours..."
                   ? {
-                      type: "location",
-                      content: `${latitude},${longitude}`,
-                      address,
-                      latitude,
-                      longitude,
-                    }
+                    type: "location",
+                    content: `${latitude},${longitude}`,
+                    address,
+                    latitude,
+                    longitude,
+                  }
                   : file
               )
             );
@@ -453,16 +453,16 @@ export default function ChatBot({ onClose }: ChatBotProps) {
             setSelectedFiles((prev) =>
               prev.map((file) =>
                 file.type === "location" &&
-                file.address === "Récupération en cours..."
+                  file.address === "Récupération en cours..."
                   ? {
-                      type: "location",
-                      content: `${latitude},${longitude}`,
-                      address: `Latitude: ${latitude.toFixed(
-                        6
-                      )}, Longitude: ${longitude.toFixed(6)}`,
-                      latitude,
-                      longitude,
-                    }
+                    type: "location",
+                    content: `${latitude},${longitude}`,
+                    address: `Latitude: ${latitude.toFixed(
+                      6
+                    )}, Longitude: ${longitude.toFixed(6)}`,
+                    latitude,
+                    longitude,
+                  }
                   : file
               )
             );
@@ -876,11 +876,10 @@ export default function ChatBot({ onClose }: ChatBotProps) {
                   onClick={() =>
                     setImageCarousel((prev) => ({ ...prev, startIndex: index }))
                   }
-                  className={`w-2.5 h-2.5 rounded-full ${
-                    index === imageCarousel.startIndex
+                  className={`w-2.5 h-2.5 rounded-full ${index === imageCarousel.startIndex
                       ? "bg-white"
                       : "bg-gray-500"
-                  }`}
+                    }`}
                   aria-label={`Image ${index + 1}`}
                 />
               ))}
@@ -902,10 +901,9 @@ export default function ChatBot({ onClose }: ChatBotProps) {
                     }
                     className={`
                       w-16 h-16 flex-shrink-0 rounded overflow-hidden 
-                      ${
-                        index === imageCarousel.startIndex
-                          ? "ring-2 ring-white"
-                          : "opacity-70"
+                      ${index === imageCarousel.startIndex
+                        ? "ring-2 ring-white"
+                        : "opacity-70"
                       }
                     `}
                   >
@@ -952,7 +950,7 @@ export default function ChatBot({ onClose }: ChatBotProps) {
             />
             <div>
               <h2 className={`${theme.text} font-medium`}>
-                Assistant E-Agence
+                Agence en ligne
               </h2>
               <p className={`${theme.textSecondary} text-sm`}>En ligne</p>
             </div>
@@ -1134,11 +1132,10 @@ export default function ChatBot({ onClose }: ChatBotProps) {
                     animate={{ scale: 1 }}
                     className={`
                     flex items-center gap-2
-                    ${
-                      isDarkMode
+                    ${isDarkMode
                         ? "bg-[#18181B] hover:bg-[#27272A]"
                         : "bg-white hover:bg-gray-50"
-                    }
+                      }
                     ${theme.text} 
                     px-4 py-2 
                     rounded-full 
@@ -1180,11 +1177,10 @@ export default function ChatBot({ onClose }: ChatBotProps) {
                     animate={{ scale: 1 }}
                     className={`
                     flex items-center gap-2
-                    ${
-                      isDarkMode
+                    ${isDarkMode
                         ? "bg-[#18181B] hover:bg-[#27272A]"
                         : "bg-white hover:bg-gray-50"
-                    }
+                      }
                     ${theme.text} 
                     px-4 py-2 
                     rounded-full 
@@ -1219,11 +1215,10 @@ export default function ChatBot({ onClose }: ChatBotProps) {
                     animate={{ scale: 1 }}
                     className={`
                     flex items-center gap-2
-                    ${
-                      isDarkMode
+                    ${isDarkMode
                         ? "bg-[#18181B] hover:bg-[#27272A]"
                         : "bg-white hover:bg-gray-50"
-                    }
+                      }
                     ${theme.text} 
                     px-4 py-2 
                     rounded-full 
@@ -1260,11 +1255,10 @@ export default function ChatBot({ onClose }: ChatBotProps) {
                     animate={{ scale: 1 }}
                     className={`
                     flex items-center gap-2
-                    ${
-                      isDarkMode
+                    ${isDarkMode
                         ? "bg-[#18181B] hover:bg-[#27272A]"
                         : "bg-white hover:bg-gray-50"
-                    }
+                      }
                     ${theme.text} 
                     px-4 py-2 
                     rounded-full 
@@ -1299,11 +1293,10 @@ export default function ChatBot({ onClose }: ChatBotProps) {
                     animate={{ scale: 1 }}
                     className={`
                     flex items-center gap-2
-                    ${
-                      isDarkMode
+                    ${isDarkMode
                         ? "bg-[#18181B] hover:bg-[#27272A]"
                         : "bg-white hover:bg-gray-50"
-                    }
+                      }
                     ${theme.text} 
                     px-4 py-2 
                     rounded-full 
@@ -1338,11 +1331,10 @@ export default function ChatBot({ onClose }: ChatBotProps) {
                     animate={{ scale: 1 }}
                     className={`
                     flex items-center gap-2
-                    ${
-                      isDarkMode
+                    ${isDarkMode
                         ? "bg-[#18181B] hover:bg-[#27272A]"
                         : "bg-white hover:bg-gray-50"
-                    }
+                      }
                     ${theme.text} 
                     px-4 py-2 
                     rounded-full 
@@ -1400,9 +1392,8 @@ export default function ChatBot({ onClose }: ChatBotProps) {
               {messages.map((message, index) => (
                 <div
                   key={index}
-                  className={`flex items-start gap-3 ${
-                    message.isUser ? "flex-row-reverse" : ""
-                  }`}
+                  className={`flex items-start gap-3 ${message.isUser ? "flex-row-reverse" : ""
+                    }`}
                 >
                   {!message.isUser && (
                     <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 bg-gradient-to-br from-red-500 to-red-600 ring-2 ring-red-500/20">
@@ -1432,20 +1423,18 @@ export default function ChatBot({ onClose }: ChatBotProps) {
                     </div>
                   )}
                   <div
-                    className={`flex flex-col gap-1.5 ${
-                      message.isUser ? "items-end" : "items-start"
-                    }`}
+                    className={`flex flex-col gap-1.5 ${message.isUser ? "items-end" : "items-start"
+                      }`}
                   >
                     <div
                       className={`
                       relative 
                       rounded-2xl px-4 py-2.5 
                       max-w-[280px]
-                      ${
-                        message.isUser
+                      ${message.isUser
                           ? "bg-gradient-to-r from-red-500 via-red-500 to-red-600 text-white shadow-lg shadow-red-500/20 rounded-tr-sm"
                           : "bg-gradient-to-br from-[#323232] to-[#272727] text-gray-100 shadow-lg shadow-black/10 rounded-tl-sm"
-                      }
+                        }
                     `}
                     >
                       {message.isLoading ? (
@@ -1630,11 +1619,10 @@ export default function ChatBot({ onClose }: ChatBotProps) {
                                       }
                                       className={`
                                       relative w-10 h-10 flex items-center justify-center rounded-full transition-all
-                                      ${
-                                        content.isPlaying
+                                      ${content.isPlaying
                                           ? "bg-red-500"
                                           : "bg-red-500/80 hover:bg-red-500"
-                                      }
+                                        }
                                     `}
                                     >
                                       {content.isPlaying && (
@@ -1694,7 +1682,7 @@ export default function ChatBot({ onClose }: ChatBotProps) {
                                             (x / rect.width) * 100;
                                           const audio =
                                             audioElements[
-                                              `${index}-${contentIndex}`
+                                            `${index}-${contentIndex}`
                                             ];
                                           if (audio) {
                                             audio.currentTime =
@@ -1717,10 +1705,10 @@ export default function ChatBot({ onClose }: ChatBotProps) {
                                           animate={{
                                             backgroundColor: content.isPlaying
                                               ? [
-                                                  "#EF4444",
-                                                  "#DC2626",
-                                                  "#EF4444",
-                                                ]
+                                                "#EF4444",
+                                                "#DC2626",
+                                                "#EF4444",
+                                              ]
                                               : "#EF4444",
                                           }}
                                           transition={{
@@ -1987,9 +1975,8 @@ export default function ChatBot({ onClose }: ChatBotProps) {
                       {(file.type === "pdf" || file.type === "doc") && (
                         <div className="p-3 rounded-lg flex items-center gap-2 bg-[#27272A] min-w-[180px] max-w-[220px]">
                           <div
-                            className={`text-${
-                              file.type === "pdf" ? "red" : "blue"
-                            }-500 flex-shrink-0`}
+                            className={`text-${file.type === "pdf" ? "red" : "blue"
+                              }-500 flex-shrink-0`}
                           >
                             <svg
                               width="20"
@@ -2255,10 +2242,9 @@ export default function ChatBot({ onClose }: ChatBotProps) {
                               }}
                               className={`
                                 relative w-10 h-10 flex items-center justify-center rounded-full
-                                ${
-                                  file.isPlaying
-                                    ? "bg-red-500"
-                                    : "bg-red-500/80 hover:bg-red-500"
+                                ${file.isPlaying
+                                  ? "bg-red-500"
+                                  : "bg-red-500/80 hover:bg-red-500"
                                 }
                               `}
                             >
@@ -2484,11 +2470,9 @@ export default function ChatBot({ onClose }: ChatBotProps) {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 20 }}
               transition={{ duration: 0.3 }}
-              className={`flex items-center gap-3 ${
-                theme.inputBg
-              } rounded-xl px-4 py-2.5 ${
-                isExpanded ? "max-w-full w-full" : ""
-              }`}
+              className={`flex items-center gap-3 ${theme.inputBg
+                } rounded-xl px-4 py-2.5 ${isExpanded ? "max-w-full w-full" : ""
+                }`}
               key="input-container"
             >
               <div className="relative">
@@ -2702,11 +2686,10 @@ export default function ChatBot({ onClose }: ChatBotProps) {
                   ${theme.buttonHover} 
                   rounded-full 
                   transition-colors
-                  ${
-                    isProcessing ||
+                  ${isProcessing ||
                     (!inputValue.trim() && selectedFiles.length === 0)
-                      ? "opacity-50 cursor-not-allowed"
-                      : ""
+                    ? "opacity-50 cursor-not-allowed"
+                    : ""
                   }
                 `}
                 onClick={handleSendMessage}

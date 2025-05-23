@@ -180,7 +180,6 @@ const AccountEditSheet: React.FC<AccountEditSheetProps> = ({ open, onClose, mode
         const result = reader.result as string;
         setProfileImage(result);
         setIsProfileVerified(false);
-
         // Sauvegarder dans localStorage
         if (typeof window !== 'undefined') {
           const status = localStorage.getItem('accountStatus');

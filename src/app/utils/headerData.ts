@@ -29,6 +29,7 @@ export const TAB_CONTENT = {
       links: [
         { href: "/bon-a-savoir", label: "Bon à savoir" },
         { href: "/tarifs", label: "Tarifs" },
+        { href: "/avance", label: "Avance sur consommation" },
         { href: "/risques-electriques", label: "Risques électriques" },
       ],
       isFirst: false,
@@ -77,6 +78,7 @@ export const TAB_CONTENT = {
       links: [
         { href: "/bon-a-savoir", label: "Bon à savoir" },
         { href: "/tarifs", label: "Tarifs" },
+        { href: "/avance", label: "Avance sur consommation" },
         { href: "/risques-electriques", label: "Risques électriques" },
       ],
     },

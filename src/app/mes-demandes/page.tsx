@@ -485,13 +485,6 @@ export default function MesDemandesPage() {
                   tabIndex={0}
                   aria-label={`Demande de ${demande.title}`}
                 >
-                  {/* Indicateur de durée/délai */}
-                  <div className="absolute top-4 right-4 inline-flex items-center px-2.5 py-1 rounded-full bg-gray-100 text-xs font-medium text-gray-800">
-                    <svg className="w-3.5 h-3.5 mr-1 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <span>Traitement: 48-72h</span>
-                  </div>
 
                   <div className="absolute -top-10 left-1/2 transform -translate-x-1/2 w-24 h-24 group-hover:scale-110 transition-all duration-300 flex items-center justify-center rounded-full bg-gradient-to-br from-orange/20 to-orange/5 shadow-md border-[6px] border-white z-10">
                     {demande.icon}
@@ -509,7 +502,7 @@ export default function MesDemandesPage() {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                       </svg>
                       Pièces à fournir:
-                      <button
+                      {/* <button
                         className="ml-1 text-orange hover:text-orange/80 focus:outline-none focus:ring-1 focus:ring-orange rounded-full"
                         title="Formats acceptés: PDF, JPG, PNG (max 5MB par fichier)"
                         aria-label="Information sur les formats acceptés"
@@ -517,7 +510,7 @@ export default function MesDemandesPage() {
                         <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                      </button>
+                      </button> */}
                     </h3>
                     <ul className="text-left text-xs text-gray-600 space-y-1.5 pl-2">
                       {demande.documents?.map((doc, idx) => (
@@ -694,17 +687,7 @@ export default function MesDemandesPage() {
                         </button>
                       </div>
 
-                      <div className="mt-8 flex justify-center">
-                        <button
-                          onClick={() => setShowAuthModal(false)}
-                          className="text-sm text-gray-500 hover:text-orange transition-all duration-300 flex items-center gap-1 py-2 px-3 rounded-lg hover:bg-orange/5"
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                          </svg>
-                          Annuler la demande
-                        </button>
-                      </div>
+
                     </div>
                   </div>
                 </div>

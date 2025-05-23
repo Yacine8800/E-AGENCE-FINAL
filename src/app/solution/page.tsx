@@ -21,7 +21,7 @@ export default function SolutionPage() {
                     // buttonLink="/contact"
                     secondButtonText="Faites vous assister par clembot"
                     secondButtonLink="#"
-                    imageRight="/depannage/depannage.png"
+                    imageRight="/risque/SOLUTION  EFFICACITE ENERGETIQUE.png"
                     onButtonClick={handleButtonClick}
                 />
             </PageWrapper>

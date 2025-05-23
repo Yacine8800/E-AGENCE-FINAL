@@ -28,12 +28,12 @@ const services: ServiceItem[] = [
   {
     title: "Prépayé",
     description: "Rechargez à l'avance pour contrôler votre consommation.",
-    image: "/compteur/compteur2.png",
+    image: "/compteur/compteur3.png",
   },
   {
     title: "PEPT",
     description: "Programme d'Électrification Pour Tous, accès facilité.",
-    image: "/compteur/compteur3.png",
+    image: "/compteur/compteur2.png",
   },
 ];
 

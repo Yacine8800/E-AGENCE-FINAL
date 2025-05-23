@@ -8,9 +8,9 @@ import Loader from "../components/animation/loader";
 import { useAuth } from "@/src/hooks/useAuth";
 import LogoutIcon from "../components/icons/LogoutIcon";
 import AccountEditSheet from "./AccountEditSheet";
+import { useSidebar } from "./SidebarContext";
 
 const Sidebar = () => {
-  const [isOpen, setIsOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -25,6 +25,7 @@ const Sidebar = () => {
 
   // Hook d'auth
   const { logout: handleLogout, isLogoutLoading, user } = useAuth();
+  const { isSidebarOpen, closeSidebar } = useSidebar();
 
   // Éviter le problème d'hydratation
   useEffect(() => {
@@ -182,19 +183,6 @@ const Sidebar = () => {
 
   return (
     <>
-      {/* Bouton hamburger (mobile) */}
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="fixed top-4 left-4 lg:hidden bg-white p-2 rounded-full shadow-lg z-50 hover:bg-gray-100 transition-colors"
-        aria-label={isOpen ? "Close menu" : "Open menu"}
-      >
-        {isOpen ? (
-          <X size={24} className="text-gray-700" />
-        ) : (
-          <Menu size={24} className="text-gray-700" />
-        )}
-      </button>
-
       {/* Container principal */}
       <div
         className={`fixed 
@@ -203,22 +191,30 @@ const Sidebar = () => {
           lg:left-6
           flex 
           flex-col 
-          gap-4 
-          transition-all 
-          duration-300 
-          ease-in-out 
-          bg-transparent
-          z-40
+          gap-0 
+          transition-transform duration-500 ease-[cubic-bezier(0.77,0,0.175,1)]
+          z-[110]
           ${
-            isOpen || !isMobile
+            isSidebarOpen || !isMobile
               ? "translate-x-0"
               : "-translate-x-full lg:translate-x-0"
           }
         `}
         style={{ width: isMobile ? "80vw" : "320px", maxWidth: "320px" }}
       >
+        {/* Croix de fermeture mobile, déplacée dans la sidebar en haut à droite */}
+        {isMobile && isSidebarOpen && (
+          <button
+            className="absolute top-4 right-4 w-10 h-10 flex items-center justify-center bg-white rounded-xl shadow z-[120] border border-gray-200 hover:bg-gray-50 transition-all"
+            style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.08)" }}
+            onClick={closeSidebar}
+            aria-label="Fermer la sidebar"
+          >
+            <X size={22} className="text-gray-700" />
+          </button>
+        )}
         {/* Logo */}
-        <div className="flex-none w-full bg-colorbaseSidebar px-4 lg:px-[30px] py-4 lg:py-[20px] rounded-none lg:rounded-[20px] flex items-center justify-center">
+        <div className="flex-none w-full bg-colorbaseSidebar px-4 lg:px-[30px] py-4 lg:py-[20px] rounded-tr-[20px] lg:rounded-[20px] flex items-center justify-center mb-0 lg:mb-4">
           <Image
             src="/logo.png"
             alt="MailIE Logo"
@@ -227,9 +223,10 @@ const Sidebar = () => {
             className="object-contain w-auto h-8 lg:h-auto"
           />
         </div>
-
+        {/* Fond blanc pour combler la séparation en mobile */}
+        <div className="lg:hidden w-full h-3 bg-white"></div>
         {/* Conteneur flex-col pour que le bouton "Déconnexion" soit en bas */}
-        <div className="flex-1 flex flex-col bg-colorbaseSidebar p-4 lg:p-[20px] rounded-none lg:rounded-[20px] relative overflow-y-auto">
+        <div className="flex-1 flex flex-col bg-colorbaseSidebar p-4 lg:p-[20px] rounded-br-[20px] lg:rounded-[20px] relative overflow-y-auto">
           <div className="absolute bottom-0 left-0 w-1/2 h-1/3 bg-colorsecondSidebar rounded-tr-[100px] blur-[40px] rounded-bl-[20px] opacity-70 z-0" />
           <div className="absolute bottom-0 left-0 w-1/3 h-1/4 bg-colorsecondSidebar rounded-tr-[80px] blur-[40px] rounded-bl-[20px] z-0" />
           <div className="absolute bottom-5 left-5 w-20 h-20 bg-colorsecondSidebar rounded-full blur-[40px] opacity-40 z-0" />
@@ -353,7 +350,7 @@ const Sidebar = () => {
               {isPhoneVerified && isEmailVerified && isIdUploaded && (
                 <>
                   <div className="my-3 border-t border-gray-200/70 w-full" />
-                  <div className="text-[#009640] text-sm font-semibold w-full text-left">
+                  <div className="text-[#009640] text-sm font-semibold w-full text-center">
                     Compte certifié
                   </div>
                 </>
@@ -396,10 +393,10 @@ const Sidebar = () => {
                       >
                         <path
                           d="M10.6666 11.968V10.718H2.54492C2.04779 10.718 1.571 10.9154 1.21939 11.2669C0.867784 11.6183 0.670143 12.095 0.669922 12.5922V13.0738C0.669922 13.8172 0.936589 14.5372 1.41992 15.103C2.72409 16.6313 4.71326 17.3863 7.33409 17.3863C8.59353 17.3863 9.70464 17.2113 10.6674 16.8613V15.5113C9.76659 15.9263 8.65909 16.1363 7.33409 16.1363C5.05242 16.1363 3.41409 15.5138 2.36992 14.2913C2.07957 13.9518 1.91999 13.5198 1.91992 13.073V12.5922C1.91992 12.4264 1.98577 12.2674 2.10298 12.1502C2.22019 12.033 2.37916 11.9672 2.54492 11.9672L10.6666 11.968ZM7.33325 0.722168C7.88043 0.722168 8.42225 0.829942 8.92777 1.03934C9.43329 1.24873 9.89262 1.55565 10.2795 1.94256C10.6664 2.32947 10.9734 2.7888 11.1828 3.29432C11.3921 3.79984 11.4999 4.34166 11.4999 4.88883C11.4999 5.43601 11.3921 5.97783 11.1828 6.48335C10.9734 6.98887 10.6664 7.4482 10.2795 7.83511C9.89262 8.22202 9.43329 8.52894 8.92777 8.73833C8.42225 8.94773 7.88043 9.0555 7.33325 9.0555C6.22819 9.0555 5.16838 8.61651 4.38698 7.83511C3.60558 7.05371 3.16659 5.9939 3.16659 4.88883C3.16659 3.78377 3.60558 2.72396 4.38698 1.94256C5.16838 1.16115 6.22819 0.722168 7.33325 0.722168ZM7.33325 1.97217C6.95023 1.97217 6.57096 2.04761 6.2171 2.19419C5.86323 2.34076 5.5417 2.5556 5.27086 2.82644C5.00002 3.09728 4.78518 3.41881 4.63861 3.77267C4.49203 4.12654 4.41659 4.50581 4.41659 4.88883C4.41659 5.27186 4.49203 5.65113 4.63861 6.00499C4.78518 6.35886 5.00002 6.68039 5.27086 6.95123C5.5417 7.22207 5.86323 7.43691 6.2171 7.58348C6.57096 7.73006 6.95023 7.8055 7.33325 7.8055C8.1068 7.8055 8.84867 7.49821 9.39565 6.95123C9.94263 6.40425 10.2499 5.66238 10.2499 4.88883C10.2499 4.11529 9.94263 3.37342 9.39565 2.82644C8.84867 2.27946 8.1068 1.97217 7.33325 1.97217ZM16.7124 7.38467C17.5174 7.38467 18.1708 8.038 18.1708 8.843V16.7597C18.1708 17.1464 18.0171 17.5174 17.7436 17.7909C17.4701 18.0644 17.0992 18.218 16.7124 18.218H12.9583C12.5715 18.218 12.2005 18.0644 11.9271 17.7909C11.6536 17.5174 11.4999 17.1464 11.4999 16.7597V8.843C11.4999 8.038 12.1524 7.38467 12.9583 7.38467H16.7124ZM15.0441 14.8822H14.6274L14.5424 14.888C14.3855 14.9096 14.2427 14.9899 14.1428 15.1128C14.0429 15.2356 13.9933 15.3918 14.0041 15.5498C14.0149 15.7078 14.0852 15.8558 14.2009 15.9639C14.3166 16.072 14.4691 16.1321 14.6274 16.1322H15.0441L15.1291 16.1263C15.286 16.1048 15.4288 16.0244 15.5287 15.9016C15.6287 15.7787 15.6782 15.6226 15.6674 15.4646C15.6566 15.3066 15.5863 15.1586 15.4706 15.0505C15.3549 14.9424 15.2024 14.8822 15.0441 14.8822Z"
-                          fill={isPhoneVerified ? "#2DAE9F" : "#EC4F48"}
+                          fill="#2DAE9F"
                         />
                       </svg>
-                      <span className="font-bold text-sm text-[#2DAE9F]">
+                      <span className="font-bold text-[13px] text-[#2DAE9F] text-left">
                         N° téléphone vérifié
                       </span>
                     </div>
@@ -440,11 +437,11 @@ const Sidebar = () => {
                     >
                       <path
                         d="M10.6666 11.968V10.718H2.54492C2.04779 10.718 1.571 10.9154 1.21939 11.2669C0.867784 11.6183 0.670143 12.095 0.669922 12.5922V13.0738C0.669922 13.8172 0.936589 14.5372 1.41992 15.103C2.72409 16.6313 4.71326 17.3863 7.33409 17.3863C8.59353 17.3863 9.70464 17.2113 10.6674 16.8613V15.5113C9.76659 15.9263 8.65909 16.1363 7.33409 16.1363C5.05242 16.1363 3.41409 15.5138 2.36992 14.2913C2.07957 13.9518 1.91999 13.5198 1.91992 13.073V12.5922C1.91992 12.4264 1.98577 12.2674 2.10298 12.1502C2.22019 12.033 2.37916 11.9672 2.54492 11.9672L10.6666 11.968ZM7.33325 0.722168C7.88043 0.722168 8.42225 0.829942 8.92777 1.03934C9.43329 1.24873 9.89262 1.55565 10.2795 1.94256C10.6664 2.32947 10.9734 2.7888 11.1828 3.29432C11.3921 3.79984 11.4999 4.34166 11.4999 4.88883C11.4999 5.43601 11.3921 5.97783 11.1828 6.48335C10.9734 6.98887 10.6664 7.4482 10.2795 7.83511C9.89262 8.22202 9.43329 8.52894 8.92777 8.73833C8.42225 8.94773 7.88043 9.0555 7.33325 9.0555C6.22819 9.0555 5.16838 8.61651 4.38698 7.83511C3.60558 7.05371 3.16659 5.9939 3.16659 4.88883C3.16659 3.78377 3.60558 2.72396 4.38698 1.94256C5.16838 1.16115 6.22819 0.722168 7.33325 0.722168ZM7.33325 1.97217C6.95023 1.97217 6.57096 2.04761 6.2171 2.19419C5.86323 2.34076 5.5417 2.5556 5.27086 2.82644C5.00002 3.09728 4.78518 3.41881 4.63861 3.77267C4.49203 4.12654 4.41659 4.50581 4.41659 4.88883C4.41659 5.27186 4.49203 5.65113 4.63861 6.00499C4.78518 6.35886 5.00002 6.68039 5.27086 6.95123C5.5417 7.22207 5.86323 7.43691 6.2171 7.58348C6.57096 7.73006 6.95023 7.8055 7.33325 7.8055C8.1068 7.8055 8.84867 7.49821 9.39565 6.95123C9.94263 6.40425 10.2499 5.66238 10.2499 4.88883C10.2499 4.11529 9.94263 3.37342 9.39565 2.82644C8.84867 2.27946 8.1068 1.97217 7.33325 1.97217ZM16.7124 7.38467C17.5174 7.38467 18.1708 8.038 18.1708 8.843V16.7597C18.1708 17.1464 18.0171 17.5174 17.7436 17.7909C17.4701 18.0644 17.0992 18.218 16.7124 18.218H12.9583C12.5715 18.218 12.2005 18.0644 11.9271 17.7909C11.6536 17.5174 11.4999 17.1464 11.4999 16.7597V8.843C11.4999 8.038 12.1524 7.38467 12.9583 7.38467H16.7124ZM15.0441 14.8822H14.6274L14.5424 14.888C14.3855 14.9096 14.2427 14.9899 14.1428 15.1128C14.0429 15.2356 13.9933 15.3918 14.0041 15.5498C14.0149 15.7078 14.0852 15.8558 14.2009 15.9639C14.3166 16.072 14.4691 16.1321 14.6274 16.1322H15.0441L15.1291 16.1263C15.286 16.1048 15.4288 16.0244 15.5287 15.9016C15.6287 15.7787 15.6782 15.6226 15.6674 15.4646C15.6566 15.3066 15.5863 15.1586 15.4706 15.0505C15.3549 14.9424 15.2024 14.8822 15.0441 14.8822Z"
-                        fill="#EC4F48"
+                        fill="#666666"
                       />
                     </svg>
-                    <span className="font-bold text-sm text-[#EC4F48] text-left">
-                      N° téléphone non vérifié
+                    <span className="font-bold text-sm text-[#666666] text-left">
+                      Vérifier n° téléphone
                     </span>
                   </button>
                 )}
@@ -453,8 +450,8 @@ const Sidebar = () => {
                   <div className="flex items-center justify-between gap-2 rounded-[10px] px-3 py-2">
                     <div className="flex items-center gap-2">
                       <svg
-                        width="18"
-                        height="18"
+                        width="21"
+                        height="21"
                         viewBox="0 0 18 18"
                         fill="none"
                         xmlns="http://www.w3.org/2000/svg"
@@ -476,7 +473,7 @@ const Sidebar = () => {
                           strokeLinejoin="round"
                         />
                       </svg>
-                      <span className="font-bold text-sm text-[#2DAE9F]">
+                      <span className="font-bold text-[13px] text-[#2DAE9F]">
                         Email vérifié
                       </span>
                     </div>
@@ -509,8 +506,8 @@ const Sidebar = () => {
                     aria-label="Vérifier l'email"
                   >
                     <svg
-                      width="18"
-                      height="18"
+                      width="20"
+                      height="20"
                       viewBox="0 0 18 18"
                       fill="none"
                       xmlns="http://www.w3.org/2000/svg"
@@ -521,19 +518,19 @@ const Sidebar = () => {
                         width="13.5"
                         height="9"
                         rx="2"
-                        stroke="#EC4F48"
+                        stroke="#666666"
                         strokeWidth="1.5"
                       />
                       <path
                         d="M3.75 6L9 10.5L14.25 6"
-                        stroke="#EC4F48"
+                        stroke="#666666"
                         strokeWidth="1.5"
                         strokeLinecap="round"
                         strokeLinejoin="round"
                       />
                     </svg>
-                    <span className="font-bold text-sm text-[#EC4F48] text-left">
-                      Email non vérifié
+                    <span className="font-bold text-sm text-[#666666] text-left">
+                      Vérifier E-mail
                     </span>
                   </button>
                 )}
@@ -542,8 +539,8 @@ const Sidebar = () => {
                   <div className="flex items-center justify-between gap-2 rounded-[10px] px-3 py-2">
                     <div className="flex items-center gap-2">
                       <svg
-                        width="23"
-                        height="21"
+                        width="19"
+                        height="19"
                         viewBox="0 0 23 21"
                         fill="none"
                         xmlns="http://www.w3.org/2000/svg"
@@ -565,8 +562,8 @@ const Sidebar = () => {
                           </clipPath>
                         </defs>
                       </svg>
-                      <span className="font-bold text-sm text-[#2DAE9F]">
-                        Pièce d'identité enregistrée
+                      <span className="font-bold text-[13px] text-[#2DAE9F] text-left">
+                        Pièce enregistrée
                       </span>
                     </div>
                     <span>
@@ -598,8 +595,8 @@ const Sidebar = () => {
                     aria-label="Enregistrer ma pièce d'identité"
                   >
                     <svg
-                      width="23"
-                      height="21"
+                      width="19"
+                      height="19"
                       viewBox="0 0 23 21"
                       fill="none"
                       xmlns="http://www.w3.org/2000/svg"
@@ -607,7 +604,7 @@ const Sidebar = () => {
                       <g clipPath="url(#clip0_6537_5454)">
                         <path
                           d="M20.625 6.30127V16.3013C20.625 16.645 20.3438 16.9263 20 16.9263H12.5C12.5 15.1997 11.1016 13.8013 9.375 13.8013H6.875C5.14844 13.8013 3.75 15.1997 3.75 16.9263H2.5C2.15625 16.9263 1.875 16.645 1.875 16.3013V6.30127H20.625ZM2.5 1.30127C1.12109 1.30127 0 2.42236 0 3.80127V16.3013C0 17.6802 1.12109 18.8013 2.5 18.8013H20C21.3789 18.8013 22.5 17.6802 22.5 16.3013V3.80127C22.5 2.42236 21.3789 1.30127 20 1.30127H2.5ZM10.625 10.0513C10.625 9.38823 10.3616 8.75234 9.89277 8.2835C9.42393 7.81466 8.78804 7.55127 8.125 7.55127C7.46196 7.55127 6.82607 7.81466 6.35723 8.2835C5.88839 8.75234 5.625 9.38823 5.625 10.0513C5.625 10.7143 5.88839 11.3502 6.35723 11.819C6.82607 12.2879 7.46196 12.5513 8.125 12.5513C8.78804 12.5513 9.42393 12.2879 9.89277 11.819C10.3616 11.3502 10.625 10.7143 10.625 10.0513ZM14.6875 8.17627C14.168 8.17627 13.75 8.59424 13.75 9.11377C13.75 9.6333 14.168 10.0513 14.6875 10.0513H17.8125C18.332 10.0513 18.75 9.6333 18.75 9.11377C18.75 8.59424 18.332 8.17627 17.8125 8.17627H14.6875ZM14.6875 11.9263C14.168 11.9263 13.75 12.3442 13.75 12.8638C13.75 13.3833 14.168 13.8013 14.6875 13.8013H17.8125C18.332 13.8013 18.75 13.3833 18.75 12.8638C18.75 12.3442 18.332 11.9263 17.8125 11.9263H14.6875Z"
-                          fill="#EC4F48"
+                          fill="#666666"
                         />
                       </g>
                       <defs>
@@ -621,8 +618,8 @@ const Sidebar = () => {
                         </clipPath>
                       </defs>
                     </svg>
-                    <span className="font-bold text-sm text-[#EC4F48] text-left">
-                      Enregistrer ma pièce d'identité
+                    <span className="font-bold text-sm text-[#666666] text-left">
+                      Enregistrer une Pièce
                     </span>
                   </button>
                 )}
@@ -632,10 +629,10 @@ const Sidebar = () => {
         </div>
       </div>
       {/* Overlay (mobile) */}
-      {isMobile && isOpen && (
+      {isMobile && isSidebarOpen && (
         <div
-          className="fixed inset-0 bg-black/20 z-30 lg:hidden"
-          onClick={() => setIsOpen(false)}
+          className="fixed inset-0 w-full bg-black/20 z-[105] lg:hidden transition-opacity duration-300"
+          onClick={closeSidebar}
         />
       )}
 

@@ -17,19 +17,19 @@ const risqueSections: RisqueSection[] = [
     id: 1,
     title: "Les ouvrages électriques",
     description: "Respectez les distances autour des lignes électriques : 5 m pour les lignes 15 à 33 kV, 15 m pour celles de 90 kV, 30 m pour les 225 kV. Tenez compte des objets manipulés (outils, perches...). Ne touchez jamais aux pylônes, poteaux ou câbles, même de loin.",
-    image: "/compteur/compteur4.png"
+    image: "/risque/RISQUE ELCTRIQUE_INSTALLATION ELECTRIQUE.png"
   },
   {
     id: 2,
     title: "Installations électriques",
     description: "Avant de toucher un appareil, coupez toujours le courant. Évitez toute manipulation les mains ou pieds mouillés. En cas d'incendie électrique, n'utilisez jamais d'eau. Appelez le CIE et les pompiers après avoir coupé l'alimentation.",
-    image: "/compteur/compteur4.png"
+    image: "/risque/RISQUE ELECTRIQUE_INSTALLATION INTERIEUR.png"
   },
   {
     id: 3,
     title: "Installations intérieurs",
     description: "Faites installer votre électricité par un pro, selon les normes. Vérifiez que votre tableau contient bien fusibles, disjoncteur et compteur. Avant toute réparation ou changement d'ampoule : coupez le courant.",
-    image: "/compteur/compteur4.png"
+    image: "/risque/RISQUE ELECTRIQUE_OUVRAGE ELECTRIQUE.png"
   }
 ];
 

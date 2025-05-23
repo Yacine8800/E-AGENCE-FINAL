@@ -24,44 +24,70 @@ const RadioSelect: React.FC<RadioSelectProps> = ({ onChange, initialValue = true
   };
 
   return (
-    <div className="flex justify-between items-center space-x-4">
-      {/* Option 1: Demande pour moi */}
-      <label className="flex items-center cursor-pointer space-x-2">
-        <span
-          className={`w-5 h-5 rounded-full border-2 border-none flex bg-white items-center justify-center ${selected === 'moi' ? 'border-red-500' : ''
-            }`}
-        >
-          {selected === 'moi' && <span className="w-5 h-5 bg-red-500 rounded-full"></span>}
-        </span>
-        <input
-          type="radio"
-          name="demande"
-          value="moi"
-          checked={selected === 'moi'}
-          onChange={() => handleChange('moi')}
-          className="hidden"
-        />
-        <span className="text-sm font-semibold">Demande pour moi</span>
-      </label>
+    <div className="flex flex-col md:flex-row gap-4 w-full">
+      <h3 className="text-sm font-medium text-gray-700 mb-2 md:mb-0 md:mr-4">
+        Cette demande concerne :
+      </h3>
 
-      {/* Option 2: Demande pour tiers */}
-      <label className="flex items-center cursor-pointer space-x-2">
-        <span
-          className={`w-5 h-5 rounded-full border-2 border-none flex bg-white items-center justify-center ${selected === 'tiers' ? 'border-red-500' : ''
-            }`}
-        >
-          {selected === 'tiers' && <span className="w-5 h-5 bg-red-500 rounded-full"></span>}
-        </span>
-        <input
-          type="radio"
-          name="demande"
-          value="tiers"
-          checked={selected === 'tiers'}
-          onChange={() => handleChange('tiers')}
-          className="hidden"
-        />
-        <span className="text-sm font-semibold">Demande pour tiers</span>
-      </label>
+      <div className="flex gap-6">
+        {/* Option 1: Demande pour moi */}
+        <label className={`
+          flex items-center cursor-pointer gap-3 py-2 px-4 md:px-5 rounded-lg transition-all duration-200
+          ${selected === 'moi'
+            ? 'bg-red-50 text-red-600 border border-red-200'
+            : 'bg-gray-50 hover:bg-gray-100 text-gray-700 border border-gray-200'}
+        `}>
+          <span className="relative flex items-center justify-center w-4 h-4">
+            <span className={`
+              absolute inset-0 rounded-full border transition-all duration-200
+              ${selected === 'moi'
+                ? 'border-red-500'
+                : 'border-gray-400'}
+            `}></span>
+            {selected === 'moi' &&
+              <span className="absolute inset-[3px] bg-red-500 rounded-full"></span>
+            }
+          </span>
+          <input
+            type="radio"
+            name="demande"
+            value="moi"
+            checked={selected === 'moi'}
+            onChange={() => handleChange('moi')}
+            className="sr-only"
+          />
+          <span className="text-sm font-medium">Pour moi-même</span>
+        </label>
+
+        {/* Option 2: Demande pour tiers */}
+        <label className={`
+          flex items-center cursor-pointer gap-3 py-2 px-4 md:px-5 rounded-lg transition-all duration-200
+          ${selected === 'tiers'
+            ? 'bg-red-50 text-red-600 border border-red-200'
+            : 'bg-gray-50 hover:bg-gray-100 text-gray-700 border border-gray-200'}
+        `}>
+          <span className="relative flex items-center justify-center w-4 h-4">
+            <span className={`
+              absolute inset-0 rounded-full border transition-all duration-200
+              ${selected === 'tiers'
+                ? 'border-red-500'
+                : 'border-gray-400'}
+            `}></span>
+            {selected === 'tiers' &&
+              <span className="absolute inset-[3px] bg-red-500 rounded-full"></span>
+            }
+          </span>
+          <input
+            type="radio"
+            name="demande"
+            value="tiers"
+            checked={selected === 'tiers'}
+            onChange={() => handleChange('tiers')}
+            className="sr-only"
+          />
+          <span className="text-sm font-medium">Pour un tiers</span>
+        </label>
+      </div>
     </div>
   );
 };
