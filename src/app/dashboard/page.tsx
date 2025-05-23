@@ -1,27 +1,25 @@
 "use client";
 
-import React, { useEffect, useState, useCallback, useRef } from "react";
-import Sidebar from "../layout/sidebar";
-import Navbar from "../layout/navbar";
+import { useAuth } from "@/src/hooks/useAuth";
 import Image from "next/image";
-import Modal from "../components/ui/Modal";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import RattacherCompteurForm from "../components/dashboard/RattacherCompteurForm";
 import RattacherIdentifiantForm from "../components/dashboard/RattacherIdentifiantForm";
-import { useAuth } from "@/src/hooks/useAuth";
+import Modal from "../components/ui/Modal";
+import Navbar from "../layout/navbar";
+import Sidebar from "../layout/sidebar";
 
-import Factures from "../components/Facture/facture";
-import ModalDEmande from "./ModalDEmande";
-import { API_URL } from "../config/constants";
+import { useToast } from "@/src/hooks/useToast";
+import { axiosService } from "@/src/services/axios.service";
+import getUserInfo from "@/src/utils/getUserInfo";
 import { handleApiError } from "@/utils/apiErrorHandler";
 import ConsumptionBarChart from "../components/barchat";
-import LinkIcon from "@/src/components/icons/LinkIcon";
-import PlusIcon from "@/src/components/icons/PlusIcon";
+import Factures from "../components/Facture/facture";
 import ReclamationModal from "../components/modales/ReclamationModal";
 import ReclamationSuccess from "../components/modales/ReclamationSuccess";
+import { API_URL } from "../config/constants";
 import { SidebarProvider } from "../layout/SidebarContext";
-import { API_EAGENCE } from "@/config/constants";
-
-
+import ModalDEmande from "./ModalDEmande";
 
 interface Client {
   _id: string;
@@ -87,7 +85,7 @@ const Level2Form = ({
   isLoading,
   itemType,
 }: {
-  onSubmit: (data: { index?: number; montant?: number }) => Promise<boolean>;
+  onSubmit: (index?: number, montant?: number) => Promise<boolean | undefined>;
   onCancel: () => void;
   isLoading: boolean;
   itemType: "prepaid" | "postpaid";
@@ -100,16 +98,21 @@ const Level2Form = ({
 
     // Validate value
     if (!value || isNaN(Number(value))) {
-      setError(`Veuillez entrer ${itemType === "postpaid" ? "un index" : "un montant"} valide`);
+      setError(
+        `Veuillez entrer ${
+          itemType === "postpaid" ? "un index" : "un montant"
+        } valide`
+      );
       return;
     }
 
     // Structure data based on item type
-    const data = itemType === "postpaid"
-      ? { index: Number(value) }
-      : { montant: Number(value) };
+    const data =
+      itemType === "postpaid"
+        ? { index: Number(value) }
+        : { montant: Number(value) };
 
-    const success = await onSubmit(data);
+    const success = await onSubmit(data.index, data.montant);
     if (success) {
       setValue("");
     }
@@ -130,7 +133,9 @@ const Level2Form = ({
             setError("");
           }}
           className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
-          placeholder={`Saisissez ${itemType === "postpaid" ? "votre index actuel" : "le montant"}`}
+          placeholder={`Saisissez ${
+            itemType === "postpaid" ? "votre index actuel" : "le montant"
+          }`}
           required
         />
         {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
@@ -278,16 +283,20 @@ const MeterSection = ({
 
       // Modifier la logique pour sélectionner les éléments à afficher
       let itemsToShow: any[] = [];
-      const selectedItemId = selectedItem.item?._id || selectedItem.item?.id || selectedItem.item?.identifiant;
+      const selectedItemId =
+        selectedItem.item?._id ||
+        selectedItem.item?.id ||
+        selectedItem.item?.identifiant;
       const isCorrectType = selectedItem.type === itemType;
 
       // Si un élément est sélectionné et du bon type, assurer qu'il soit dans les éléments affichés
       if (selectedItemId && isCorrectType) {
         // Trouver l'élément sélectionné
-        const selectedItemIndex = items.findIndex(item =>
-          item._id === selectedItemId ||
-          item.id === selectedItemId ||
-          item.identifiant === selectedItemId
+        const selectedItemIndex = items.findIndex(
+          (item) =>
+            item._id === selectedItemId ||
+            item.id === selectedItemId ||
+            item.identifiant === selectedItemId
         );
 
         if (selectedItemIndex !== -1) {
@@ -299,7 +308,10 @@ const MeterSection = ({
             itemsToShow = [...items];
           } else {
             // Essayer d'afficher l'élément sélectionné avec des éléments adjacents
-            const startIndex = Math.max(0, Math.min(selectedItemIndex, items.length - visibleCount));
+            const startIndex = Math.max(
+              0,
+              Math.min(selectedItemIndex, items.length - visibleCount)
+            );
             itemsToShow = items.slice(startIndex, startIndex + visibleCount);
           }
         } else {
@@ -387,43 +399,62 @@ const MeterSection = ({
                   {displayedItems.map((item: any) => (
                     <div
                       key={item._id || item.id || item.identifiant}
-                      className={`flex flex-col items-center p-1 rounded-lg cursor-pointer transition-all duration-200 ${((selectedItem.item?._id && selectedItem.item._id === item._id) ||
-                        (selectedItem.item?.id && selectedItem.item.id === item.id) ||
-                        (selectedItem.item?.identifiant && selectedItem.item.identifiant === item.identifiant &&
-                          selectedItem.type === itemType))
-                        ? itemType === "prepaid"
-                          ? "bg-gradient-to-r from-[#27c3b2]/20 to-[#56c1b5]/20 ring-1 ring-[#27c3b2]/20 shadow"
-                          : "bg-gradient-to-r from-[#FFA755]/20 to-[#EC4F48]/20 ring-1 ring-[#EC4F48]/20 shadow"
-                        : "hover:bg-gray-50"
-                        }`}
-                      onClick={() => handleItemClick(item)}
-                      style={{ position: 'static', zIndex: 'auto' }}
-                    >
-                      <div className="flex items-start mb-1 relative" style={{ position: 'static', zIndex: 'auto' }}>
-                        <div className={`w-10 h-10 flex items-center justify-center rounded-2xl transition-all duration-200 ${((selectedItem.item?._id && selectedItem.item._id === item._id) ||
-                          (selectedItem.item?.id && selectedItem.item.id === item.id) ||
-                          (selectedItem.item?.identifiant && selectedItem.item.identifiant === item.identifiant &&
-                            selectedItem.type === itemType))
+                      className={`flex flex-col items-center p-1 rounded-lg cursor-pointer transition-all duration-200 ${
+                        (selectedItem.item?._id &&
+                          selectedItem.item._id === item._id) ||
+                        (selectedItem.item?.id &&
+                          selectedItem.item.id === item.id) ||
+                        (selectedItem.item?.identifiant &&
+                          selectedItem.item.identifiant === item.identifiant &&
+                          selectedItem.type === itemType)
                           ? itemType === "prepaid"
-                            ? "bg-gradient-to-r from-[#27c3b2] to-[#56c1b5] shadow"
-                            : "bg-gradient-to-r from-[#FFA755] to-[#EC4F48] shadow"
-                          : "bg-white shadow-sm hover:shadow"
-                          }`} style={{ position: 'static', zIndex: 'auto' }}>
+                            ? "bg-gradient-to-r from-[#27c3b2]/20 to-[#56c1b5]/20 ring-1 ring-[#27c3b2]/20 shadow"
+                            : "bg-gradient-to-r from-[#FFA755]/20 to-[#EC4F48]/20 ring-1 ring-[#EC4F48]/20 shadow"
+                          : "hover:bg-gray-50"
+                      }`}
+                      onClick={() => handleItemClick(item)}
+                      style={{ position: "static", zIndex: "auto" }}
+                    >
+                      <div
+                        className="flex items-start mb-1 relative"
+                        style={{ position: "static", zIndex: "auto" }}
+                      >
+                        <div
+                          className={`w-10 h-10 flex items-center justify-center rounded-2xl transition-all duration-200 ${
+                            (selectedItem.item?._id &&
+                              selectedItem.item._id === item._id) ||
+                            (selectedItem.item?.id &&
+                              selectedItem.item.id === item.id) ||
+                            (selectedItem.item?.identifiant &&
+                              selectedItem.item.identifiant ===
+                                item.identifiant &&
+                              selectedItem.type === itemType)
+                              ? itemType === "prepaid"
+                                ? "bg-gradient-to-r from-[#27c3b2] to-[#56c1b5] shadow"
+                                : "bg-gradient-to-r from-[#FFA755] to-[#EC4F48] shadow"
+                              : "bg-white shadow-sm hover:shadow"
+                          }`}
+                          style={{ position: "static", zIndex: "auto" }}
+                        >
                           <svg
                             width="24"
                             height="24"
                             viewBox="0 0 30 30"
                             fill="none"
                             xmlns="http://www.w3.org/2000/svg"
-                            style={{ position: 'static', zIndex: 'auto' }}
+                            style={{ position: "static", zIndex: "auto" }}
                           >
                             <path
                               d="M15 12.5C17.7614 12.5 20 10.2614 20 7.5C20 4.73858 17.7614 2.5 15 2.5C12.2386 2.5 10 4.73858 10 7.5C10 10.2614 12.2386 12.5 15 12.5Z"
                               fill={
-                                ((selectedItem.item?._id && selectedItem.item._id === item._id) ||
-                                  (selectedItem.item?.id && selectedItem.item.id === item.id) ||
-                                  (selectedItem.item?.identifiant && selectedItem.item.identifiant === item.identifiant &&
-                                    selectedItem.type === itemType))
+                                (selectedItem.item?._id &&
+                                  selectedItem.item._id === item._id) ||
+                                (selectedItem.item?.id &&
+                                  selectedItem.item.id === item.id) ||
+                                (selectedItem.item?.identifiant &&
+                                  selectedItem.item.identifiant ===
+                                    item.identifiant &&
+                                  selectedItem.type === itemType)
                                   ? "white"
                                   : iconFill
                               }
@@ -432,36 +463,51 @@ const MeterSection = ({
                               opacity="0.5"
                               d="M25 21.875C25 24.9812 25 27.5 15 27.5C5 27.5 5 24.9812 5 21.875C5 18.7688 9.4775 16.25 15 16.25C20.5225 16.25 25 18.7688 25 21.875Z"
                               fill={
-                                ((selectedItem.item?._id && selectedItem.item._id === item._id) ||
-                                  (selectedItem.item?.id && selectedItem.item.id === item.id) ||
-                                  (selectedItem.item?.identifiant && selectedItem.item.identifiant === item.identifiant &&
-                                    selectedItem.type === itemType))
+                                (selectedItem.item?._id &&
+                                  selectedItem.item._id === item._id) ||
+                                (selectedItem.item?.id &&
+                                  selectedItem.item.id === item.id) ||
+                                (selectedItem.item?.identifiant &&
+                                  selectedItem.item.identifiant ===
+                                    item.identifiant &&
+                                  selectedItem.type === itemType)
                                   ? "white"
                                   : iconFill
                               }
                             />
                           </svg>
                           {item.isAlert && (
-                            <div className="absolute -top-1 -right-1 w-3 h-3 bg-yellow-400 rounded-full border-[1px] border-white shadow-sm">
-                            </div>
+                            <div className="absolute -top-1 -right-1 w-3 h-3 bg-yellow-400 rounded-full border-[1px] border-white shadow-sm"></div>
                           )}
                         </div>
                       </div>
                       <span
-                        className={`text-xs font-medium text-center transition-colors ${((selectedItem.item?._id && selectedItem.item._id === item._id) ||
-                          (selectedItem.item?.id && selectedItem.item.id === item.id) ||
-                          (selectedItem.item?.identifiant && selectedItem.item.identifiant === item.identifiant &&
-                            selectedItem.type === itemType))
-                          ? "font-bold"
-                          : ""
-                          }`}
+                        className={`text-xs font-medium text-center transition-colors ${
+                          (selectedItem.item?._id &&
+                            selectedItem.item._id === item._id) ||
+                          (selectedItem.item?.id &&
+                            selectedItem.item.id === item.id) ||
+                          (selectedItem.item?.identifiant &&
+                            selectedItem.item.identifiant ===
+                              item.identifiant &&
+                            selectedItem.type === itemType)
+                            ? "font-bold"
+                            : ""
+                        }`}
                         style={{
-                          color: ((selectedItem.item?._id && selectedItem.item._id === item._id) ||
-                            (selectedItem.item?.id && selectedItem.item.id === item.id) ||
-                            (selectedItem.item?.identifiant && selectedItem.item.identifiant === item.identifiant &&
-                              selectedItem.type === itemType))
-                            ? itemType === "prepaid" ? "#27c3b2" : "#EC4F48"
-                            : iconFill
+                          color:
+                            (selectedItem.item?._id &&
+                              selectedItem.item._id === item._id) ||
+                            (selectedItem.item?.id &&
+                              selectedItem.item.id === item.id) ||
+                            (selectedItem.item?.identifiant &&
+                              selectedItem.item.identifiant ===
+                                item.identifiant &&
+                              selectedItem.type === itemType)
+                              ? itemType === "prepaid"
+                                ? "#27c3b2"
+                                : "#EC4F48"
+                              : iconFill,
                         }}
                       >
                         {item.libelle || item.label || ""}
@@ -486,17 +532,23 @@ const MeterSection = ({
                     <div
                       className="flex flex-col items-center p-1 rounded-lg hover:bg-gray-50 active:bg-gray-100 transition-colors cursor-pointer"
                       onClick={handleViewMoreClick}
-                      style={{ position: 'static', zIndex: 'auto' }}
+                      style={{ position: "static", zIndex: "auto" }}
                     >
-                      <div className="flex mb-1 relative" style={{ position: 'static', zIndex: 'auto' }}>
-                        <div className="w-10 h-10 bg-gray-100 flex items-center justify-center rounded-2xl shadow-sm hover:shadow transition-colors" style={{ position: 'static', zIndex: 'auto' }}>
+                      <div
+                        className="flex mb-1 relative"
+                        style={{ position: "static", zIndex: "auto" }}
+                      >
+                        <div
+                          className="w-10 h-10 bg-gray-100 flex items-center justify-center rounded-2xl shadow-sm hover:shadow transition-colors"
+                          style={{ position: "static", zIndex: "auto" }}
+                        >
                           <svg
                             width="24"
                             height="24"
                             viewBox="0 0 30 30"
                             fill="none"
                             xmlns="http://www.w3.org/2000/svg"
-                            style={{ position: 'static', zIndex: 'auto' }}
+                            style={{ position: "static", zIndex: "auto" }}
                           >
                             <circle cx="10" cy="15" r="2" fill={iconFill} />
                             <circle cx="15" cy="15" r="2" fill={iconFill} />
@@ -515,18 +567,21 @@ const MeterSection = ({
                 </div>
 
                 {/* Bouton d'ajout toujours visible */}
-                <div className="flex flex-col items-center justify-center p-1 ml-auto" style={{ position: 'static', zIndex: 'auto' }}>
+                <div
+                  className="flex flex-col items-center justify-center p-1 ml-auto"
+                  style={{ position: "static", zIndex: "auto" }}
+                >
                   <button
                     className="w-10 h-10 bg-[#E8E8E8] flex justify-center items-center rounded-2xl hover:bg-gray-200 active:bg-gray-300 transition-colors shadow-sm hover:shadow"
                     onClick={onButtonClick}
-                    style={{ position: 'static', zIndex: 'auto' }}
+                    style={{ position: "static", zIndex: "auto" }}
                   >
                     <svg
                       width="18"
                       height="18"
                       viewBox="0 0 19 18"
                       fill="currentColor"
-                      style={{ position: 'static', zIndex: 'auto' }}
+                      style={{ position: "static", zIndex: "auto" }}
                     >
                       <path d="M8.5 17C8.5 17.2652 8.60536 17.5196 8.79289 17.7071C8.98043 17.8946 9.23478 18 9.5 18C9.76522 18 10.0196 17.8946 10.2071 17.7071C10.3946 17.5196 10.5 17.2652 10.5 17V10H17.5C17.7652 10 18.0196 9.89464 18.2071 9.70711C18.3946 9.51957 18.5 9.26522 18.5 9C18.5 8.73478 18.3946 8.48043 18.2071 8.29289C18.0196 8.10536 17.7652 8 17.5 8H10.5V1C10.5 0.734784 10.3946 0.48043 10.2071 0.292893C10.0196 0.105357 9.76522 0 9.5 0C9.23478 0 8.98043 0.105357 8.79289 0.292893C8.60536 0.48043 8.5 0.734784 8.5 1V8H1.5C1.23478 8 0.98043 8.10536 0.792893 8.29289C0.605357 8.48043 0.5 8.73478 0.5 9C0.5 9.26522 0.605357 9.51957 0.792893 9.70711C0.98043 9.89464 1.23478 10 1.5 10H8.5V17Z" />
                     </svg>
@@ -547,15 +602,19 @@ const MeterSection = ({
           <div
             className="bg-white rounded-2xl overflow-hidden max-w-xl w-full max-h-[80vh] flex flex-col z-[1000000] shadow-xl animate-fadeInUp"
             style={{
-              boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)"
+              boxShadow:
+                "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)",
             }}
           >
             <div className="flex items-center justify-between p-5 border-b border-gray-100">
               <div className="flex items-center">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center mr-3 ${itemType === "prepaid"
-                  ? "bg-gradient-to-r from-[#27c3b2] to-[#56c1b5]"
-                  : "bg-gradient-to-r from-[#FFA755] to-[#EC4F48]"
-                  }`}>
+                <div
+                  className={`w-8 h-8 rounded-full flex items-center justify-center mr-3 ${
+                    itemType === "prepaid"
+                      ? "bg-gradient-to-r from-[#27c3b2] to-[#56c1b5]"
+                      : "bg-gradient-to-r from-[#FFA755] to-[#EC4F48]"
+                  }`}
+                >
                   <svg
                     width="16"
                     height="16"
@@ -576,10 +635,14 @@ const MeterSection = ({
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-gray-800">
-                    {itemType === "prepaid" ? "Mes compteurs" : "Mes identifiants"}
+                    {itemType === "prepaid"
+                      ? "Mes compteurs"
+                      : "Mes identifiants"}
                   </h3>
                   <p className="text-xs text-gray-500">
-                    {items.length} {itemType === "prepaid" ? "compteurs" : "identifiants"} disponibles
+                    {items.length}{" "}
+                    {itemType === "prepaid" ? "compteurs" : "identifiants"}{" "}
+                    disponibles
                   </p>
                 </div>
               </div>
@@ -609,32 +672,41 @@ const MeterSection = ({
                 {items.map((item: any, index: number) => (
                   <div
                     key={item._id || item.id || item.identifiant}
-                    className={`flex flex-col items-center p-3 rounded-xl cursor-pointer transition-all duration-300 ${((selectedItem.item?._id && selectedItem.item._id === item._id) ||
-                      (selectedItem.item?.id && selectedItem.item.id === item.id) ||
-                      (selectedItem.item?.identifiant && selectedItem.item.identifiant === item.identifiant &&
-                        selectedItem.type === itemType))
-                      ? itemType === "prepaid"
-                        ? "bg-gradient-to-r from-[#27c3b2]/10 to-[#56c1b5]/10 ring-1 ring-[#27c3b2]/20 shadow-sm"
-                        : "bg-gradient-to-r from-[#FFA755]/10 to-[#EC4F48]/10 ring-1 ring-[#EC4F48]/20 shadow-sm"
-                      : "hover:bg-gray-50 active:bg-gray-100"
-                      }`}
+                    className={`flex flex-col items-center p-3 rounded-xl cursor-pointer transition-all duration-300 ${
+                      (selectedItem.item?._id &&
+                        selectedItem.item._id === item._id) ||
+                      (selectedItem.item?.id &&
+                        selectedItem.item.id === item.id) ||
+                      (selectedItem.item?.identifiant &&
+                        selectedItem.item.identifiant === item.identifiant &&
+                        selectedItem.type === itemType)
+                        ? itemType === "prepaid"
+                          ? "bg-gradient-to-r from-[#27c3b2]/10 to-[#56c1b5]/10 ring-1 ring-[#27c3b2]/20 shadow-sm"
+                          : "bg-gradient-to-r from-[#FFA755]/10 to-[#EC4F48]/10 ring-1 ring-[#EC4F48]/20 shadow-sm"
+                        : "hover:bg-gray-50 active:bg-gray-100"
+                    }`}
                     onClick={() => handleItemClick(item)}
                     style={{
                       animationDelay: `${index * 0.05}s`,
-                      animation: "fadeInUp 0.5s ease-out forwards"
+                      animation: "fadeInUp 0.5s ease-out forwards",
                     }}
                   >
                     <div className="flex items-center justify-center mb-3 relative">
                       <div
-                        className={`w-14 h-14 flex items-center justify-center rounded-full transition-all duration-300 ${((selectedItem.item?._id && selectedItem.item._id === item._id) ||
-                          (selectedItem.item?.id && selectedItem.item.id === item.id) ||
-                          (selectedItem.item?.identifiant && selectedItem.item.identifiant === item.identifiant &&
-                            selectedItem.type === itemType))
-                          ? itemType === "prepaid"
-                            ? "bg-gradient-to-r from-[#27c3b2] to-[#56c1b5] shadow"
-                            : "bg-gradient-to-r from-[#FFA755] to-[#EC4F48] shadow"
-                          : "bg-white shadow-sm hover:shadow"
-                          }`}
+                        className={`w-14 h-14 flex items-center justify-center rounded-full transition-all duration-300 ${
+                          (selectedItem.item?._id &&
+                            selectedItem.item._id === item._id) ||
+                          (selectedItem.item?.id &&
+                            selectedItem.item.id === item.id) ||
+                          (selectedItem.item?.identifiant &&
+                            selectedItem.item.identifiant ===
+                              item.identifiant &&
+                            selectedItem.type === itemType)
+                            ? itemType === "prepaid"
+                              ? "bg-gradient-to-r from-[#27c3b2] to-[#56c1b5] shadow"
+                              : "bg-gradient-to-r from-[#FFA755] to-[#EC4F48] shadow"
+                            : "bg-white shadow-sm hover:shadow"
+                        }`}
                       >
                         <svg
                           width="24"
@@ -647,10 +719,14 @@ const MeterSection = ({
                           <path
                             d="M15 12.5C17.7614 12.5 20 10.2614 20 7.5C20 4.73858 17.7614 2.5 15 2.5C12.2386 2.5 10 4.73858 10 7.5C10 10.2614 12.2386 12.5 15 12.5Z"
                             fill={
-                              ((selectedItem.item?._id && selectedItem.item._id === item._id) ||
-                                (selectedItem.item?.id && selectedItem.item.id === item.id) ||
-                                (selectedItem.item?.identifiant && selectedItem.item.identifiant === item.identifiant &&
-                                  selectedItem.type === itemType))
+                              (selectedItem.item?._id &&
+                                selectedItem.item._id === item._id) ||
+                              (selectedItem.item?.id &&
+                                selectedItem.item.id === item.id) ||
+                              (selectedItem.item?.identifiant &&
+                                selectedItem.item.identifiant ===
+                                  item.identifiant &&
+                                selectedItem.type === itemType)
                                 ? "white"
                                 : iconFill
                             }
@@ -659,10 +735,14 @@ const MeterSection = ({
                             opacity="0.5"
                             d="M25 21.875C25 24.9812 25 27.5 15 27.5C5 27.5 5 24.9812 5 21.875C5 18.7688 9.4775 16.25 15 16.25C20.5225 16.25 25 18.7688 25 21.875Z"
                             fill={
-                              ((selectedItem.item?._id && selectedItem.item._id === item._id) ||
-                                (selectedItem.item?.id && selectedItem.item.id === item.id) ||
-                                (selectedItem.item?.identifiant && selectedItem.item.identifiant === item.identifiant &&
-                                  selectedItem.type === itemType))
+                              (selectedItem.item?._id &&
+                                selectedItem.item._id === item._id) ||
+                              (selectedItem.item?.id &&
+                                selectedItem.item.id === item.id) ||
+                              (selectedItem.item?.identifiant &&
+                                selectedItem.item.identifiant ===
+                                  item.identifiant &&
+                                selectedItem.type === itemType)
                                 ? "white"
                                 : iconFill
                             }
@@ -675,20 +755,32 @@ const MeterSection = ({
                     </div>
                     <div className="flex flex-col items-center text-center">
                       <span
-                        className={`text-sm transition-colors ${((selectedItem.item?._id && selectedItem.item._id === item._id) ||
-                          (selectedItem.item?.id && selectedItem.item.id === item.id) ||
-                          (selectedItem.item?.identifiant && selectedItem.item.identifiant === item.identifiant &&
-                            selectedItem.type === itemType))
-                          ? "font-semibold"
-                          : "font-medium"
-                          }`}
+                        className={`text-sm transition-colors ${
+                          (selectedItem.item?._id &&
+                            selectedItem.item._id === item._id) ||
+                          (selectedItem.item?.id &&
+                            selectedItem.item.id === item.id) ||
+                          (selectedItem.item?.identifiant &&
+                            selectedItem.item.identifiant ===
+                              item.identifiant &&
+                            selectedItem.type === itemType)
+                            ? "font-semibold"
+                            : "font-medium"
+                        }`}
                         style={{
-                          color: ((selectedItem.item?._id && selectedItem.item._id === item._id) ||
-                            (selectedItem.item?.id && selectedItem.item.id === item.id) ||
-                            (selectedItem.item?.identifiant && selectedItem.item.identifiant === item.identifiant &&
-                              selectedItem.type === itemType))
-                            ? itemType === "prepaid" ? "#27c3b2" : "#EC4F48"
-                            : "#222928"
+                          color:
+                            (selectedItem.item?._id &&
+                              selectedItem.item._id === item._id) ||
+                            (selectedItem.item?.id &&
+                              selectedItem.item.id === item.id) ||
+                            (selectedItem.item?.identifiant &&
+                              selectedItem.item.identifiant ===
+                                item.identifiant &&
+                              selectedItem.type === itemType)
+                              ? itemType === "prepaid"
+                                ? "#27c3b2"
+                                : "#EC4F48"
+                              : "#222928",
                         }}
                       >
                         {item.libelle || item.label || ""}
@@ -714,7 +806,7 @@ const MeterSection = ({
                     }}
                     style={{
                       animationDelay: `${items.length * 0.05}s`,
-                      animation: "fadeInUp 0.5s ease-out forwards"
+                      animation: "fadeInUp 0.5s ease-out forwards",
                     }}
                   >
                     <div className="flex items-center justify-center mb-3 relative">
@@ -727,7 +819,13 @@ const MeterSection = ({
                           xmlns="http://www.w3.org/2000/svg"
                           className="transition-transform duration-300 group-hover:scale-110"
                         >
-                          <path d="M12 5V19M5 12H19" stroke="#27c3b2" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                          <path
+                            d="M12 5V19M5 12H19"
+                            stroke="#27c3b2"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
                         </svg>
                       </div>
                     </div>
@@ -752,10 +850,11 @@ const MeterSection = ({
                     onButtonClick(); // Appeler onButtonClick après fermeture
                   }, 300); // Délai pour l'animation de fermeture
                 }}
-                className={`w-full flex items-center justify-center gap-2 py-3 rounded-lg font-medium transition-all duration-300 hover:scale-[1.02] ${itemType === "prepaid"
-                  ? "text-white bg-gradient-to-r from-[#27c3b2] to-[#56c1b5] hover:shadow-[0_10px_15px_-3px_rgba(39,195,178,0.3)]"
-                  : "text-white bg-gradient-to-r from-[#FFA755] to-[#EC4F48] hover:shadow-[0_10px_15px_-3px_rgba(236,79,72,0.3)]"
-                  }`}
+                className={`w-full flex items-center justify-center gap-2 py-3 rounded-lg font-medium transition-all duration-300 hover:scale-[1.02] ${
+                  itemType === "prepaid"
+                    ? "text-white bg-gradient-to-r from-[#27c3b2] to-[#56c1b5] hover:shadow-[0_10px_15px_-3px_rgba(39,195,178,0.3)]"
+                    : "text-white bg-gradient-to-r from-[#FFA755] to-[#EC4F48] hover:shadow-[0_10px_15px_-3px_rgba(236,79,72,0.3)]"
+                }`}
               >
                 <svg
                   width="16"
@@ -777,14 +876,17 @@ const MeterSection = ({
 };
 
 export default function Dashboard() {
+  // Récupération des infos de l'utilisateur connecté & du token
+  const userInfo = getUserInfo();
+  const token = userInfo.token;
+
+  // Toast de gestion des apis
+  const { showToast } = useToast();
+
   const [isRattachementModalOpen, setIsRattachementModalOpen] = useState(false);
   const [rattachementType, setRattachementType] = useState<
     "prepaid" | "postpaid"
   >("postpaid");
-
-  // États précédents conservés pour compatibilité
-  const [isCompteurModalOpen, setIsCompteurModalOpen] = useState(false);
-  const [isIdentifiantModalOpen, setIsIdentifiantModalOpen] = useState(false);
 
   // Paramètres de pagination et filtrage pour l'API
   const [rattachementParams, setRattachementParams] = useState({
@@ -810,31 +912,6 @@ export default function Dashboard() {
     lastname: string;
     userId: string;
   } | null>(null);
-
-  // Suppression de l'état local, tout passe par le contexte
-
-  // Fonction pour afficher un message toast
-  const showToastMessage = useCallback(
-    (
-      message: string,
-      type: "success" | "error" | "info" | "warning" = "info"
-    ) => {
-      // Vérifier si la fonction toast existe dans l'environnement global
-      if (typeof window !== "undefined" && (window as any).toast) {
-        (window as any).toast[type](message);
-      } else {
-        // Utiliser l'API native si disponible
-        if (typeof window !== "undefined" && "Notification" in window) {
-          Notification.requestPermission().then((permission) => {
-            if (permission === "granted") {
-              new Notification(message);
-            }
-          });
-        }
-      }
-    },
-    []
-  );
 
   // Pour gérer le montage du composant côté client et récupérer les données de l'URL
   useEffect(() => {
@@ -906,118 +983,7 @@ export default function Dashboard() {
     setIsLoadingPrepaid(true);
     setIsLoadingPostpaid(true);
 
-    // Fonction pour charger depuis le cache
-    const tryLoadFromCache = () => {
-      try {
-        const cachedPrepaid = sessionStorage.getItem("compteursPrepaid");
-        const cachedPostpaid = sessionStorage.getItem("compteursPostpaid");
-
-        if (cachedPrepaid) {
-          const parsedData = JSON.parse(cachedPrepaid);
-          const compteursFromCache = parsedData.map((item: any) => ({
-            _id: item._id,
-            id: item.id,
-            identifiant: item.identifiant,
-            label: item.label || item.identifiant,
-            isAlert: item.isAlert || false,
-            status: item.status,
-            statutRattachement: item.statutRattachement,
-            type: "prepaid",
-          }));
-          setCompteursPrepaid(compteursFromCache);
-        }
-
-        if (cachedPostpaid) {
-          const parsedData = JSON.parse(cachedPostpaid);
-          const compteursFromCache = parsedData.map((item: any) => ({
-            _id: item._id,
-            id: item.id,
-            identifiant: item.identifiant,
-            label: item.label || item.identifiant,
-            isAlert: item.isAlert || false,
-            status: item.status,
-            statutRattachement: item.statutRattachement,
-            type: "postpaid",
-          }));
-          setCompteursPostpaid(compteursFromCache);
-        }
-
-        return cachedPrepaid || cachedPostpaid;
-      } catch (cacheError) {
-        console.error("Erreur lors de la récupération du cache:", cacheError);
-        return false;
-      }
-    };
-
     try {
-      // Récupérer le token depuis plusieurs sources possibles
-      let token_login: string | null = null;
-
-      // Vérifier si nous sommes côté client avant d'accéder au localStorage/sessionStorage
-      if (typeof window !== "undefined") {
-        // Essayer de récupérer le token depuis différentes sources dans un ordre de priorité
-        token_login = localStorage.getItem("token_login");
-
-        if (!token_login) {
-          token_login = localStorage.getItem("token");
-        }
-
-        if (!token_login) {
-          token_login = sessionStorage.getItem("token_login");
-        }
-
-        if (!token_login) {
-          token_login = sessionStorage.getItem("token");
-        }
-
-        // Essayer de récupérer depuis authData en dernier recours
-        if (!token_login) {
-          const authData = sessionStorage.getItem("authData");
-          if (authData) {
-            try {
-              const parsedAuthData = JSON.parse(authData);
-              token_login = parsedAuthData.token;
-            } catch (e) {
-              console.error("Erreur lors du parsing de authData:", e);
-            }
-          }
-        }
-      }
-
-      // Si aucun token n'est trouvé, charger les données depuis le cache si disponible
-      if (!token_login) {
-        console.warn(
-          "Token d'authentification non trouvé, tentative de récupération depuis le cache"
-        );
-
-        // Si des données sont chargées depuis le cache
-        if (tryLoadFromCache()) {
-          showToastMessage(
-            "Session expirée. Affichage des données en cache. Veuillez vous reconnecter.",
-            "warning"
-          );
-          // Marquer que les données ont été chargées (même si c'est depuis le cache)
-          dataLoadedRef.current = true;
-        } else {
-          // Si pas de données en cache et pas de token, rediriger vers la page de connexion
-          showToastMessage(
-            "Session expirée. Veuillez vous reconnecter.",
-            "error"
-          );
-
-          // Délai court avant la redirection pour permettre l'affichage du message
-          setTimeout(() => {
-            window.location.href = "/";
-          }, 2000);
-        }
-
-        // Terminer les états de chargement
-        setIsLoading(false);
-        setIsLoadingPrepaid(false);
-        setIsLoadingPostpaid(false);
-        return;
-      }
-
       // Construire l'URL avec les paramètres
       const queryParams = new URLSearchParams();
       Object.entries(rattachementParams).forEach(([key, value]) => {
@@ -1026,74 +992,20 @@ export default function Dashboard() {
         }
       });
 
-      // Configuration des requêtes
-      const headers = {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token_login}`,
-      };
-
       // Exécuter les deux requêtes en parallèle
       const [postpaidResponse, prepaidResponse] = await Promise.all([
-        fetch(
-          `/api/proxy/rattachement/postpaye/me?${queryParams.toString()}`,
-          {
-            method: "GET",
-            headers,
-          }
+        axiosService.get(
+          `/v3/rattachement/postpaye/me?${queryParams.toString()}`
         ),
-        fetch(
-          `/api/proxy/rattachement/prepaye/me?${queryParams.toString()}`,
-          {
-            method: "GET",
-            headers,
-          }
+        axiosService.get(
+          `/v3/rattachement/prepaye/me?${queryParams.toString()}`
         ),
       ]);
 
-      // Vérifier les réponses et traiter les codes d'erreur HTTP
-      if (!postpaidResponse.ok) {
-        // Si le token est expiré (401) ou non autorisé (403)
-        if (
-          postpaidResponse.status === 401 ||
-          postpaidResponse.status === 403
-        ) {
-          // Essayer de restaurer depuis le cache et suggérer une reconnexion
-          const hasCachedData = tryLoadFromCache();
-          if (hasCachedData) {
-            showToastMessage(
-              "Session expirée. Affichage des données en cache. Veuillez vous reconnecter.",
-              "warning"
-            );
-          } else {
-            showToastMessage(
-              "Session expirée. Veuillez vous reconnecter.",
-              "error"
-            );
-            setTimeout(() => {
-              window.location.href = "/";
-            }, 2000);
-          }
-          return;
-        }
-        throw new Error(
-          `Erreur lors de la récupération des rattachements postpayés: ${postpaidResponse.status}`
-        );
-      }
-
-      if (!prepaidResponse.ok) {
-        if (prepaidResponse.status === 401 || prepaidResponse.status === 403) {
-          // Déjà géré par le bloc précédent
-          return;
-        }
-        throw new Error(
-          `Erreur lors de la récupération des rattachements prépayés: ${prepaidResponse.status}`
-        );
-      }
-
       // Transformer les réponses en JSON en parallèle
-      const [postpaidData, prepaidData] = await Promise.all([
-        postpaidResponse.json(),
-        prepaidResponse.json(),
+      const [postpaidData, prepaidData]: any = await Promise.all([
+        postpaidResponse,
+        prepaidResponse,
       ]);
 
       // Traiter les données postpayées
@@ -1122,72 +1034,16 @@ export default function Dashboard() {
 
       // Marquer que les données ont été chargées
       dataLoadedRef.current = true;
-
-      // Utiliser sessionStorage pour stocker les résultats (mise en cache)
-      if (typeof window !== "undefined") {
-        sessionStorage.setItem(
-          "compteursPrepaid",
-          JSON.stringify(prepaidData.data || [])
-        );
-        sessionStorage.setItem(
-          "compteursPostpaid",
-          JSON.stringify(postpaidData.data || [])
-        );
-        sessionStorage.setItem(
-          "rattachementsLastUpdate",
-          new Date().toISOString()
-        );
-      }
     } catch (err: any) {
       console.error("Erreur lors de la récupération des rattachements:", err);
-
-      // En cas d'erreur, essayer de récupérer les données en cache
-      if (typeof window !== "undefined") {
-        try {
-          const cachedPrepaid = sessionStorage.getItem("compteursPrepaid");
-          const cachedPostpaid = sessionStorage.getItem("compteursPostpaid");
-
-          if (cachedPrepaid) {
-            const parsedData = JSON.parse(cachedPrepaid);
-            const compteursFromCache = parsedData.map((item: any) => ({
-              ...item, // Preserve all original fields
-              label: item.label || item.identifiant, // Ensure label exists
-              isAlert: item.isAlert || false, // Add UI-specific field if not present
-              type: "prepaid", // Ensure type is set to prepaid
-            }));
-            setCompteursPrepaid(compteursFromCache);
-          }
-
-          if (cachedPostpaid) {
-            const parsedData = JSON.parse(cachedPostpaid);
-            const compteursFromCache = parsedData.map((item: any) => ({
-              ...item, // Preserve all original fields
-              label: item.label || item.identifiant, // Ensure label exists
-              isAlert: item.isAlert || false, // Add UI-specific field if not present
-              type: "postpaid", // Ensure type is set to postpaid
-            }));
-            setCompteursPostpaid(compteursFromCache);
-          }
-
-          // Afficher un message si on utilise les données en cache
-          if (cachedPrepaid || cachedPostpaid) {
-            showToastMessage(
-              "Affichage des données en cache. Essayez de rafraîchir la page.",
-              "info"
-            );
-          }
-        } catch (cacheError) {
-          console.error("Erreur lors de la récupération du cache:", cacheError);
-        }
-      }
     } finally {
       setIsLoading(false);
       setIsLoadingPrepaid(false);
       setIsLoadingPostpaid(false);
     }
-  }, [rattachementParams, showToastMessage]);
+  }, [rattachementParams]);
 
-  // Charger les données au montage du composant et lors des changements de paramètres
+  //  Charger les données au montage du composant et lors des changements de paramètres
   useEffect(() => {
     // S'assurer que nous sommes côté client avant d'appeler fetchAllRattachements
     if (typeof window !== "undefined" && mounted) {
@@ -1195,178 +1051,43 @@ export default function Dashboard() {
     }
   }, [fetchAllRattachements, mounted]);
 
-  // Mettre à jour fetchRattachements pour qu'il utilise la nouvelle fonction optimisée
-  const fetchRattachements = useCallback(() => {
-    // Réinitialiser le flag pour forcer le rechargement des données
-    dataLoadedRef.current = false;
-    fetchAllRattachements();
-  }, [fetchAllRattachements]);
-
-  // Fonction pour décoder le token JWT et extraire l'ID client
-  const decodeToken = (token: string | null): any | null => {
-    if (!token) return null;
-
-    try {
-      // Décoder le token JWT pour obtenir la payload
-      const base64Url = token.split(".")[1];
-      if (!base64Url) return null;
-
-      const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
-      const payload = JSON.parse(window.atob(base64));
-
-      return payload;
-    } catch (error) {
-      console.error("Erreur lors du décodage du token:", error);
-      return null;
-    }
-  };
-
-  // Fonction générique pour soumettre le formulaire de rattachement
-  const handleRattachementSubmit = async (data: {
-    identifiant: string;
-    isAlerte?: boolean;
-    label?: string;
-  }) => {
-    try {
-      // Récupérer le label (utiliser l'identifiant comme fallback si non fourni)
-      const label = data.label || data.identifiant;
-
-      // Appeler directement la fonction de rattachement selon le type
-      let success;
-      if (rattachementType === "postpaid") {
-        success = await handleRattachementPostpaid(data.identifiant, label);
-      } else {
-        success = await handleRattachementPrepaid(data.identifiant, label);
-      }
-
-      // Fermer la modal si le rattachement a réussi
-      if (success) {
-        setIsRattachementModalOpen(false);
-      }
-
-      return success;
-    } catch (error) {
-      console.error("Erreur lors du rattachement:", error);
-      return false;
-    }
-  };
-
-  // Fonction pour le rattachement générique (utilisable pour prépayé et postpayé)
+  // Rattachemet niveau 1
   const handleRattachement = async (
     identifiant: string,
     label: string,
     type: "prepaid" | "postpaid"
   ) => {
     try {
+      console.log(type, "type");
       setIsLoading(true);
 
-      // Récupérer le token pour l'authentification
-      const token_login =
-        localStorage.getItem("token_login") ||
-        localStorage.getItem("token") ||
-        sessionStorage.getItem("token") ||
-        (sessionStorage.getItem("authData")
-          ? JSON.parse(sessionStorage.getItem("authData") || "{}").token
-          : null);
+      // Configuration de la requête
+      const endpoint =
+        type === "postpaid"
+          ? `/v3/rattachement/postpaye/niveau/1`
+          : `/v3/rattachement/prepaye/niveau/1`;
 
-      if (!token_login) {
-        throw new Error("Aucun token d'authentification trouvé");
-      }
-
-      // Récupérer l'objet user depuis localStorage et le parser correctement
-      let clientId: string | null = null;
-      const userStr = localStorage.getItem("user");
-
-      if (userStr) {
-        try {
-          const userObj = JSON.parse(userStr);
-          clientId = userObj._id;
-        } catch (e) {
-          console.error("Erreur lors du parsing de l'utilisateur:", e);
-        }
-      }
-
-      // Si on n'a pas trouvé de clientId dans localStorage, chercher dans d'autres sources
-      if (!clientId && user && user._id) {
-        clientId = user._id;
-      }
-
-      // En dernier recours, essayer d'extraire à partir du token
-      if (!clientId) {
-        const decodedToken = decodeToken(token_login);
-        if (decodedToken && decodedToken._id) {
-          clientId = decodedToken._id;
-        }
-      }
-
-      // Vérifier si on a bien un clientId
-      if (!clientId) {
-        throw new Error("Impossible de récupérer l'ID client");
-      }
-
-      // Corps de la requête
       const requestBody = {
         identifiant,
         label,
-        clientId,
       };
 
-      // URL de l'endpoint en fonction du type
-      const endpoint =
-        type === "postpaid"
-          ? `${API_EAGENCE}/rattachement/postpaye/niveau/1`
-          : `${API_EAGENCE}/rattachement/prepaye/niveau/1`;
+      const response: any = await axiosService.post(endpoint, requestBody);
+      console.log(response, "responseRattachement");
 
-      // Effectuer la requête
-      const response = await fetch(endpoint, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token_login}`,
-        },
-        body: JSON.stringify(requestBody),
-      });
+      if (response.data) {
+        setIsRattachementModalOpen(false);
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(
-          data.message || `Erreur lors du rattachement: ${response.status}`
-        );
+        showToast("Rattachement effectué avec succes", "success");
+        // Rafraîchir les données après le rattachement
+        fetchAllRattachements();
       }
-
-      // Si le rattachement est réussi
-      if (data && data.message === "Action éffectuée avec succès") {
-        // Afficher le message de succès
-        showToastMessage(
-          `Rattachement ${type === "postpaid" ? "postpayé" : "prépayé"
-          } effectué avec succès`,
-          "success"
-        );
-
-        // Rafraîchir la liste des rattachements
-        fetchRattachements();
-
-        return true;
-      } else {
-        throw new Error(data.message || "Erreur lors du rattachement");
-      }
-    } catch (error: any) {
-      const errorMessage = handleApiError(error);
-      showToastMessage(errorMessage, "error");
-      return false;
+    } catch (error) {
+      console.log(error.response.data.message, "errorrattachement");
+      showToast(error.response.data.message, "error");
     } finally {
       setIsLoading(false);
     }
-  };
-
-  // Fonctions simplifiées pour le rattachement - ne font que relayer à handleRattachement
-  const handleRattachementPostpaid = (identifiant: string, label: string) => {
-    return handleRattachement(identifiant, label, "postpaid");
-  };
-
-  const handleRattachementPrepaid = (identifiant: string, label: string) => {
-    return handleRattachement(identifiant, label, "prepaid");
   };
 
   // État pour gérer le compteur/identifiant sélectionné
@@ -1385,183 +1106,93 @@ export default function Dashboard() {
   const [isLoadingInvoice, setIsLoadingInvoice] = useState(false);
 
   // Fonction pour récupérer les détails d'un identifiant/compteur
-  const fetchItemDetails = useCallback(
-    async (id: string) => {
-      if (!id) {
-        console.error("ID manquant pour fetchItemDetails");
-        return;
-      }
+  const fetchItemDetails = useCallback(async (id: string) => {
+    if (!id) {
+      console.error("ID manquant pour fetchItemDetails");
+      return;
+    }
 
-      setIsLoadingDetails(true);
+    setIsLoadingDetails(true);
 
-      try {
-        // Récupérer le token pour l'authentification
-        const token_login =
-          localStorage.getItem("token_login") ||
-          localStorage.getItem("token") ||
-          sessionStorage.getItem("token") ||
-          (sessionStorage.getItem("authData")
-            ? JSON.parse(sessionStorage.getItem("authData") || "{}").token
-            : null);
+    try {
+      // Appel API pour récupérer les détails
+      const response: any = await axiosService.get(
+        `/v3/rattachement/details/${id}`
+      );
 
-        if (!token_login) {
-          console.error("Token d'authentification introuvable");
-          throw new Error("Aucun token d'authentification trouvé");
-        }
-
-        // Configuration de la requête
-        const headers = {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token_login}`,
-        };
-
-        // Appel API pour récupérer les détails
-        const response = await fetch(
-          `/api/proxy/rattachement/details/${id}`,
-          {
-            method: "GET",
-            headers,
-          }
-        );
-
-        if (!response.ok) {
-          // Gérer les erreurs d'authentification
-          if (response.status === 401 || response.status === 403) {
-            showToastMessage(
-              "Session expirée. Veuillez vous reconnecter.",
-              "warning"
-            );
-            return;
-          }
-          throw new Error(
-            `Erreur lors de la récupération des détails: ${response.status}`
-          );
-        }
-
-        const responseData = await response.json();
-
-        // Mettre à jour l'état avec les détails reçus selon le nouveau format de réponse
-        if (responseData && responseData.data) {
-          setItemDetails(responseData.data);
-        } else {
-          console.warn("Réponse API sans données valides:", responseData);
-          setItemDetails(null);
-        }
-      } catch (error: any) {
-        console.error(
-          "Erreur détaillée lors de la récupération des détails:",
-          error
-        );
-        const errorMessage = handleApiError(error);
-        showToastMessage(errorMessage, "error");
+      // Mettre à jour l'état avec les détails reçus selon le nouveau format de réponse
+      if (response.data) {
+        setItemDetails(response.data);
+      } else {
+        console.warn("Réponse API sans données valides:", response);
         setItemDetails(null);
-      } finally {
-        setIsLoadingDetails(false);
       }
-    },
-    [showToastMessage]
-  );
+    } catch (error: any) {
+      console.error(
+        "Erreur détaillée lors de la récupération des détails:",
+        error
+      );
+      const errorMessage = handleApiError(error);
+      setItemDetails(null);
+    } finally {
+      setIsLoadingDetails(false);
+    }
+  }, []);
 
   // Fonction pour récupérer la dernière facture d'un identifiant postpayé
-  const fetchLastInvoice = useCallback(
-    async (identifiant: string) => {
-      if (!identifiant) {
-        console.error("Identifiant manquant pour fetchLastInvoice");
-        return;
-      }
+  const fetchLastInvoice = useCallback(async (identifiant: string) => {
+    if (!identifiant) {
+      console.error("Identifiant manquant pour fetchLastInvoice");
+      return;
+    }
 
-      setIsLoadingInvoice(true);
+    setIsLoadingInvoice(true);
 
-      try {
-        // Récupérer le token pour l'authentification
-        const token_login =
-          localStorage.getItem("token_login") ||
-          localStorage.getItem("token") ||
-          sessionStorage.getItem("token") ||
-          (sessionStorage.getItem("authData")
-            ? JSON.parse(sessionStorage.getItem("authData") || "{}").token
-            : null);
+    try {
+      // Configuration de la requête
+      const headers = {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      };
 
-        if (!token_login) {
-          console.error("Token d'authentification introuvable");
-          throw new Error("Aucun token d'authentification trouvé");
+      // Appel API pour récupérer la dernière facture
+      const response = await fetch(
+        `${API_URL}/v3/rattachement/postpaye/factures/${identifiant}/last`,
+        {
+          method: "GET",
+          headers,
         }
+      );
 
-        // Configuration de la requête
-        const headers = {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token_login}`,
-        };
+      const responseData = await response.json();
 
-        // Appel API pour récupérer la dernière facture
-        const response = await fetch(
-          `/api/proxy/rattachement/postpaye/factures/${identifiant}/last`,
-          {
-            method: "GET",
-            headers,
-          }
-        );
-
-        const responseData = await response.json();
-
-        if (!response.ok) {
-          // Gérer les erreurs d'authentification
-          if (response.status === 401 || response.status === 403) {
-            showToastMessage(
-              "Session expirée. Veuillez vous reconnecter.",
-              "warning"
-            );
-            return;
-          }
-          throw new Error(
-            `Erreur lors de la récupération de la dernière facture: ${response.status}`
-          );
-        }
-
-        // Vérifier les différents cas de message avec data null
-        if (responseData) {
-          // Cas 1: "Cet identifiant ne possède pas de facture"
-          if (responseData.message === "Cet identifiant ne possède pas de facture") {
-            showToastMessage("Cet identifiant ne possède pas de facture", "info");
-            setLastInvoice(null);
-            return;
-          }
-
-          // Cas 2: "L'identifiant n'appartient pas à ce client"
-          if (responseData.message === "L'identifiant n'appartient pas à ce client") {
-            showToastMessage("L'identifiant n'appartient pas à ce client", "warning");
-            setLastInvoice(null);
-            return;
-          }
-
-          // Cas standard: On a des données
-          if (responseData.data) {
-            setLastInvoice(responseData.data);
-          } else {
-            console.warn(
-              "Réponse API sans données valides pour la facture:",
-              responseData
-            );
-            setLastInvoice(null);
-          }
+      // Vérifier les différents cas de message avec data null
+      if (responseData) {
+        // Cas standard: On a des données
+        if (responseData.data) {
+          setLastInvoice(responseData.data);
         } else {
-          console.warn("Réponse API indéfinie", responseData);
+          console.warn(
+            "Réponse API sans données valides pour la facture:",
+            responseData
+          );
           setLastInvoice(null);
         }
-      } catch (error: any) {
-        console.error(
-          "Erreur détaillée lors de la récupération de la dernière facture:",
-          error
-        );
-        const errorMessage = handleApiError(error);
-        showToastMessage(errorMessage, "error");
+      } else {
+        console.warn("Réponse API indéfinie", responseData);
         setLastInvoice(null);
-      } finally {
-        setIsLoadingInvoice(false);
       }
-    },
-    [showToastMessage]
-  );
+    } catch (error: any) {
+      console.error(
+        "Erreur détaillée lors de la récupération de la dernière facture:",
+        error
+      );
+      const errorMessage = handleApiError(error);
+      setLastInvoice(null);
+    } finally {
+      setIsLoadingInvoice(false);
+    }
+  }, []);
 
   // Appeler fetchItemDetails chaque fois que selectedItem change
   useEffect(() => {
@@ -1640,15 +1271,6 @@ export default function Dashboard() {
     setIsRattachementModalOpen(true);
   };
 
-  // Pour compatibilité avec le code existant
-  const handleCompteurSubmit = async (data: any) => {
-    return handleRattachementSubmit(data);
-  };
-
-  const handleIdentifiantSubmit = async (data: any) => {
-    return handleRattachementSubmit(data);
-  };
-
   const [isDemandeModalOpen, setIsDemandeModalOpen] = useState(false);
   const [isLevel2ModalOpen, setIsLevel2ModalOpen] = useState(false);
   // Ajouter un nouvel état pour le modal de réclamation
@@ -1658,18 +1280,24 @@ export default function Dashboard() {
 
   // Effet pour vérifier s'il y a une demande en attente à ouvrir automatiquement
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       // Utiliser setTimeout pour donner le temps au composant de se monter complètement
       setTimeout(() => {
         // Vérifier s'il y a une demande à ouvrir automatiquement
-        const openDemandeType = localStorage.getItem('openDemandeType');
+        const openDemandeType = localStorage.getItem("openDemandeType");
         if (openDemandeType) {
-          console.log("Demande en attente détectée, ouverture automatique de la modal:", openDemandeType);
+          console.log(
+            "Demande en attente détectée, ouverture automatique de la modal:",
+            openDemandeType
+          );
           // Forcer l'ouverture de la modal
           setIsDemandeModalOpen(true);
 
           // Pour déboguer
-          console.log("État de la modal après tentative d'ouverture:", isDemandeModalOpen);
+          console.log(
+            "État de la modal après tentative d'ouverture:",
+            isDemandeModalOpen
+          );
         }
 
         // Ne pas supprimer la demande en attente si elle n'a pas été traitée correctement
@@ -1678,58 +1306,19 @@ export default function Dashboard() {
   }, []);
 
   // Function for level 2 attachment (postpaid only)
-  const handleLevel2Attachment = async (data: { index?: number; montant?: number }) => {
+  const handleLevel2Attachment = async (index?: number, montant?: number) => {
     try {
       setIsLoading(true);
-
-      // Get the authentication token
-      const token_login =
-        localStorage.getItem("token_login") ||
-        localStorage.getItem("token") ||
-        sessionStorage.getItem("token") ||
-        (sessionStorage.getItem("authData")
-          ? JSON.parse(sessionStorage.getItem("authData") || "{}").token
-          : null);
-
-      if (!token_login) {
-        throw new Error("Aucun token d'authentification trouvé");
-      }
-
-      // Get client ID
-      let clientId: string | null = null;
-      const userStr = localStorage.getItem("user");
-
-      if (userStr) {
-        try {
-          const userObj = JSON.parse(userStr);
-          clientId = userObj._id;
-        } catch (e) {
-          console.error("Erreur lors du parsing de l'utilisateur:", e);
-        }
-      }
-
-      // If clientId not found in localStorage, check other sources
-      if (!clientId && user && user._id) {
-        clientId = user._id;
-      }
-
-      // As a last resort, try to extract from token
-      if (!clientId) {
-        const decodedToken = decodeToken(token_login);
-        if (decodedToken && decodedToken._id) {
-          clientId = decodedToken._id;
-        }
-      }
-
-      // Check if we have a clientId
-      if (!clientId) {
-        throw new Error("Impossible de récupérer l'ID client");
-      }
 
       // Check if we have the selected item with identifiant
       if (!selectedItem.item || !selectedItem.item.identifiant) {
         throw new Error("Aucun compteur sélectionné");
       }
+
+      // API endpoint for level 2 attachment
+      const endpoint = `/v3/rattachement/${
+        selectedItem.type === "postpaid" ? "postpaye" : "prepaye"
+      }/niveau/2`;
 
       // Create request body based on selectedItem.type
       let requestBody;
@@ -1737,73 +1326,23 @@ export default function Dashboard() {
         // Pour les compteurs postpayé: besoin de index
         requestBody = {
           identifiant: selectedItem.item.identifiant,
-          index: data.index,
-          clientId,
+          index: index,
         };
       } else {
         // Pour les compteurs prépayé: besoin de montant
         requestBody = {
           identifiant: selectedItem.item.identifiant,
-          montant: data.montant,
-          clientId,
+          montant: montant,
         };
       }
 
-      // API endpoint for level 2 attachment
-      const endpoint = `${API_EAGENCE}/${selectedItem.type === "postpaid" ? "postpaye" : "prepaye"}/niveau/2`;
-
       // Make the request
-      const response = await fetch(endpoint, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token_login}`,
-        },
-        body: JSON.stringify(requestBody),
-      });
+      const response = await axiosService.post(endpoint, requestBody);
 
-      const responseData = await response.json();
-
-      if (!response.ok) {
-        throw new Error(
-          responseData.message ||
-          `Erreur lors du rattachement niveau 2: ${response.status}`
-        );
-      }
-
-      // If level 2 attachment is successful
-      if (
-        responseData &&
-        responseData.message === "Action éffectuée avec succès"
-      ) {
-        // Show success message
-        showToastMessage(
-          `Rattachement niveau 2 ${selectedItem.type === "postpaid" ? "postpayé" : "prépayé"} effectué avec succès`,
-          "success"
-        );
-
-        // Close the modal
-        setIsLevel2ModalOpen(false);
-
-        // Refresh item details to update the UI
-        if (selectedItem.item._id) {
-          await fetchItemDetails(selectedItem.item._id);
-        }
-
-        // Forcer le rechargement de tous les rattachements pour mettre à jour la liste complète
-        // Marquer les données comme obsolètes pour forcer le rafraîchissement
-        dataLoadedRef.current = false;
-        fetchAllRattachements();
-
-        return true;
-      } else {
-        throw new Error(
-          responseData.message || "Erreur lors du rattachement niveau 2"
-        );
-      }
+      console.log(response, "responseLevel2Attachment");
     } catch (error: any) {
       const errorMessage = handleApiError(error);
-      showToastMessage(errorMessage, "error");
+
       return false;
     } finally {
       setIsLoading(false);
@@ -1815,8 +1354,8 @@ export default function Dashboard() {
     if (isDemandeModalOpen) {
       console.log("Modal de demande ouverte avec succès");
       // La modal est maintenant ouverte, on peut nettoyer les données
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem('pendingDemandeMode');
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("pendingDemandeMode");
         // Ne pas supprimer openDemandeType tout de suite car ModalDEmande en a besoin
         // pour savoir quel type de demande afficher
       }
@@ -1827,17 +1366,19 @@ export default function Dashboard() {
   useEffect(() => {
     // Script qui s'exécute immédiatement
     const forceOpenModalIfNeeded = () => {
-      if (typeof window !== 'undefined') {
+      if (typeof window !== "undefined") {
         // Vérifier les paramètres URL
         const urlParams = new URLSearchParams(window.location.search);
-        const shouldOpenModal = urlParams.get('openModal') === 'true';
+        const shouldOpenModal = urlParams.get("openModal") === "true";
 
         // Vérifier le localStorage
-        const openDemandeType = localStorage.getItem('openDemandeType');
+        const openDemandeType = localStorage.getItem("openDemandeType");
 
         if (openDemandeType || shouldOpenModal) {
-          console.log("Tentative immédiate d'ouverture de modal:",
-            openDemandeType ? openDemandeType : "via paramètre URL");
+          console.log(
+            "Tentative immédiate d'ouverture de modal:",
+            openDemandeType ? openDemandeType : "via paramètre URL"
+          );
           setIsDemandeModalOpen(true);
 
           // Nettoyer l'URL si nécessaire
@@ -1855,19 +1396,21 @@ export default function Dashboard() {
     const timers = [
       setTimeout(forceOpenModalIfNeeded, 500),
       setTimeout(forceOpenModalIfNeeded, 1500),
-      setTimeout(forceOpenModalIfNeeded, 3000)
+      setTimeout(forceOpenModalIfNeeded, 3000),
     ];
 
     // Nettoyage des timers
     return () => {
-      timers.forEach(timer => clearTimeout(timer));
+      timers.forEach((timer) => clearTimeout(timer));
     };
   }, []);
 
   const handleReclamationSubmit = (data: any) => {
     console.log("Réclamation submitted:", data);
     // Simuler un numéro de demande
-    setRequestNumber("D" + Math.floor(Math.random() * 9000000000 + 1000000000) + "RC");
+    setRequestNumber(
+      "D" + Math.floor(Math.random() * 9000000000 + 1000000000) + "RC"
+    );
     setIsReclModalOpen(false);
     setIsReclSuccessOpen(true);
   };
@@ -2035,8 +1578,9 @@ export default function Dashboard() {
               >
                 <div
                   style={{
-                    transform: `scale(${zoomLevel}) translate(${position.x / zoomLevel
-                      }px, ${position.y / zoomLevel}px)`,
+                    transform: `scale(${zoomLevel}) translate(${
+                      position.x / zoomLevel
+                    }px, ${position.y / zoomLevel}px)`,
                     transformOrigin: "center",
                     transition: isDragging ? "none" : "transform 0.2s ease-out",
                     width: "100%",
@@ -2062,14 +1606,16 @@ export default function Dashboard() {
                     {selectedFacture.montant}
                   </p>
                   <span
-                    className={`text-sm px-2 py-1 rounded-full flex items-center ${selectedFacture.isPaid
-                      ? "bg-green-100 text-green-700"
-                      : "bg-red-100 text-red-700"
-                      }`}
+                    className={`text-sm px-2 py-1 rounded-full flex items-center ${
+                      selectedFacture.isPaid
+                        ? "bg-green-100 text-green-700"
+                        : "bg-red-100 text-red-700"
+                    }`}
                   >
                     <span
-                      className={`h-2 w-2 ${selectedFacture.isPaid ? "bg-green-600" : "bg-red-600"
-                        } rounded-full mr-1`}
+                      className={`h-2 w-2 ${
+                        selectedFacture.isPaid ? "bg-green-600" : "bg-red-600"
+                      } rounded-full mr-1`}
                     ></span>
                     {selectedFacture.isPaid ? "Payée" : "Non payée"}
                   </span>
@@ -2138,9 +1684,10 @@ export default function Dashboard() {
                       ? user
                         ? `${user.lastname || ""} ${user.firstname || ""}`
                         : urlUserData
-                          ? `${urlUserData.lastname || ""} ${urlUserData.firstname || ""
+                        ? `${urlUserData.lastname || ""} ${
+                            urlUserData.firstname || ""
                           }`
-                          : "Utilisateur"
+                        : "Utilisateur"
                       : "Utilisateur"}
                   </span>
                 </h1>
@@ -2283,7 +1830,10 @@ export default function Dashboard() {
 
               {/* Détails du compteur et factures */}
               {selectedItem.item ? (
-                <div className="flex flex-col gap-[20px] mb-[50px] overflow-hidden" style={{ position: 'static', zIndex: 'auto' }}>
+                <div
+                  className="flex flex-col gap-[20px] mb-[50px] overflow-hidden"
+                  style={{ position: "static", zIndex: "auto" }}
+                >
                   {" "}
                   <h1 className="text-xl font-semibold">
                     Détail compte -{" "}
@@ -2294,8 +1844,8 @@ export default function Dashboard() {
                           selectedItem.type === "prepaid"
                             ? "#1F7A70"
                             : selectedItem.type === "postpaid"
-                              ? "#EE761A"
-                              : "#1F7A70",
+                            ? "#EE761A"
+                            : "#1F7A70",
                       }}
                     >
                       {selectedItem.item
@@ -2303,38 +1853,38 @@ export default function Dashboard() {
                         : ""}
                     </span>
                   </h1>
-
                   <div className="w-full grid grid-cols-1 xl:grid-cols-12 gap-4 rounded-xl transition-all duration-300 overflow-hidden max-w-full">
                     {/* Solde à régler - Ne s'affiche que lorsque les deux requêtes sont terminées */}
-                    {itemDetails &&
-                      !isLoadingDetails &&
-                      (!isLoadingInvoice) ? (
+                    {itemDetails && !isLoadingDetails && !isLoadingInvoice ? (
                       <div className="lg:col-span-5 dashboard-card max-w-full">
                         <div className="dashboard-header">
                           <p className="text-base font-semibold text-gray-800 ml-4 mt-2">
                             Solde à régler
                           </p>
                           {(isLoadingDetails || isLoadingInvoice) && (
-                            <div className="dashboard-pill">
-                              Chargement...
-                            </div>
+                            <div className="dashboard-pill">Chargement...</div>
                           )}
                         </div>
-                        <div className="p-5 overflow-hidden">{/* Contenu reste le même */}
+                        <div className="p-5 overflow-hidden">
+                          {/* Contenu reste le même */}
                           <div className="flex items-center justify-between mb-5 flex-wrap">
                             <div className="flex items-center">
                               <div className="flex items-center">
                                 <div className="relative">
                                   {isMontantHidden ? (
                                     <div className="dashboard-highlight animate-fadeIn">
-                                      <p className="text-xs font-medium text-gray-500 mb-1">Solde total</p>
+                                      <p className="text-xs font-medium text-gray-500 mb-1">
+                                        Solde total
+                                      </p>
                                       <h2 className="text-3xl sm:text-5xl font-bold gradient-orange-text">
                                         ••••••
                                       </h2>
                                     </div>
                                   ) : (
                                     <div className="p-3 border-l-4 border-[#FF6B00] pl-5 bg-orange-50/50 rounded-r-lg">
-                                      <p className="text-xs font-medium text-gray-500 mb-1">Solde total</p>
+                                      <p className="text-xs font-medium text-gray-500 mb-1">
+                                        Solde total
+                                      </p>
                                       <h2 className="text-3xl sm:text-5xl font-bold text-[#FF6B00] flex items-baseline">
                                         {lastInvoice?.solde ||
                                           itemDetails?.solde ||
@@ -2384,15 +1934,33 @@ export default function Dashboard() {
                                 <span className="dashboard-pill flex items-center">
                                   {itemDetails?.type === "postpaye" ? (
                                     <>
-                                      <svg className="w-3 h-3 mr-1 text-blue-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"></path>
+                                      <svg
+                                        className="w-3 h-3 mr-1 text-blue-500"
+                                        fill="currentColor"
+                                        viewBox="0 0 20 20"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                      >
+                                        <path
+                                          fillRule="evenodd"
+                                          d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                          clipRule="evenodd"
+                                        ></path>
                                       </svg>
                                       Postpayé
                                     </>
                                   ) : (
                                     <>
-                                      <svg className="w-3 h-3 mr-1 text-green-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"></path>
+                                      <svg
+                                        className="w-3 h-3 mr-1 text-green-500"
+                                        fill="currentColor"
+                                        viewBox="0 0 20 20"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                      >
+                                        <path
+                                          fillRule="evenodd"
+                                          d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                          clipRule="evenodd"
+                                        ></path>
                                       </svg>
                                       Prépayé
                                     </>
@@ -2434,11 +2002,11 @@ export default function Dashboard() {
                                 <span className="font-medium">
                                   {lastInvoice
                                     ? `Échéance: ${new Date(
-                                      lastInvoice.dateLimite
-                                    ).toLocaleDateString()}`
+                                        lastInvoice.dateLimite
+                                      ).toLocaleDateString()}`
                                     : `Rattaché le: ${new Date(
-                                      itemDetails?.linkedAt
-                                    ).toLocaleDateString()}`}
+                                        itemDetails?.linkedAt
+                                      ).toLocaleDateString()}`}
                                 </span>
                               </div>
                             </div>
@@ -2470,15 +2038,34 @@ export default function Dashboard() {
                                 {lastInvoice?.reglageDisja || ""}
                               </p>
                             </div>
-                            <div className="dashboard-highlight overflow-hidden" style={{ zIndex: 5, position: 'relative' }}>
+                            <div
+                              className="dashboard-highlight overflow-hidden"
+                              style={{ zIndex: 5, position: "relative" }}
+                            >
                               <p className="text-xs font-medium text-gray-500 mb-1 flex items-center">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="mr-1 flex-shrink-0">
-                                  <path d="M12 8V12L15 15M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="#FF6B00" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                <svg
+                                  width="14"
+                                  height="14"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  className="mr-1 flex-shrink-0"
+                                >
+                                  <path
+                                    d="M12 8V12L15 15M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z"
+                                    stroke="#FF6B00"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                  />
                                 </svg>
                                 Montant à régler
                               </p>
                               <p className="font-bold text-lg gradient-orange-text truncate">
-                                {lastInvoice?.montantTotalARegler || "0"} <span className="text-sm font-medium text-gray-600">FCFA</span>
+                                {lastInvoice?.montantTotalARegler || "0"}{" "}
+                                <span className="text-sm font-medium text-gray-600">
+                                  FCFA
+                                </span>
                               </p>
                             </div>
                             <div className="dashboard-grid-item overflow-hidden">
@@ -2487,7 +2074,9 @@ export default function Dashboard() {
                               </p>
                               <p className="font-medium truncate">
                                 {itemDetails?.status === "active" ? (
-                                  <span className="dashboard-badge badge-active">active</span>
+                                  <span className="dashboard-badge badge-active">
+                                    active
+                                  </span>
                                 ) : (
                                   itemDetails?.status || "active"
                                 )}
@@ -2532,8 +2121,8 @@ export default function Dashboard() {
                               <p className="font-medium truncate">
                                 {lastInvoice?.dateFacture
                                   ? new Date(
-                                    lastInvoice.dateFacture
-                                  ).toLocaleDateString()
+                                      lastInvoice.dateFacture
+                                    ).toLocaleDateString()
                                   : ""}
                               </p>
                             </div>
@@ -2544,10 +2133,10 @@ export default function Dashboard() {
                               <p className="font-medium truncate">
                                 {lastInvoice?.dateDebutConso
                                   ? `${new Date(
-                                    lastInvoice.dateDebutConso
-                                  ).toLocaleDateString()} - ${new Date(
-                                    lastInvoice.dateFinConso
-                                  ).toLocaleDateString()}`
+                                      lastInvoice.dateDebutConso
+                                    ).toLocaleDateString()} - ${new Date(
+                                      lastInvoice.dateFinConso
+                                    ).toLocaleDateString()}`
                                   : ""}
                               </p>
                             </div>
@@ -2564,8 +2153,8 @@ export default function Dashboard() {
                               <p className="font-medium truncate">
                                 {itemDetails?.createdAt
                                   ? new Date(
-                                    itemDetails.createdAt
-                                  ).toLocaleDateString()
+                                      itemDetails.createdAt
+                                    ).toLocaleDateString()
                                   : ""}
                               </p>
                             </div>
@@ -2587,9 +2176,11 @@ export default function Dashboard() {
                     <div className="xl:col-span-7 relative overflow-hidden max-w-full">
                       <div className="relative">
                         {/* Blur overlay */}
-                        {itemDetails &&
-                          itemDetails.level !== 2 ? (
-                          <div className="absolute inset-0 bg-white/50 backdrop-blur-md rounded-xl flex flex-col items-center justify-center" style={{ zIndex: 5 }}>
+                        {itemDetails && itemDetails.level !== 2 ? (
+                          <div
+                            className="absolute inset-0 bg-white/50 backdrop-blur-md rounded-xl flex flex-col items-center justify-center"
+                            style={{ zIndex: 5 }}
+                          >
                             <p className="text-[#151515] text-[20px] font-semibold mb-4">
                               Faites un pas de plus vers plus de sérénité et de
                               contrôle !
@@ -2677,7 +2268,7 @@ export default function Dashboard() {
                                           428) /
                                           (itemDetails?.consommation
                                             ?.similaire || 347)) *
-                                        100
+                                          100
                                       )}%`,
                                     }}
                                   ></div>
@@ -2706,12 +2297,25 @@ export default function Dashboard() {
                                     Ma conso
                                   </p>
 
-                                  {lastInvoice?.dateDebutConso && lastInvoice?.dateFinConso && (
-                                    <p className="text-xs text-gray-600 ml-8">
-                                      {`${new Date(lastInvoice.dateDebutConso).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' })} - 
-                                      ${new Date(lastInvoice.dateFinConso).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' })}`}
-                                    </p>
-                                  )}
+                                  {lastInvoice?.dateDebutConso &&
+                                    lastInvoice?.dateFinConso && (
+                                      <p className="text-xs text-gray-600 ml-8">
+                                        {`${new Date(
+                                          lastInvoice.dateDebutConso
+                                        ).toLocaleDateString("fr-FR", {
+                                          day: "2-digit",
+                                          month: "2-digit",
+                                          year: "numeric",
+                                        })} - 
+                                      ${new Date(
+                                        lastInvoice.dateFinConso
+                                      ).toLocaleDateString("fr-FR", {
+                                        day: "2-digit",
+                                        month: "2-digit",
+                                        year: "numeric",
+                                      })}`}
+                                      </p>
+                                    )}
                                 </div>
 
                                 {/* Colonne droite - Index et foyers similaires */}
@@ -2719,7 +2323,8 @@ export default function Dashboard() {
                                   <div className="flex items-center">
                                     <div className="bg-vert rounded-sm w-[6px] h-5 mr-2"></div>
                                     <span className="text-sm font-semibold text-noir">
-                                      {itemDetails?.consommation?.similaire || "347"}{" "}
+                                      {itemDetails?.consommation?.similaire ||
+                                        "347"}{" "}
                                       <span className="font-medium">kWh</span>
                                     </span>
                                   </div>
@@ -2727,11 +2332,13 @@ export default function Dashboard() {
                                     Foyer similaires
                                   </p>
 
-                                  {lastInvoice?.indexAncien && lastInvoice?.indexNvl && (
-                                    <p className="text-xs text-gray-600 ml-8">
-                                      Index {lastInvoice.indexAncien} → {lastInvoice.indexNvl}
-                                    </p>
-                                  )}
+                                  {lastInvoice?.indexAncien &&
+                                    lastInvoice?.indexNvl && (
+                                      <p className="text-xs text-gray-600 ml-8">
+                                        Index {lastInvoice.indexAncien} →{" "}
+                                        {lastInvoice.indexNvl}
+                                      </p>
+                                    )}
                                 </div>
                               </div>
                             </div>
@@ -2751,14 +2358,6 @@ export default function Dashboard() {
                 </div>
               ) : (
                 <div className="flex flex-col items-center justify-center px-8 py-10 gap-5 mb-8 bg-gradient-to-r from-[#F7942E]/20 to-amber-50 rounded-xl shadow-sm border border-orange-100  overflow-hidden">
-                  {/* Decorative bubbles */}
-                  {/* <div className="absolute top-6 left-8 w-16 h-16 rounded-full bg-[#F7942E]/10 animate-float"></div>
-                  <div className="absolute bottom-8 right-10 w-12 h-12 rounded-full bg-[#F7942E]/15 animate-float-delayed"></div>
-                  <div className="absolute top-1/3 right-8 w-8 h-8 rounded-full bg-[#F7942E]/15 animate-float-slow"></div>
-                  <div className="absolute bottom-10 left-12 w-10 h-10 rounded-full bg-[#F7942E]/10 animate-float-slow"></div>
-                  <div className="absolute top-1/2 left-1/3 w-5 h-5 rounded-full bg-[#F7942E]/20 animate-float"></div>
-                  <div className="absolute top-1/4 right-1/4 w-7 h-7 rounded-full bg-[#F7942E]/10 animate-float-delayed"></div> */}
-
                   <div className="">
                     <Image
                       src="/compteur/compteurgif.gif"
@@ -2771,9 +2370,13 @@ export default function Dashboard() {
 
                   <div className="bg-white/30 px-6 py-5 rounded-xl">
                     <div className="text-center">
-                      <h3 className="text-xl font-bold text-gray-800 mb-3">Aucun compteur sélectionné</h3>
+                      <h3 className="text-xl font-bold text-gray-800 mb-3">
+                        Aucun compteur sélectionné
+                      </h3>
                       <p className="text-gray-600">
-                        Sélectionnez un compteur existant ou rattachez-en un nouveau<br />
+                        Sélectionnez un compteur existant ou rattachez-en un
+                        nouveau
+                        <br />
                         pour accéder à ses informations détaillées.
                       </p>
                     </div>
@@ -2825,44 +2428,108 @@ export default function Dashboard() {
         scrollbarWidth="none"
         className="overflow-auto"
       >
-        <div className="overflow-y-auto"
+        <div
+          className="overflow-y-auto"
           style={{ scrollbarWidth: "none", WebkitOverflowScrolling: "touch" }}
         >
           {/* Header decorative element with dynamic color */}
           <div className="flex items-center mb-6 p-1">
-            <div className={`h-1 w-1/3 bg-gradient-to-r ${rattachementType === "postpaid"
-              ? "from-[#F7942E]/60 to-[#F7942E]/20"
-              : "from-[#56C1B5]/60 to-[#56C1B5]/20"
-              } rounded-full`}></div>
-            <div className={`mx-2 h-6 w-6 rounded-full ${rattachementType === "postpaid"
-              ? "bg-[#F7942E]/10"
-              : "bg-[#56C1B5]/10"
-              } flex items-center justify-center`}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M13 5L21 5M21 5L21 13M21 5L13 13" stroke={rattachementType === "postpaid" ? "#F7942E" : "#56C1B5"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                <path d="M11 3H7.8C5.11984 3 3.77976 3 2.76972 3.49873C1.8805 3.9382 1.1382 4.8805 0.698732 5.76972C0.2 6.77976 0.2 8.11984 0.2 10.8V16.2C0.2 18.8802 0.2 20.2202 0.698732 21.2303C1.1382 22.1195 1.8805 23.0618 2.76972 23.5013C3.77976 24 5.11984 24 7.8 24H13.2C15.8802 24 17.2202 24 18.2303 23.5013C19.1195 23.0618 20.0618 22.1195 20.5013 21.2303C21 20.2202 21 18.8802 21 16.2V13" stroke={rattachementType === "postpaid" ? "#F7942E" : "#56C1B5"} strokeWidth="2" strokeLinecap="round" />
+            <div
+              className={`h-1 w-1/3 bg-gradient-to-r ${
+                rattachementType === "postpaid"
+                  ? "from-[#F7942E]/60 to-[#F7942E]/20"
+                  : "from-[#56C1B5]/60 to-[#56C1B5]/20"
+              } rounded-full`}
+            ></div>
+            <div
+              className={`mx-2 h-6 w-6 rounded-full ${
+                rattachementType === "postpaid"
+                  ? "bg-[#F7942E]/10"
+                  : "bg-[#56C1B5]/10"
+              } flex items-center justify-center`}
+            >
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M13 5L21 5M21 5L21 13M21 5L13 13"
+                  stroke={
+                    rattachementType === "postpaid" ? "#F7942E" : "#56C1B5"
+                  }
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M11 3H7.8C5.11984 3 3.77976 3 2.76972 3.49873C1.8805 3.9382 1.1382 4.8805 0.698732 5.76972C0.2 6.77976 0.2 8.11984 0.2 10.8V16.2C0.2 18.8802 0.2 20.2202 0.698732 21.2303C1.1382 22.1195 1.8805 23.0618 2.76972 23.5013C3.77976 24 5.11984 24 7.8 24H13.2C15.8802 24 17.2202 24 18.2303 23.5013C19.1195 23.0618 20.0618 22.1195 20.5013 21.2303C21 20.2202 21 18.8802 21 16.2V13"
+                  stroke={
+                    rattachementType === "postpaid" ? "#F7942E" : "#56C1B5"
+                  }
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
               </svg>
             </div>
-            <div className={`h-1 flex-grow bg-gradient-to-r ${rattachementType === "postpaid"
-              ? "from-[#F7942E]/20"
-              : "from-[#56C1B5]/20"
-              } to-transparent rounded-full`}></div>
+            <div
+              className={`h-1 flex-grow bg-gradient-to-r ${
+                rattachementType === "postpaid"
+                  ? "from-[#F7942E]/20"
+                  : "from-[#56C1B5]/20"
+              } to-transparent rounded-full`}
+            ></div>
           </div>
 
           {/* Type icon */}
           <div className="flex justify-center mb-4">
-            <div className={`w-16 h-16 rounded-full flex items-center justify-center ${rattachementType === "postpaid"
-              ? "bg-gradient-to-br from-orange-50 to-orange-100 border border-orange-200"
-              : "bg-gradient-to-br from-green-50 to-green-100 border border-green-200"
-              }`}>
+            <div
+              className={`w-16 h-16 rounded-full flex items-center justify-center ${
+                rattachementType === "postpaid"
+                  ? "bg-gradient-to-br from-orange-50 to-orange-100 border border-orange-200"
+                  : "bg-gradient-to-br from-green-50 to-green-100 border border-green-200"
+              }`}
+            >
               {rattachementType === "postpaid" ? (
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M21 5H3C1.89543 5 1 5.89543 1 7V17C1 18.1046 1.89543 19 3 19H21C22.1046 19 23 18.1046 23 17V7C23 5.89543 22.1046 5 21 5Z" stroke="#F7942E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                  <path d="M1 10H23" stroke="#F7942E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                <svg
+                  width="28"
+                  height="28"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M21 5H3C1.89543 5 1 5.89543 1 7V17C1 18.1046 1.89543 19 3 19H21C22.1046 19 23 18.1046 23 17V7C23 5.89543 22.1046 5 21 5Z"
+                    stroke="#F7942E"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M1 10H23"
+                    stroke="#F7942E"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
                 </svg>
               ) : (
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12 15.5H7.5C6.10444 15.5 5.40665 15.5 4.83886 15.6722C3.56045 16.06 2.56004 17.0605 2.17224 18.3389C2 18.9067 2 19.6044 2 21M19 21V15M16 18H22M14.5 7.5C14.5 9.98528 12.4853 12 10 12C7.51472 12 5.5 9.98528 5.5 7.5C5.5 5.01472 7.51472 3 10 3C12.4853 3 14.5 5.01472 14.5 7.5Z" stroke="#56C1B5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                <svg
+                  width="28"
+                  height="28"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M12 15.5H7.5C6.10444 15.5 5.40665 15.5 4.83886 15.6722C3.56045 16.06 2.56004 17.0605 2.17224 18.3389C2 18.9067 2 19.6044 2 21M19 21V15M16 18H22M14.5 7.5C14.5 9.98528 12.4853 12 10 12C7.51472 12 5.5 9.98528 5.5 7.5C5.5 5.01472 7.51472 3 10 3C12.4853 3 14.5 5.01472 14.5 7.5Z"
+                    stroke="#56C1B5"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
                 </svg>
               )}
             </div>
@@ -2870,37 +2537,41 @@ export default function Dashboard() {
 
           {/* Description text */}
           <div className="mb-6 px-1 text-center">
-            <h4 className={`text-base font-medium mb-2 ${rattachementType === "postpaid"
-              ? "text-[#F7942E]"
-              : "text-[#56C1B5]"
-              }`}>
+            <h4
+              className={`text-base font-medium mb-2 ${
+                rattachementType === "postpaid"
+                  ? "text-[#F7942E]"
+                  : "text-[#56C1B5]"
+              }`}
+            >
               {rattachementType === "postpaid"
                 ? "Accès à vos informations de facturation"
-                : "Suivi en temps réel de votre consommation"
-              }
+                : "Suivi en temps réel de votre consommation"}
             </h4>
             <p className="text-gray-600 text-sm">
               {rattachementType === "postpaid"
                 ? "Rattachez un identifiant à votre compte pour accéder à vos factures, historiques et services."
-                : "Rattachez un compteur à votre compte pour suivre votre consommation et optimiser votre utilisation."
-              }
+                : "Rattachez un compteur à votre compte pour suivre votre consommation et optimiser votre utilisation."}
             </p>
           </div>
 
           {/* Form container with subtle background */}
-          <div className={`bg-gradient-to-br from-gray-50 to-white rounded-xl p-6 border ${rattachementType === "postpaid"
-            ? "border-orange-100/30"
-            : "border-green-100/30"
-            } shadow-sm`}>
+          <div
+            className={`bg-gradient-to-br from-gray-50 to-white rounded-xl p-6 border ${
+              rattachementType === "postpaid"
+                ? "border-orange-100/30"
+                : "border-green-100/30"
+            } shadow-sm`}
+          >
             {rattachementType === "postpaid" ? (
-              <RattacherCompteurForm
-                onSubmit={handleRattachementSubmit}
+              <RattacherIdentifiantForm
+                onSubmit={handleRattachement}
                 onCancel={() => setIsRattachementModalOpen(false)}
                 colorTheme="orange"
               />
             ) : (
-              <RattacherIdentifiantForm
-                onSubmit={handleRattachementSubmit}
+              <RattacherCompteurForm
+                onSubmit={handleRattachement}
                 onCancel={() => setIsRattachementModalOpen(false)}
                 colorTheme="green"
               />
@@ -2910,57 +2581,30 @@ export default function Dashboard() {
           {/* Footer note */}
           <div className="mt-4 px-1">
             <p className="text-xs text-gray-500 italic flex items-center">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="mr-1.5">
-                <path d="M13 16H12V12H11M12 8H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z" stroke={rattachementType === "postpaid" ? "#F7942E" : "#56C1B5"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                className="mr-1.5"
+              >
+                <path
+                  d="M13 16H12V12H11M12 8H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
+                  stroke={
+                    rattachementType === "postpaid" ? "#F7942E" : "#56C1B5"
+                  }
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
               </svg>
-              Assurez-vous de saisir les informations correctes pour faciliter le rattachement.
+              Assurez-vous de saisir les informations correctes pour faciliter
+              le rattachement.
             </p>
           </div>
         </div>
       </Modal>
-
-      {/* Modales existantes conservées pour compatibilité, mais masquées */}
-      <div style={{ display: "none" }}>
-        <Modal
-          isOpen={isCompteurModalOpen}
-          onClose={() => setIsCompteurModalOpen(false)}
-          title="Rattacher un identifiant"
-          size="lg"
-          hasCloseBtn={true}
-          scrollbarWidth="none"
-          className="overflow-auto"
-        >
-          <div
-            className="overflow-y-auto"
-            style={{ scrollbarWidth: "none", WebkitOverflowScrolling: "touch" }}
-          >
-            <RattacherCompteurForm
-              onSubmit={handleCompteurSubmit}
-              onCancel={() => setIsCompteurModalOpen(false)}
-            />
-          </div>
-        </Modal>
-
-        <Modal
-          isOpen={isIdentifiantModalOpen}
-          onClose={() => setIsIdentifiantModalOpen(false)}
-          title="Rattacher un compteur"
-          size="lg"
-          hasCloseBtn={true}
-          scrollbarWidth="none"
-          className="overflow-auto"
-        >
-          <div
-            className="overflow-y-auto"
-            style={{ scrollbarWidth: "none", WebkitOverflowScrolling: "touch" }}
-          >
-            <RattacherIdentifiantForm
-              onSubmit={handleIdentifiantSubmit}
-              onCancel={() => setIsIdentifiantModalOpen(false)}
-            />
-          </div>
-        </Modal>
-      </div>
 
       {/* Modal "En cours de développement" pour les réclamations */}
       {isReclModalOpen && (
@@ -3015,10 +2659,21 @@ export default function Dashboard() {
               {/* Illustration en SVG - Améliorée */}
               <div className="w-80 h-80 mb-8 relative hover:scale-105 transition-transform duration-300 z-10">
                 <div className="absolute inset-0 bg-[#F7942E]/10 rounded-full animate-pulse-slow"></div>
-                <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" className="w-full h-full drop-shadow-xl">
+                <svg
+                  viewBox="0 0 400 400"
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="w-full h-full drop-shadow-xl"
+                >
                   {/* Fond */}
                   <defs>
-                    <radialGradient id="bgGradient" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+                    <radialGradient
+                      id="bgGradient"
+                      cx="50%"
+                      cy="50%"
+                      r="50%"
+                      fx="50%"
+                      fy="50%"
+                    >
                       <stop offset="0%" stopColor="#F8FAFC" />
                       <stop offset="100%" stopColor="#E0F2FE" />
                     </radialGradient>
@@ -3027,46 +2682,134 @@ export default function Dashboard() {
                   <circle cx="200" cy="200" r="110" fill="#E0F2FE" />
 
                   {/* Engrenage 1 */}
-                  <g transform="translate(170, 170)" className="animate-spin" style={{ animationDuration: '15s' }}>
+                  <g
+                    transform="translate(170, 170)"
+                    className="animate-spin"
+                    style={{ animationDuration: "15s" }}
+                  >
                     <circle cx="0" cy="0" r="38" fill="#4ECDC4" opacity="0.2" />
-                    <path fill="#4ECDC4" d="M38,10.8c-1.5-2.8-3.4-5.4-5.6-7.6l2.9-10.4l-11.2-6.4l-7.4,7.8c-3.1-0.8-6.3-1.1-9.5-0.8l-5.8-9.5 l-12.1,3.1l0.4,11.7c-2.3,1.9-4.3,4.2-5.9,6.8L-28-2l-8.5,9l5.8,10.2c-0.8,3.1-1,6.3-0.7,9.5l-11.1,6.4l3.1,12.1L-28,46 c1.8,2.3,4,4.3,6.5,5.9l-2.9,10.4l11.2,6.4l7.9-8.3c3,0.8,6,1,9.1,0.7l6.4,11.1l12.1-3.1l-0.9-11.7c2.3-1.9,4.3-4.1,5.9-6.6l10.7,2.5 l8.5-9l-5.8-10.2c0.8-3,1-6.1,0.7-9.2l11.1-6.4l-3.1-12.1L38,10.8z M41.8,62.3c-16.7,4.3-33.8-5.8-38.2-22.6C-0.7,23-9.5,5.9,7.2,1.6C24-2.8,41,7.4,45.4,24.2C49.8,41,58.5,58,41.8,62.3z" />
+                    <path
+                      fill="#4ECDC4"
+                      d="M38,10.8c-1.5-2.8-3.4-5.4-5.6-7.6l2.9-10.4l-11.2-6.4l-7.4,7.8c-3.1-0.8-6.3-1.1-9.5-0.8l-5.8-9.5 l-12.1,3.1l0.4,11.7c-2.3,1.9-4.3,4.2-5.9,6.8L-28-2l-8.5,9l5.8,10.2c-0.8,3.1-1,6.3-0.7,9.5l-11.1,6.4l3.1,12.1L-28,46 c1.8,2.3,4,4.3,6.5,5.9l-2.9,10.4l11.2,6.4l7.9-8.3c3,0.8,6,1,9.1,0.7l6.4,11.1l12.1-3.1l-0.9-11.7c2.3-1.9,4.3-4.1,5.9-6.6l10.7,2.5 l8.5-9l-5.8-10.2c0.8-3,1-6.1,0.7-9.2l11.1-6.4l-3.1-12.1L38,10.8z M41.8,62.3c-16.7,4.3-33.8-5.8-38.2-22.6C-0.7,23-9.5,5.9,7.2,1.6C24-2.8,41,7.4,45.4,24.2C49.8,41,58.5,58,41.8,62.3z"
+                    />
                   </g>
 
                   {/* Engrenage 2 */}
-                  <g transform="translate(230, 220)" className="animate-spin" style={{ animationDuration: '10s', animationDirection: 'reverse' }}>
+                  <g
+                    transform="translate(230, 220)"
+                    className="animate-spin"
+                    style={{
+                      animationDuration: "10s",
+                      animationDirection: "reverse",
+                    }}
+                  >
                     <circle cx="0" cy="0" r="28" fill="#EC4F48" opacity="0.2" />
-                    <path fill="#EC4F48" opacity="0.8" d="M28.5,8.1c-1.1-2.1-2.6-4-4.2-5.7l2.2-7.8l-8.4-4.8l-5.6,5.9c-2.3-0.6-4.7-0.8-7.1-0.6l-4.4-7.1l-9.1,2.3 l0.3,8.8c-1.7,1.4-3.2,3.2-4.4,5.1l-8-1.5l-6.4,6.8l4.4,7.7c-0.6,2.3-0.8,4.7-0.5,7.1l-8.3,4.8l2.3,9.1l8.8-0.7 c1.4,1.7,3,3.2,4.9,4.4l-2.2,7.8l8.4,4.8l5.9-6.2c2.3,0.6,4.5,0.8,6.8,0.5l4.8,8.3l9.1-2.3l-0.7-8.8c1.7-1.4,3.2-3.1,4.4-5l8,1.9 l6.4-6.8l-4.4-7.7c0.6-2.3,0.8-4.6,0.5-6.9l8.3-4.8l-2.3-9.1L28.5,8.1z M2.4,33.4c-9.9,2.5-20-3.4-22.6-13.3S-16.8,0.1-6.9-2.5 S13.1,0.9,15.7,10.8S12.3,30.9,2.4,33.4z" />
+                    <path
+                      fill="#EC4F48"
+                      opacity="0.8"
+                      d="M28.5,8.1c-1.1-2.1-2.6-4-4.2-5.7l2.2-7.8l-8.4-4.8l-5.6,5.9c-2.3-0.6-4.7-0.8-7.1-0.6l-4.4-7.1l-9.1,2.3 l0.3,8.8c-1.7,1.4-3.2,3.2-4.4,5.1l-8-1.5l-6.4,6.8l4.4,7.7c-0.6,2.3-0.8,4.7-0.5,7.1l-8.3,4.8l2.3,9.1l8.8-0.7 c1.4,1.7,3,3.2,4.9,4.4l-2.2,7.8l8.4,4.8l5.9-6.2c2.3,0.6,4.5,0.8,6.8,0.5l4.8,8.3l9.1-2.3l-0.7-8.8c1.7-1.4,3.2-3.1,4.4-5l8,1.9 l6.4-6.8l-4.4-7.7c0.6-2.3,0.8-4.6,0.5-6.9l8.3-4.8l-2.3-9.1L28.5,8.1z M2.4,33.4c-9.9,2.5-20-3.4-22.6-13.3S-16.8,0.1-6.9-2.5 S13.1,0.9,15.7,10.8S12.3,30.9,2.4,33.4z"
+                    />
                   </g>
 
                   {/* Engrenage 3 - Petit engrenage */}
-                  <g transform="translate(190, 260)" className="animate-spin" style={{ animationDuration: '7s' }}>
+                  <g
+                    transform="translate(190, 260)"
+                    className="animate-spin"
+                    style={{ animationDuration: "7s" }}
+                  >
                     <circle cx="0" cy="0" r="15" fill="#FFA755" opacity="0.2" />
-                    <path fill="#FFA755" opacity="0.7" d="M15,4c-0.6-1-1.3-2-2.1-2.8l1.1-3.9l-4.2-2.4l-2.8,2.9c-1.2-0.3-2.4-0.4-3.6-0.3l-2.2-3.6l-4.5,1.2l0.1,4.4 c-0.9,0.7-1.6,1.6-2.2,2.6l-4-0.8l-3.2,3.4l2.2,3.8c-0.3,1.2-0.4,2.4-0.3,3.6l-4.2,2.4l1.2,4.5l4.4-0.3c0.7,0.9,1.5,1.6,2.5,2.2 l-1.1,3.9l4.2,2.4l3-3.1c1.1,0.3,2.3,0.4,3.4,0.3l2.4,4.2l4.5-1.2l-0.3-4.4c0.9-0.7,1.6-1.5,2.2-2.5l4,0.9l3.2-3.4l-2.2-3.8 c0.3-1.1,0.4-2.3,0.3-3.5l4.2-2.4l-1.2-4.5L15,4z M1.2,16.7c-5,1.3-10-1.7-11.3-6.6c-1.3-5,1.7-10,6.6-11.3s10,1.7,11.3,6.6 C9.1,10.3,6.1,15.4,1.2,16.7z" />
+                    <path
+                      fill="#FFA755"
+                      opacity="0.7"
+                      d="M15,4c-0.6-1-1.3-2-2.1-2.8l1.1-3.9l-4.2-2.4l-2.8,2.9c-1.2-0.3-2.4-0.4-3.6-0.3l-2.2-3.6l-4.5,1.2l0.1,4.4 c-0.9,0.7-1.6,1.6-2.2,2.6l-4-0.8l-3.2,3.4l2.2,3.8c-0.3,1.2-0.4,2.4-0.3,3.6l-4.2,2.4l1.2,4.5l4.4-0.3c0.7,0.9,1.5,1.6,2.5,2.2 l-1.1,3.9l4.2,2.4l3-3.1c1.1,0.3,2.3,0.4,3.4,0.3l2.4,4.2l4.5-1.2l-0.3-4.4c0.9-0.7,1.6-1.5,2.2-2.5l4,0.9l3.2-3.4l-2.2-3.8 c0.3-1.1,0.4-2.3,0.3-3.5l4.2-2.4l-1.2-4.5L15,4z M1.2,16.7c-5,1.3-10-1.7-11.3-6.6c-1.3-5,1.7-10,6.6-11.3s10,1.7,11.3,6.6 C9.1,10.3,6.1,15.4,1.2,16.7z"
+                    />
                   </g>
 
                   {/* Engrenage 4 - Nouveau petit engrenage supplémentaire */}
-                  <g transform="translate(130, 210)" className="animate-spin" style={{ animationDuration: '12s' }}>
+                  <g
+                    transform="translate(130, 210)"
+                    className="animate-spin"
+                    style={{ animationDuration: "12s" }}
+                  >
                     <circle cx="0" cy="0" r="13" fill="#38BDF8" opacity="0.2" />
-                    <path fill="#38BDF8" opacity="0.6" d="M13,3.5c-0.5-0.9-1.1-1.7-1.8-2.4l0.9-3.3l-3.6-2l-2.4,2.5c-1-0.3-2-0.3-3-0.2l-1.9-3l-3.9,1l0.1,3.7 c-0.7,0.6-1.4,1.3-1.9,2.2l-3.4-0.7l-2.7,2.8l1.9,3.2c-0.3,1-0.3,2-0.2,3l-3.5,2l1,3.9l3.7-0.3c0.6,0.7,1.3,1.4,2.1,1.9l-0.9,3.3 l3.6,2l2.5-2.6c0.9,0.3,1.9,0.3,2.9,0.2l2,3.5l3.9-1l-0.3-3.7c0.7-0.6,1.4-1.3,1.9-2.1l3.4,0.8l2.7-2.8l-1.9-3.2 c0.2-1,0.3-1.9,0.2-2.9l3.5-2l-1-3.9L13,3.5z M1,14.2c-4.2,1.1-8.5-1.4-9.6-5.7c-1.1-4.2,1.4-8.5,5.7-9.6s8.5,1.4,9.6,5.7 C7.8,8.8,5.2,13.1,1,14.2z" />
+                    <path
+                      fill="#38BDF8"
+                      opacity="0.6"
+                      d="M13,3.5c-0.5-0.9-1.1-1.7-1.8-2.4l0.9-3.3l-3.6-2l-2.4,2.5c-1-0.3-2-0.3-3-0.2l-1.9-3l-3.9,1l0.1,3.7 c-0.7,0.6-1.4,1.3-1.9,2.2l-3.4-0.7l-2.7,2.8l1.9,3.2c-0.3,1-0.3,2-0.2,3l-3.5,2l1,3.9l3.7-0.3c0.6,0.7,1.3,1.4,2.1,1.9l-0.9,3.3 l3.6,2l2.5-2.6c0.9,0.3,1.9,0.3,2.9,0.2l2,3.5l3.9-1l-0.3-3.7c0.7-0.6,1.4-1.3,1.9-2.1l3.4,0.8l2.7-2.8l-1.9-3.2 c0.2-1,0.3-1.9,0.2-2.9l3.5-2l-1-3.9L13,3.5z M1,14.2c-4.2,1.1-8.5-1.4-9.6-5.7c-1.1-4.2,1.4-8.5,5.7-9.6s8.5,1.4,9.6,5.7 C7.8,8.8,5.2,13.1,1,14.2z"
+                    />
                   </g>
 
                   {/* Panneau de construction - Amélioré */}
-                  <g transform="translate(115, 160)" className="animate-bounce-gentle">
-                    <rect x="0" y="0" width="170" height="80" rx="12" fill="white" filter="drop-shadow(0px 4px 6px rgba(0,0,0,0.1))" />
-                    <rect x="3" y="3" width="164" height="74" rx="9" fill="none" stroke="#EC4F48" strokeWidth="5" />
-                    <linearGradient id="textGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <g
+                    transform="translate(115, 160)"
+                    className="animate-bounce-gentle"
+                  >
+                    <rect
+                      x="0"
+                      y="0"
+                      width="170"
+                      height="80"
+                      rx="12"
+                      fill="white"
+                      filter="drop-shadow(0px 4px 6px rgba(0,0,0,0.1))"
+                    />
+                    <rect
+                      x="3"
+                      y="3"
+                      width="164"
+                      height="74"
+                      rx="9"
+                      fill="none"
+                      stroke="#EC4F48"
+                      strokeWidth="5"
+                    />
+                    <linearGradient
+                      id="textGradient"
+                      x1="0%"
+                      y1="0%"
+                      x2="100%"
+                      y2="100%"
+                    >
                       <stop offset="0%" stopColor="#333333" />
                       <stop offset="100%" stopColor="#555555" />
                     </linearGradient>
-                    <text x="85" y="30" textAnchor="middle" fontWeight="bold" fontSize="17" fill="url(#textGradient)">EN COURS DE</text>
-                    <text x="85" y="55" textAnchor="middle" fontWeight="bold" fontSize="17" className="animate-pulse-slow" fill="url(#textGradient)">DÉVELOPPEMENT</text>
+                    <text
+                      x="85"
+                      y="30"
+                      textAnchor="middle"
+                      fontWeight="bold"
+                      fontSize="17"
+                      fill="url(#textGradient)"
+                    >
+                      EN COURS DE
+                    </text>
+                    <text
+                      x="85"
+                      y="55"
+                      textAnchor="middle"
+                      fontWeight="bold"
+                      fontSize="17"
+                      className="animate-pulse-slow"
+                      fill="url(#textGradient)"
+                    >
+                      DÉVELOPPEMENT
+                    </text>
 
                     {/* Icône de construction - Améliorée avec animation */}
-                    <g transform="translate(20, -30) scale(0.8)" className="animate-rockConstruction">
-                      <path fill="#FFA755" d="M36,34.5v-8.7l-6.8,3.8C29.4,30.6,29.6,31.6,30,32.5c0.9,2.1,3.3,3,5.4,2.1C35.6,34.5,35.8,34.5,36,34.5z" />
-                      <path fill="#FFA755" d="M44.1,11.3C43.7,10.5,43,10,42,10H12c-1,0-1.7,0.5-2.1,1.3c-0.4,0.8-0.3,1.7,0.3,2.4l7.5,10.1v8
+                    <g
+                      transform="translate(20, -30) scale(0.8)"
+                      className="animate-rockConstruction"
+                    >
+                      <path
+                        fill="#FFA755"
+                        d="M36,34.5v-8.7l-6.8,3.8C29.4,30.6,29.6,31.6,30,32.5c0.9,2.1,3.3,3,5.4,2.1C35.6,34.5,35.8,34.5,36,34.5z"
+                      />
+                      <path
+                        fill="#FFA755"
+                        d="M44.1,11.3C43.7,10.5,43,10,42,10H12c-1,0-1.7,0.5-2.1,1.3c-0.4,0.8-0.3,1.7,0.3,2.4l7.5,10.1v8
                       c0,0.5,0.2,1,0.5,1.4l8,10c0.5,0.6,1.2,0.9,2,0.9h0c0.8,0,1.5-0.3,2-0.9l8-10c0.3-0.4,0.5-0.9,0.5-1.4v-8l7.5-10.1
-                      C44.4,13,44.5,12,44.1,11.3z M32,28c0,0.6-0.4,1-1,1h-8c-0.6,0-1-0.4-1-1v-7c0-0.6,0.4-1,1-1h8c0.6,0,1,0.4,1,1V28z"/>
+                      C44.4,13,44.5,12,44.1,11.3z M32,28c0,0.6-0.4,1-1,1h-8c-0.6,0-1-0.4-1-1v-7c0-0.6,0.4-1,1-1h8c0.6,0,1,0.4,1,1V28z"
+                      />
                     </g>
                   </g>
                 </svg>
@@ -3077,8 +2820,9 @@ export default function Dashboard() {
                   Module de réclamation en construction
                 </h3>
                 <p className="text-gray-600 mb-8 text-lg leading-relaxed">
-                  Notre équipe technique travaille actuellement sur cette fonctionnalité.
-                  Elle sera disponible très prochainement pour vous permettre de soumettre vos réclamations.
+                  Notre équipe technique travaille actuellement sur cette
+                  fonctionnalité. Elle sera disponible très prochainement pour
+                  vous permettre de soumettre vos réclamations.
                 </p>
                 <button
                   onClick={() => setIsReclModalOpen(false)}

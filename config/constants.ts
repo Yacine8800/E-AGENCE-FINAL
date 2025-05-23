@@ -44,7 +44,7 @@ export const API_BOT_CIE_UNSUBSCRIBE = process.env
   .NEXT_PUBLIC_API_BOT_CIE_UNSUBSCRIBE as string;
 
 export const API_GOOGLE_CLIENT_ID = process.env
-  .NEXT_PUBLIC_GOOGLE_CLIENT_ID as string;
+  .NEXT_PUBLIC_PROVIDERS_AUTH as string;
 
 export const API_FACEBOOK_APP_ID = process.env
   .NEXT_PUBLIC_FACEBOOK_APP_ID as string;

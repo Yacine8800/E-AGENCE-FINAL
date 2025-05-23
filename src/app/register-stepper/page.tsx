@@ -13,16 +13,19 @@ import { X, AlertCircle, CheckCircle, ChevronDown } from "lucide-react";
 import { API_KEY, API_URL } from "../config/constants";
 import CountdownTimer from "../components/countdownTimer";
 import Title from "../components/title";
+import { axiosService } from "@/src/services/axios.service";
+import { useToast } from '@/src/hooks/useToast';
+import Toast from '@/src/components/Toast';
 
 // Constants
 const PIN_LENGTH = 6;
 
 // Registration phases
 const PHASE = {
-  USER_INFO: 'user_info',
-  OTP_VERIFICATION: 'otp_verification',
-  PASSCODE_CREATION: 'passcode_creation',
-  PASSCODE_CONFIRMATION: 'passcode_confirmation'
+  USER_INFO: "user_info",
+  OTP_VERIFICATION: "otp_verification",
+  PASSCODE_CREATION: "passcode_creation",
+  PASSCODE_CONFIRMATION: "passcode_confirmation",
 };
 
 // Définition des préfixes téléphoniques
@@ -37,6 +40,7 @@ const COUNTRY_PREFIXES = [
 const Register = () => {
   const router = useRouter();
   const { isMobile } = useResponsive();
+  const { showToast } = useToast();
 
   // Current registration phase
   const [currentPhase, setCurrentPhase] = useState(PHASE.USER_INFO);
@@ -59,9 +63,6 @@ const Register = () => {
   const [confirmPasscode, setConfirmPasscode] = useState<string[]>([]);
 
   // UI state
-  const [showToast, setShowToast] = useState(false);
-  const [toastMessage, setToastMessage] = useState("");
-  const [toastType, setToastType] = useState<"success" | "error">("error");
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [shakeAnimation, setShakeAnimation] = useState(false);
 
@@ -73,27 +74,15 @@ const Register = () => {
   const [selectedPrefix, setSelectedPrefix] = useState(COUNTRY_PREFIXES[0]);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       const urlParams = new URLSearchParams(window.location.search);
-      const mode = urlParams.get('mode');
+      const mode = urlParams.get("mode");
       if (mode) {
         setModeParam(mode);
-        localStorage.setItem('pendingDemandeMode', mode);
+        localStorage.setItem("pendingDemandeMode", mode);
       }
     }
   }, []);
-
-  // Show toast message
-  const showToastMessage = (
-    message: string,
-    type: "success" | "error" = "error",
-    duration: number = 3000
-  ) => {
-    setToastMessage(message);
-    setToastType(type);
-    setShowToast(true);
-    setTimeout(() => setShowToast(false), duration);
-  };
 
   // Get API token for authenticated requests
   const getApiToken = async () => {
@@ -105,16 +94,11 @@ const Register = () => {
         return storedToken;
       }
 
-      const response = await fetch(`${API_URL}/v3/user/get-token`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+      const response : any = await axiosService.post(`/v3/user/get-token`, {
         body: JSON.stringify({ apikey: `${API_KEY}` }),
       });
 
-      const data = await response.json();
-
+      const data = response.data;
       if (data.message === "ok" && data.data) {
         localStorage.setItem("api_token", data.data);
         const expiry = new Date();
@@ -131,15 +115,17 @@ const Register = () => {
   };
 
   // Handle form data change
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   // Gérer le changement de préfixe
-  const handlePrefixChange = (prefix: typeof COUNTRY_PREFIXES[0]) => {
+  const handlePrefixChange = (prefix: (typeof COUNTRY_PREFIXES)[0]) => {
     setSelectedPrefix(prefix);
-    setFormData(prev => ({ ...prev, contactPrefix: prefix.code }));
+    setFormData((prev) => ({ ...prev, contactPrefix: prefix.code }));
     setPrefixDropdownOpen(false);
   };
 
@@ -148,46 +134,89 @@ const Register = () => {
     e.preventDefault();
 
     if (!formData.email && !formData.contact) {
-      showToastMessage("Veuillez saisir un email ou un numéro de téléphone", "error");
+      showToast("Veuillez saisir un email ou un numéro de téléphone", "error");
       return;
     }
 
     if (formData.email && formData.email !== formData.confirmEmail) {
-      showToastMessage("Les adresses email ne correspondent pas", "error");
+      showToast("Les adresses email ne correspondent pas", "error");
       return;
     }
 
     try {
-      const apiToken = await getApiToken();
       const loginValue = formData.contact;
+      const emailValue = formData.email;
 
-      const response = await fetch(`${API_URL}/v3/user/otp/generate`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${apiToken}`,
-        },
-        body: JSON.stringify({
+      if (emailValue) {
+        const reponseVerifyEmail: any = await axiosService.post(
+          `/v3/user/client/verify`,
+          {
+            login: emailValue,
+          }
+        );
+      }
+
+      const responseVerify: any = await axiosService.post(
+        `/v3/user/client/verify`,
+        {
           login: loginValue,
-        }),
+        }
+      );
+
+      console.log(responseVerify, "responseVerify");
+
+      if (responseVerify.data !== "no_account") {
+        showToast("Numéro de téléphone déjà utilisé", "error");
+        return null;
+      }
+
+      // return false;
+
+      const response: any = await axiosService.post(`/v3/user/otp/generate`, {
+        login: loginValue,
       });
 
-      const data = await response.json();
-
-      if (response.ok) {
-        showToastMessage("Code OTP envoyé avec succès", "success");
+      if (response.data) {
+        showToast("Code OTP envoyé avec succès", "success");
         setCurrentPhase(PHASE.OTP_VERIFICATION);
       } else {
-        showToastMessage(
-          data.message || "Erreur lors de la génération du code OTP",
+        showToast(
+          response.data.message || "Erreur lors de la génération du code OTP",
           "error"
         );
       }
     } catch (error) {
       console.error("Erreur lors de la génération de l'OTP:", error);
-      showToastMessage("Une erreur est survenue. Veuillez réessayer.", "error");
+      showToast("Une erreur est survenue. Veuillez réessayer.", "error");
     }
   };
+
+    // Verify OTP with API
+    const verifyOtp = async (code: string) => {
+      try {
+        const loginValue = formData.contact;
+  
+        const response: any = await axiosService.post(`/v3/user/otp/verify`, {
+          login: loginValue,
+          code: code,
+        });
+  
+        if (response.data) {
+          showToast("Code OTP vérifié avec succès", "success");
+          setTimeout(() => setCurrentPhase(PHASE.PASSCODE_CREATION), 500);
+        } else {
+          showToast(
+            response.data.message || "Code OTP invalide. Veuillez réessayer.",
+            "error"
+          );
+          setOtpCode(""); // Reset OTP code
+        }
+      } catch (error) {
+        console.error("Erreur lors de la vérification de l'OTP:", error);
+        showToast("Une erreur est survenue. Veuillez réessayer.", "error");
+        setOtpCode(""); // Reset OTP code
+      }
+    };
 
   // Handle OTP verification
   const handleOtpChange = (newCode: string) => {
@@ -200,42 +229,7 @@ const Register = () => {
     }
   };
 
-  // Verify OTP with API
-  const verifyOtp = async (code: string) => {
-    try {
-      const apiToken = await getApiToken();
-      const loginValue = formData.contact;
 
-      const response = await fetch(`${API_URL}/v3/user/otp/verify`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${apiToken}`,
-        },
-        body: JSON.stringify({
-          login: loginValue,
-          code: code,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        showToastMessage("Code OTP vérifié avec succès", "success");
-        setTimeout(() => setCurrentPhase(PHASE.PASSCODE_CREATION), 500);
-      } else {
-        showToastMessage(
-          data.message || "Code OTP invalide. Veuillez réessayer.",
-          "error"
-        );
-        setOtpCode(""); // Reset OTP code
-      }
-    } catch (error) {
-      console.error("Erreur lors de la vérification de l'OTP:", error);
-      showToastMessage("Une erreur est survenue. Veuillez réessayer.", "error");
-      setOtpCode(""); // Reset OTP code
-    }
-  };
 
   // Handle passcode entry
   const handleDigitClick = (digit: string) => {
@@ -261,20 +255,24 @@ const Register = () => {
 
   // Check passcode when fully entered
   useEffect(() => {
-    if (passcode.length === PIN_LENGTH && currentPhase === PHASE.PASSCODE_CREATION) {
+    if (
+      passcode.length === PIN_LENGTH &&
+      currentPhase === PHASE.PASSCODE_CREATION
+    ) {
       setCurrentPhase(PHASE.PASSCODE_CONFIRMATION);
     }
   }, [passcode, currentPhase]);
 
   // Verify confirmation passcode matches and register user
   useEffect(() => {
-    if (confirmPasscode.length === PIN_LENGTH && currentPhase === PHASE.PASSCODE_CONFIRMATION) {
+    if (
+      confirmPasscode.length === PIN_LENGTH &&
+      currentPhase === PHASE.PASSCODE_CONFIRMATION
+    ) {
       if (passcode.join("") === confirmPasscode.join("")) {
         registerUser(passcode.join(""));
       } else {
-        setToastMessage("Les codes ne correspondent pas, veuillez réessayer.");
-        setShowToast(true);
-        setTimeout(() => setShowToast(false), 3000);
+        showToast("Les codes ne correspondent pas, veuillez réessayer.", "error");
 
         // Reset passcode and return to creation phase
         setPasscode([]);
@@ -295,7 +293,7 @@ const Register = () => {
         contactPrefix: formData.contactPrefix,
         lastname: formData.lastname,
         firstname: formData.firstname,
-        passcode: finalPasscode
+        passcode: finalPasscode,
       };
 
       const response = await fetch(`${API_URL}/v3/user/client/register`, {
@@ -310,7 +308,7 @@ const Register = () => {
       const data = await response.json();
 
       if (response.ok) {
-        showToastMessage("Inscription réussie!", "success");
+        showToast("Inscription réussie!", "success");
 
         // Try to login automatically
         try {
@@ -333,7 +331,7 @@ const Register = () => {
             localStorage.setItem("user", JSON.stringify(loginData.data.user));
 
             // Redirect based on pending mode
-            const pendingMode = localStorage.getItem('pendingDemandeMode');
+            const pendingMode = localStorage.getItem("pendingDemandeMode");
 
             if (pendingMode) {
               let demandeType = "";
@@ -352,7 +350,7 @@ const Register = () => {
               }
 
               if (demandeType) {
-                localStorage.setItem('openDemandeType', demandeType);
+                localStorage.setItem("openDemandeType", demandeType);
                 setTimeout(() => router.push("/dashboard?openModal=true"), 500);
               } else {
                 router.push("/dashboard");
@@ -369,9 +367,10 @@ const Register = () => {
           setTimeout(() => router.push("/login"), 1000);
         }
       } else {
-        const errorMsg = data.message || "Erreur lors de l'inscription. Veuillez réessayer.";
+        const errorMsg =
+          data.message || "Erreur lors de l'inscription. Veuillez réessayer.";
         setErrorMessage(errorMsg);
-        showToastMessage(errorMsg, "error");
+        showToast(errorMsg, "error");
 
         setShakeAnimation(true);
         setTimeout(() => setShakeAnimation(false), 500);
@@ -384,7 +383,7 @@ const Register = () => {
       console.error("Erreur lors de l'inscription:", error);
       const errorMsg = "Une erreur est survenue. Veuillez réessayer.";
       setErrorMessage(errorMsg);
-      showToastMessage(errorMsg, "error");
+      showToast(errorMsg, "error");
 
       setShakeAnimation(true);
       setTimeout(() => setShakeAnimation(false), 500);
@@ -470,14 +469,21 @@ const Register = () => {
                 placeholder="Confirmez votre email"
                 value={formData.confirmEmail}
                 onChange={handleInputChange}
-                className={`w-full rounded-xl px-5 py-4 border-2 ${formData.email && formData.confirmEmail && formData.email !== formData.confirmEmail
-                  ? "border-red-500"
-                  : "border-[#EDEDED]"
-                  } mt-2`}
+                className={`w-full rounded-xl px-5 py-4 border-2 ${
+                  formData.email &&
+                  formData.confirmEmail &&
+                  formData.email !== formData.confirmEmail
+                    ? "border-red-500"
+                    : "border-[#EDEDED]"
+                } mt-2`}
               />
-              {formData.email && formData.confirmEmail && formData.email !== formData.confirmEmail && (
-                <p className="text-red-500 text-sm mt-1">Les adresses email ne correspondent pas</p>
-              )}
+              {formData.email &&
+                formData.confirmEmail &&
+                formData.email !== formData.confirmEmail && (
+                  <p className="text-red-500 text-sm mt-1">
+                    Les adresses email ne correspondent pas
+                  </p>
+                )}
             </div>
 
             <div className="flex gap-2">
@@ -493,7 +499,9 @@ const Register = () => {
                   >
                     <span className="font-medium">{selectedPrefix.code}</span>
                     <ChevronDown
-                      className={`h-5 w-5 text-gray-400 transition-transform ${prefixDropdownOpen ? 'rotate-180' : ''}`}
+                      className={`h-5 w-5 text-gray-400 transition-transform ${
+                        prefixDropdownOpen ? "rotate-180" : ""
+                      }`}
                     />
                   </button>
 
@@ -538,7 +546,11 @@ const Register = () => {
             <button
               type="submit"
               className="w-full rounded-full bg-primary text-white font-semibold py-4 hover:bg-primary/90 transition-colors"
-              disabled={!formData.lastname || !formData.firstname || (!formData.email && !formData.contact)}
+              disabled={
+                !formData.lastname ||
+                !formData.firstname ||
+                (!formData.email && !formData.contact)
+              }
             >
               Continuer
             </button>
@@ -549,9 +561,7 @@ const Register = () => {
       {/* Separator */}
       <div className="flex items-center my-5 px-10 pt-3">
         <div className="flex-grow border-t border-smallText"></div>
-        <span className="px-3 text-sm text-smallText">
-          ou continuer avec
-        </span>
+        <span className="px-3 text-sm text-smallText">ou continuer avec</span>
         <div className="flex-grow border-t border-smallText"></div>
       </div>
 
@@ -589,14 +599,14 @@ const Register = () => {
         <Title title="Vérification OTP" />
         <p className="text-[14px] font-medium text-center">
           Entrez le code OTP qui vous a été envoyé à{" "}
-          <span className="font-bold">
-            {formData.contact}
-          </span>
+          <span className="font-bold">{formData.contact}</span>
         </p>
       </div>
 
       {/* OTP Input */}
-      <div className={`pt-10 w-full flex justify-center ${isMobile ? "px-5" : ""}`}>
+      <div
+        className={`pt-10 w-full flex justify-center ${isMobile ? "px-5" : ""}`}
+      >
         <OtpInput
           value={otpCode}
           onChange={handleOtpChange}
@@ -661,9 +671,7 @@ const Register = () => {
               />
             </svg>
           </div>
-          <p className="text-primary font-medium">
-            Retour
-          </p>
+          <p className="text-primary font-medium">Retour</p>
         </button>
       </div>
     </>
@@ -686,14 +694,20 @@ const Register = () => {
         </p>
 
         {/* PIN indicators */}
-        <div className={`flex gap-2 mb-3 ${shakeAnimation ? "animate-shake" : ""}`}>
+        <div
+          className={`flex gap-2 mb-3 ${shakeAnimation ? "animate-shake" : ""}`}
+        >
           {Array.from({ length: PIN_LENGTH }).map((_, index) => (
             <span
               key={index}
-              className={`h-6 w-6 rounded-full ${index < (currentPhase === PHASE.PASSCODE_CREATION ? passcode.length : confirmPasscode.length)
-                ? "bg-primary"
-                : "bg-[#F1F1F1]"
-                }`}
+              className={`h-6 w-6 rounded-full ${
+                index <
+                (currentPhase === PHASE.PASSCODE_CREATION
+                  ? passcode.length
+                  : confirmPasscode.length)
+                  ? "bg-primary"
+                  : "bg-[#F1F1F1]"
+              }`}
             ></span>
           ))}
         </div>
@@ -714,9 +728,7 @@ const Register = () => {
                   clipRule="evenodd"
                 />
               </svg>
-              <p className="text-red-600 font-medium text-sm">
-                {errorMessage}
-              </p>
+              <p className="text-red-600 font-medium text-sm">{errorMessage}</p>
             </div>
           </div>
         )}
@@ -779,17 +791,38 @@ const Register = () => {
   return (
     <AuthLayout>
       <>
+        <Toast />
         {/* Styles for custom animations */}
         <style jsx>{`
           @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
-            20%, 40%, 60%, 80% { transform: translateX(10px); }
+            0%,
+            100% {
+              transform: translateX(0);
+            }
+            10%,
+            30%,
+            50%,
+            70%,
+            90% {
+              transform: translateX(-10px);
+            }
+            20%,
+            40%,
+            60%,
+            80% {
+              transform: translateX(10px);
+            }
           }
 
           @keyframes fade-in {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+              opacity: 0;
+              transform: translateY(-10px);
+            }
+            to {
+              opacity: 1;
+              transform: translateY(0);
+            }
           }
 
           .animate-shake {
@@ -801,37 +834,15 @@ const Register = () => {
           }
         `}</style>
 
-        <div className={`flex items-center justify-center ${isMobile ? "pt-10 px-3" : ""}`}>
+        <div
+          className={`flex items-center justify-center ${
+            isMobile ? "pt-10 px-3" : ""
+          }`}
+        >
           <div className="w-full max-w-md">
             {/* Current phase content */}
             {renderPhaseContent()}
           </div>
-        </div>
-
-        {/* Toast notification */}
-        <div
-          className={`fixed top-4 right-4 max-w-xs w-full bg-white shadow-md rounded-lg p-4 flex items-center gap-3 transform transition-all duration-300 z-[2000] ${showToast ? "translate-y-0 opacity-100" : "translate-y-[-20px] opacity-0"
-            }`}
-        >
-          <div className={`${toastType === "error" ? "bg-red-500" : "bg-green-500"} p-2 rounded-full`}>
-            {toastType === "error" ? (
-              <AlertCircle className="text-white h-5 w-5" />
-            ) : (
-              <CheckCircle className="text-white h-5 w-5" />
-            )}
-          </div>
-          <div className="flex-1">
-            <p className="font-medium text-sm text-gray-800">
-              {toastType === "error" ? "Erreur" : "Succès"}
-            </p>
-            <p className="text-xs text-gray-500">{toastMessage}</p>
-          </div>
-          <button
-            className="text-gray-400 hover:text-gray-600 transition-colors"
-            onClick={() => setShowToast(false)}
-          >
-            <X className="h-4 w-4" />
-          </button>
         </div>
       </>
     </AuthLayout>
